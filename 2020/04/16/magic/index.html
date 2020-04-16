@@ -6,22 +6,23 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://yoursite.com">
-  <title>magic | Stay hungry</title>
+  <title>magic (攻防世界pwn) | Stay hungry</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="title: magic (攻防世界pwn)date: 2020-04-16 09:29:07tags: IO FILE 攻击FILE结构体利用fwrite()与fread()实现任意地址读写">
+  <meta name="description" content="攻击FILE结构体利用fwrite()与fread()实现任意地址读写">
 <meta property="og:type" content="article">
-<meta property="og:title" content="magic">
+<meta property="og:title" content="magic (攻防世界pwn)">
 <meta property="og:url" content="http://yoursite.com/2020/04/16/magic/index.html">
 <meta property="og:site_name" content="Stay hungry">
-<meta property="og:description" content="title: magic (攻防世界pwn)date: 2020-04-16 09:29:07tags: IO FILE 攻击FILE结构体利用fwrite()与fread()实现任意地址读写">
+<meta property="og:description" content="攻击FILE结构体利用fwrite()与fread()实现任意地址读写">
 <meta property="og:image" content="https://i.loli.net/2020/04/16/tLGv5OqzRI14orM.png">
 <meta property="og:image" content="https://i.loli.net/2020/04/16/vkJajKQziZ4oyAW.png">
 <meta property="og:image" content="https://i.loli.net/2020/04/16/jELCoPgMWyGi5xK.png">
 <meta property="og:image" content="https://i.loli.net/2020/04/16/ghOtN9LTCxr8FmD.png">
 <meta property="og:image" content="https://i.loli.net/2020/04/16/wgWNuqx9bvKSVyn.png">
-<meta property="article:published_time" content="2020-04-16T01:29:07.566Z">
-<meta property="article:modified_time" content="2020-04-16T14:55:55.625Z">
+<meta property="article:published_time" content="2020-04-16T01:29:07.000Z">
+<meta property="article:modified_time" content="2020-04-16T15:04:10.382Z">
 <meta property="article:author" content="X1do0">
+<meta property="article:tag" content="IO FILE">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://i.loli.net/2020/04/16/tLGv5OqzRI14orM.png">
   
@@ -154,21 +155,20 @@
         
   
     <h1 class="article-title" itemprop="name">
-      magic
+      magic (攻防世界pwn)
     </h1>
   
 
         
         <a href="/2020/04/16/magic/" class="archive-article-date">
-  	<time datetime="2020-04-16T01:29:07.566Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-16</time>
+  	<time datetime="2020-04-16T01:29:07.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2020-04-16</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>title: magic (攻防世界pwn)<br>date: 2020-04-16 09:29:07<br>tags: IO FILE</p>
-<p>攻击FILE结构体利用<code>fwrite()</code>与<code>fread()</code>实现任意地址读写</p>
+        <p>攻击FILE结构体利用<code>fwrite()</code>与<code>fread()</code>实现任意地址读写</p>
 <a id="more"></a>
 
 <h2 id="程序概况"><a href="#程序概况" class="headerlink" title="程序概况"></a>程序概况</h2><h3 id="checksec"><a href="#checksec" class="headerlink" title="checksec"></a>checksec</h3><p>64位程序，只开了<code>NX</code>与<code>Canary</code>，可以劫持<code>got</code>表</p>
@@ -259,6 +259,17 @@
     <div class="article-info article-info-index">
       
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">IO FILE</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
       
 
       
