@@ -1,130 +1,318 @@
-<!DOCTYPE html><html lang="zh-Hans" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Stay hungry - no pwn no fun</title><meta name="description"><meta name="author" content="X1do0"><meta name="copyright" content="X1do0"><meta name="format-detection" content="telephone=no"><link rel="shortcut icon" href="/img/favicon.png"><meta http-equiv="Cache-Control" content="no-transform"><meta http-equiv="Cache-Control" content="no-siteapp"><link rel="preconnect" href="//cdn.jsdelivr.net"/><link rel="dns-prefetch" href="//cdn.jsdelivr.net"/><link rel="preconnect" href="https://fonts.googleapis.com" crossorigin="crossorigin"/><link rel="dns-prefetch" href="https://fonts.googleapis.com"/><link rel="preconnect" href="//busuanzi.ibruce.info"/><link rel="dns-prefetch" href="//busuanzi.ibruce.info"/><meta name="twitter:card" content="summary"><meta name="twitter:title" content="Stay hungry"><meta name="twitter:description"><meta name="twitter:image" content="https://xidoo123.github.io/img/a.jpg"><meta property="og:type" content="website"><meta property="og:title" content="Stay hungry"><meta property="og:url" content="https://xidoo123.github.io/"><meta property="og:site_name" content="Stay hungry"><meta property="og:description"><meta property="og:image" content="https://xidoo123.github.io/img/a.jpg"><meta property="article:published_time" content="2020-08-17T14:29:37.039Z"><meta property="article:modified_time" content="2020-08-17T14:29:37.039Z"><script src="https://cdn.jsdelivr.net/npm/js-cookie/dist/js.cookie.min.js"></script><script>var autoChangeMode = '1'
-var t = Cookies.get("theme")
-if (autoChangeMode == '1'){
-  var isDarkMode = window.matchMedia("(prefers-color-scheme: dark)").matches
-  var isLightMode = window.matchMedia("(prefers-color-scheme: light)").matches
-  var isNotSpecified = window.matchMedia("(prefers-color-scheme: no-preference)").matches
-  var hasNoSupport = !isDarkMode && !isLightMode && !isNotSpecified
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta property="og:type" content="website">
+<meta property="og:title" content="Stay hungry">
+<meta property="og:url" content="https://xidoo123.github.io/index.html">
+<meta property="og:site_name" content="Stay hungry">
+<meta property="og:locale" content="en_US">
+<meta property="article:author" content="X1do0">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/veg.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>Stay hungry</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
 
-  if (t === undefined){
-    if (isLightMode) activateLightMode()
-    else if (isDarkMode) activateDarkMode()
-    else if (isNotSpecified || hasNoSupport){
-      console.log('You specified no preference for a color scheme or your browser does not support it. I Schedule dark mode during night time.')
-      var now = new Date()
-      var hour = now.getHours()
-      var isNight = hour < 6 || hour >= 18
-      isNight ? activateDarkMode() : activateLightMode()
-  }
-  } else if (t == 'light') activateLightMode()
-  else activateDarkMode()
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
 
-} else if (autoChangeMode == '2'){
-  now = new Date();
-  hour = now.getHours();
-  isNight = hour < 6 || hour >= 18
-  if(t === undefined) isNight? activateDarkMode() : activateLightMode()
-  else if (t === 'light') activateLightMode()
-  else activateDarkMode() 
-} else {
-  if ( t == 'dark' ) activateDarkMode()
-  else if ( t == 'light') activateLightMode()
-}
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.0"></head>
 
-function activateDarkMode(){
-  document.documentElement.setAttribute('data-theme', 'dark')
-  if (document.querySelector('meta[name="theme-color"]') !== null){
-    document.querySelector('meta[name="theme-color"]').setAttribute('content','#000')
-  }
-}
-function activateLightMode(){
-  document.documentElement.setAttribute('data-theme', 'light')
-  if (document.querySelector('meta[name="theme-color"]') !== null){
-  document.querySelector('meta[name="theme-color"]').setAttribute('content','#fff')
-  }
-}</script><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/font-awesome@latest/css/font-awesome.min.css"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.css"><link rel="canonical" href="https://xidoo123.github.io/"><link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Titillium+Web"><script>var GLOBAL_CONFIG = { 
-  root: '/',
-  algolia: undefined,
-  localSearch: undefined,
-  translate: {"defaultEncoding":2,"translateDelay":0,"cookieDomain":"https://xxx/","msgToTraditionalChinese":"繁","msgToSimplifiedChinese":"簡"},
-  copy: {
-    success: 'Copy successfully',
-    error: 'Copy error',
-    noSupport: 'The browser does not support'
-  },
-  bookmark: {
-    message_prev: 'Press',
-    message_next: 'to bookmark this page'
-  },
-  runtime_unit: 'days',
-  runtime: true,
-  copyright: undefined,
-  ClickShowText: undefined,
-  medium_zoom: false,
-  fancybox: true,
-  Snackbar: undefined,
-  baiduPush: false,
-  highlightCopy: true,
-  highlightLang: true,
-  highlightShrink: 'false',
-  isFontAwesomeV5: false,
-  isPhotoFigcaption: false,
-  islazyload: false,
-  isanchor: false
+<body class="max-width mx-auto px3 ltr">
+    
+    <div class="content index py4">
+        
+          <header id="header">
+  <a href="/">
   
-}</script><script>var GLOBAL_CONFIG_SITE = { 
-  isPost: false,
-  isHome: true,
-  isSidebar: false  
-  }</script><noscript><style>
-#page-header {
-  opacity: 1
-}
-.justified-gallery img{
-  opacity: 1
-}
-</style></noscript><meta name="generator" content="Hexo 4.2.0"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">Loading...</div></div></div><canvas class="fireworks"></canvas><div id="mobile-sidebar"><div id="menu_mask"></div><div id="mobile-sidebar-menus"><div class="mobile_author_icon"><img class="avatar-img" src="/img/a.jpg" onerror="onerror=null;src='/img/friend_404.gif'" alt="avatar"/></div><div class="mobile_post_data"><div class="mobile_data_item is-center"><div class="mobile_data_link"><a href="/archives/"><div class="headline">Articles</div><div class="length_num">15</div></a></div></div><div class="mobile_data_item is-center">      <div class="mobile_data_link"><a href="/tags/"><div class="headline">Tags</div><div class="length_num">6</div></a></div></div></div><hr/><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> Link</span></a></div></div></div></div><div id="body-wrap"><div class="full_page" id="nav" style="background-image: url(https://i.loli.net/2020/05/01/IuWi8QbHvzjlOPw.jpg)"><div id="page-header"><span class="pull_left" id="blog_name"><a class="blog_title" id="site-name" href="/">Stay hungry</a></span><span class="pull_right menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fa fa-home"></i><span> Home</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fa fa-archive"></i><span> Archives</span></a></div><div class="menus_item"><a class="site-page" href="/tags/"><i class="fa-fw fa fa-tags"></i><span> Tags</span></a></div><div class="menus_item"><a class="site-page" href="/categories/"><i class="fa-fw fa fa-folder-open"></i><span> Categories</span></a></div><div class="menus_item"><a class="site-page" href="/link/"><i class="fa-fw fa fa-link"></i><span> Link</span></a></div></div><span class="toggle-menu close"><a class="site-page"><i class="fa fa-bars fa-fw" aria-hidden="true"></i></a></span></span></div><div id="site-info"><h1 id="site_title">Stay hungry</h1><div id="site_subtitle"><span id="subtitle"></span></div><div id="site_social_icons"><a class="social-icon" href="mailto:3388053568@qq.com" target="_blank" title="Email"><i class="fa fa-envelope" aria-hidden="true"></i></a></div></div><div id="scroll_down"><i class="fa fa-angle-down scroll-down-effects"></i></div></div><main class="layout_page" id="content-inner"><div class="recent-posts" id="recent-posts"><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2020/08/17/say-goodbye/" title="say goodbye">     <img class="post_bg" src="https://i.loli.net/2020/05/01/gkihqEjXxJ5UZ1C.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="say goodbye"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/08/17/say-goodbye/" title="say goodbye">say goodbye</a><div class="article-meta-wrap"><time class="post-meta__date" title="Created 2020-08-17 22:27:22"><i class="fa fa-calendar" aria-hidden="true"></i>2020-08-17</time></div><div class="content">blog即将搬迁，好事多磨啊~关键是notion太太太香了…Time to Say goodbye ~
-</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2020/07/03/pwnable-tw/" title="pwnable.tw">     <img class="post_bg" src="https://i.loli.net/2020/07/09/DqUt6w5rcdEmCps.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="pwnable.tw"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/07/03/pwnable-tw/" title="pwnable.tw">pwnable.tw</a><div class="article-meta-wrap"><time class="post-meta__date" title="Created 2020-07-03 20:40:23"><i class="fa fa-calendar" aria-hidden="true"></i>2020-07-03</time></div><div class="content">start开幕雷击，没有完整程序。分析汇编考虑在栈上填充shellcode ，得想办法泄露栈地址。发现程序本身sys_write 调用前有mov ecx,esp ，所以覆盖到这个地方就可以打印esp 值指向的内容，这个内容经过调试发现与esp的值差0x4 ，故解决。
-1234567891011121 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2020/06/28/bulitDocker/" title="Ubuntu16.04 docker搭建">     <img class="post_bg" src="https://i.loli.net/2020/05/01/gkihqEjXxJ5UZ1C.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="Ubuntu16.04 docker搭建"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/06/28/bulitDocker/" title="Ubuntu16.04 docker搭建">Ubuntu16.04 docker搭建</a><div class="article-meta-wrap"><time class="post-meta__date" title="Created 2020-06-28 11:07:53"><i class="fa fa-calendar" aria-hidden="true"></i>2020-06-28</time></div><div class="content">为获取2.27libc下pwn环境，虚拟机过于麻烦，遂启用docker。
-安装docker执行这个命令后，脚本就会自动的将一切准备工作做好，并且把Docker CE 的Edge版本安装在系统中
-123sudo apt install curlcurl -fsSL get.docker.com -o  ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2020/06/25/5space/" title="“第五空间”网络安全挑战赛wp(pwn)">     <img class="post_bg" src="https://i.loli.net/2020/06/25/EQ4iYuwgLSOJMmF.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="“第五空间”网络安全挑战赛wp(pwn)"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/06/25/5space/" title="“第五空间”网络安全挑战赛wp(pwn)">“第五空间”网络安全挑战赛wp(pwn)</a><div class="article-meta-wrap"><time class="post-meta__date" title="Created 2020-06-25 08:11:24"><i class="fa fa-calendar" aria-hidden="true"></i>2020-06-25</time></div><div class="content">By X1do0@Lilac
+    
+      <div id="logo" style="background-image: url(/images/logo.jpg);"></div>
+    
+  
+    <div id="title">
+      <h1>Stay hungry</h1>
+    </div>
+  </a>
+  <div id="nav">
+    <ul>
+      <li class="icon">
+        <a href="#"><i class="fas fa-bars fa-2x"></i></a>
+      </li>
+       
+        <li><a href="/">Home</a></li>
+       
+        <li><a href="/about/">About</a></li>
+       
+        <li><a href="/archives/">Writing</a></li>
+      
+    </ul>
+  </div>
+</header>
 
-of这题给的C文件与服务器上不同，实际上远程的remove功能并没有清楚堆存储cookie的位置…(pu1p师傅透视挂实锤了)
-所以是tcache入门题了…double free即可
-123456789101112131415161718192021222324252 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2020/06/14/RCTF/" title="RCTF2020(pwn)">     <img class="post_bg" src="https://i.loli.net/2020/06/14/7BcAOF49qNtrh1w.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="RCTF2020(pwn)"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/06/14/RCTF/" title="RCTF2020(pwn)">RCTF2020(pwn)</a><div class="article-meta-wrap"><time class="post-meta__date" title="Created 2020-06-14 09:52:35"><i class="fa fa-calendar" aria-hidden="true"></i>2020-06-14</time></div><div class="content">十几天前的比赛，说来惭愧最近沉迷火影无法自拔，挖个坑最近填一下
-note当时被打到只有两百多分的题竟然没做出来…赛下不到一个小时就整出来了…tcl…这题的难点在于程序是乱的，但静下心来逆一下也不是很复杂，就是要辨认出各个plt表函数。当时也注意到了数组负溢出漏洞，但是一直不知道怎么绕过大小检测，毕竟 ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2020/06/11/journey2/" title="All the fairy tails are full of shit">     <img class="post_bg" src="https://i.loli.net/2020/06/11/NnDm68urXwTa1EC.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="All the fairy tails are full of shit"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/06/11/journey2/" title="All the fairy tails are full of shit">All the fairy tails are full of shit</a><div class="article-meta-wrap"><time class="post-meta__date" title="Created 2020-06-11 22:52:35"><i class="fa fa-calendar" aria-hidden="true"></i>2020-06-11</time></div><div class="content">浮躁疯狂的五月六月，愿今晚深深睡去，醒来拥有改变自己、掌控局势的能力。
-理性分析浮躁主要来源于：
+        
+        <section id="about">
+  
+  
+    <p>
+      Find me on
+      
+      
+      
+        
+          <a class="icon" target="_blank" rel="noopener" href="mailto:wantsomemilk@qq.com">
+            <i class="fas fa-envelope"></i><!--
+      ---></a>
+        <!--
+    --->.
+        
+      
+    </p>
+  
+</section>
 
-司马jwc能做点事嘛？排个考试安排这么难？老子日你妈哟能整点阳间操作？不提前公布考试时间的意思是我这一两个月必须得一直复习以备突击考试？不想复习，想pwn —&gt; pwn到一半不行啊卧槽老子不复习 ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2020/06/08/software-engineering/" title="软件构造复习(JAVA)">     <img class="post_bg" src="https://i.loli.net/2020/06/08/4aYZVD6bKEignL1.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="软件构造复习(JAVA)"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/06/08/software-engineering/" title="软件构造复习(JAVA)">软件构造复习(JAVA)</a><div class="article-meta-wrap"><time class="post-meta__date" title="Created 2020-06-08 14:24:31"><i class="fa fa-calendar" aria-hidden="true"></i>2020-06-08</time></div><div class="content">
- unit1，2  —&gt; 06/08
- unit3 —&gt; 06/09,10
- unit4 —&gt; 06/11 (06/12完成，咕得好哇)
- unit5 —&gt; 06/12
- unit6 —&gt; 06/13
- unit7 —&gt; 06/14 
+<section id="writing">
+  <span class="h1"><a href="/archives/">Writing</a></span>
+  
+  <ul class="post-list">
+    
+    
+      
+    
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2020-07-03T12:40:23.000Z" itemprop="datePublished">2020-07-03</time>
+        
+      
+    </div>
 
-Unit 1-2Targ ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2020/05/29/WHUCTF/" title="WHUCTF(pwn)">     <img class="post_bg" src="https://i.loli.net/2020/05/29/ZfPVTuCtrmzkX1W.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="WHUCTF(pwn)"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/05/29/WHUCTF/" title="WHUCTF(pwn)">WHUCTF(pwn)</a><div class="article-meta-wrap"><time class="post-meta__date" title="Created 2020-05-29 22:58:17"><i class="fa fa-calendar" aria-hidden="true"></i>2020-05-29</time></div><div class="content">赛场http://iwhu.info/  武大萌新赛（whu的萌新已经强大到这种地步了嘛
-不过题目大部分还算基础，但还是有很多新姿势的。
-pwnpwnpwn常规的ret2libc，给了lib版本
-1234567891011121314151617181920212223242526from pwn  ...</div></div></div><div class="recent-post-item"><div class="post_cover left_radius"><a href="/2020/05/28/journey1/" title="free loop">     <img class="post_bg" src="https://i.loli.net/2020/05/28/2Gbmr6YTidgEc3M.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="free loop"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/05/28/journey1/" title="free loop">free loop</a><div class="article-meta-wrap"><time class="post-meta__date" title="Created 2020-05-28 23:25:14"><i class="fa fa-calendar" aria-hidden="true"></i>2020-05-28</time></div><div class="content"> I’m a little used to calling outside your name  
-I won’t see you tonight so I can keep from going insane
-But I don’t know enough, I get some kind of  ...</div></div></div><div class="recent-post-item"><div class="post_cover right_radius"><a href="/2020/04/25/easyheap/" title="easyheap(高校战&quot;疫&quot;网络安全挑战赛)(pwn)">     <img class="post_bg" src="https://i.loli.net/2020/05/28/BhrVce3UHAljXwR.png" onerror="this.onerror=null;this.src='/img/404.jpg'" alt="easyheap(高校战&quot;疫&quot;网络安全挑战赛)(pwn)"></a></div><div class="recent-post-info"><a class="article-title" href="/2020/04/25/easyheap/" title="easyheap(高校战&quot;疫&quot;网络安全挑战赛)(pwn)">easyheap(高校战&quot;疫&quot;网络安全挑战赛)(pwn)</a><div class="article-meta-wrap"><time class="post-meta__date" title="Created 2020-04-25 14:09:23"><i class="fa fa-calendar" aria-hidden="true"></i>2020-04-25</time></div><div class="content">修改fastbin中chunk的fd 指针，使fake chunk在malloc 时分配出来，实现指定位置写
+
+        <span>
+    
+        <a class="" href="/2020/07/03/pwnable-tw/">pwnable.tw</a>
+    
 
 
-程序概况checksec64位程序，只开了NX 和canary ，可修改got表
-漏洞首先还是在ida中添加结构体，这里我们可以看到messa 的context_ptr 正好为fastb ...</div></div></div><nav id="pagination"><div class="pagination"><span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/"><i class="fa fa-fw fa-chevron-right" aria-hidden="true"></i></a></div></nav></div><div class="aside_content" id="aside_content"><div class="card-widget card-info"><div class="card-content"><div class="card-info-avatar is-center"><img class="avatar-img" src="/img/a.jpg" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"/><div class="author-info__name">X1do0</div><div class="author-info__description"></div></div><div class="card-info-data"><div class="card-info-data-item is-center"><a href="/archives"><div class="headline">Articles</div><div class="length_num">15</div></a></div><div class="card-info-data-item is-center">      <a href="/tags"><div class="headline">Tags</div><div class="length_num">6</div></a></div></div><div class="card-info-bookmark is-center"><a class="bookmark button--primary button--animated" id="bookmark-it" href="javascript:;" title="Bookmark" target="_self"><i class="fa fa-bookmark" aria-hidden="true"></i><span>Bookmark</span></a></div><div class="card-info-social-icons is-center"><a class="social-icon" href="mailto:3388053568@qq.com" target="_blank" title="Email"><i class="fa fa-envelope" aria-hidden="true"></i></a></div></div></div><div class="card-widget card-announcement"><div class="card-content"><div class="item-headline"><i class="fa fa-bullhorn card-announcement-animation" aria-hidden="true"></i><span>Announcement</span></div><div class="announcement_content">This is my Blog</div></div></div><div class="card-widget card-recent-post"><div class="card-content"><div class="item-headline"><i class="fa fa-history" aria-hidden="true"></i><span>Recent Post</span></div><div class="aside-recent-item"><div class="aside-recent-post"><a href="/2020/08/17/say-goodbye/"><div class="aside-post-cover"><img class="aside-post-bg" src="https://i.loli.net/2020/05/01/gkihqEjXxJ5UZ1C.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" title="say goodbye" alt="say goodbye"/></div><div class="aside-post-title"><div class="aside-post_title" href="/2020/08/17/say-goodbye/" title="say goodbye">say goodbye</div><time class="aside-post_meta post-meta__date" title="Created 2020-08-17 22:27:22">2020-08-17</time></div></a></div><div class="aside-recent-post"><a href="/2020/07/03/pwnable-tw/"><div class="aside-post-cover"><img class="aside-post-bg" src="https://i.loli.net/2020/07/09/DqUt6w5rcdEmCps.png" onerror="this.onerror=null;this.src='/img/404.jpg'" title="pwnable.tw" alt="pwnable.tw"/></div><div class="aside-post-title"><div class="aside-post_title" href="/2020/07/03/pwnable-tw/" title="pwnable.tw">pwnable.tw</div><time class="aside-post_meta post-meta__date" title="Created 2020-07-03 20:40:23">2020-07-03</time></div></a></div><div class="aside-recent-post"><a href="/2020/06/28/bulitDocker/"><div class="aside-post-cover"><img class="aside-post-bg" src="https://i.loli.net/2020/05/01/gkihqEjXxJ5UZ1C.jpg" onerror="this.onerror=null;this.src='/img/404.jpg'" title="Ubuntu16.04 docker搭建" alt="Ubuntu16.04 docker搭建"/></div><div class="aside-post-title"><div class="aside-post_title" href="/2020/06/28/bulitDocker/" title="Ubuntu16.04 docker搭建">Ubuntu16.04 docker搭建</div><time class="aside-post_meta post-meta__date" title="Created 2020-06-28 11:07:53">2020-06-28</time></div></a></div><div class="aside-recent-post"><a href="/2020/06/25/5space/"><div class="aside-post-cover"><img class="aside-post-bg" src="https://i.loli.net/2020/06/25/EQ4iYuwgLSOJMmF.png" onerror="this.onerror=null;this.src='/img/404.jpg'" title="“第五空间”网络安全挑战赛wp(pwn)" alt="“第五空间”网络安全挑战赛wp(pwn)"/></div><div class="aside-post-title"><div class="aside-post_title" href="/2020/06/25/5space/" title="“第五空间”网络安全挑战赛wp(pwn)">“第五空间”网络安全挑战赛wp(pwn)</div><time class="aside-post_meta post-meta__date" title="Created 2020-06-25 08:11:24">2020-06-25</time></div></a></div><div class="aside-recent-post"><a href="/2020/06/14/RCTF/"><div class="aside-post-cover"><img class="aside-post-bg" src="https://i.loli.net/2020/06/14/7BcAOF49qNtrh1w.png" onerror="this.onerror=null;this.src='/img/404.jpg'" title="RCTF2020(pwn)" alt="RCTF2020(pwn)"/></div><div class="aside-post-title"><div class="aside-post_title" href="/2020/06/14/RCTF/" title="RCTF2020(pwn)">RCTF2020(pwn)</div><time class="aside-post_meta post-meta__date" title="Created 2020-06-14 09:52:35">2020-06-14</time></div></a></div></div></div></div><div class="card-widget card-tags"><div class="card-content"><div class="item-headline"><i class="fa fa-tags" aria-hidden="true"></i><span>Tags</span></div><div class="card-tag-cloud"><a href="/tags/IO-FILE/" style="font-size: 19px; color: #99a1ac">IO FILE</a> <a href="/tags/String-format/" style="font-size: 16px; color: #999">String format</a> <a href="/tags/diary/" style="font-size: 22px; color: #99a9bf">diary</a> <a href="/tags/fastbin-attack/" style="font-size: 19px; color: #99a1ac">fastbin attack</a> <a href="/tags/heap/" style="font-size: 22px; color: #99a9bf">heap</a> <a href="/tags/off-by-one/" style="font-size: 16px; color: #999">off-by-one</a></div></div></div><div class="card-widget card-archives"><div class="card-content"><div class="item-headline"><i class="fa fa-archive" aria-hidden="true"></i><span>Archives</span></div><ul class="card-archive-list"><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/08/"><span class="card-archive-list-date">August 2020</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/07/"><span class="card-archive-list-date">July 2020</span><span class="card-archive-list-count">1</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/06/"><span class="card-archive-list-date">June 2020</span><span class="card-archive-list-count">5</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/05/"><span class="card-archive-list-date">May 2020</span><span class="card-archive-list-count">2</span></a></li><li class="card-archive-list-item"><a class="card-archive-list-link" href="/archives/2020/04/"><span class="card-archive-list-date">April 2020</span><span class="card-archive-list-count">6</span></a></li></ul></div></div><div class="card-widget card-webinfo"><div class="card-content"><div class="item-headline"><i class="fa fa-line-chart" aria-hidden="true"></i><span>Info</span></div><div class="webinfo"><div class="webinfo-item"><div class="webinfo-article-name">Article :</div><div class="webinfo-article-count">15</div></div><div class="webinfo-item"><div class="webinfo-runtime-name">Run time :</div><div class="webinfo-runtime-count" id="webinfo-runtime-count" start_date="5/28/2020 00:00:00">     </div></div><div class="webinfo-item">      <div class="webinfo-site-uv-name">UV :</div><div class="webinfo-site-uv-count" id="busuanzi_value_site_uv"></div></div><div class="webinfo-item"><div class="webinfo-site-name">PV :</div><div class="webinfo-site-pv-count" id="busuanzi_value_site_pv"></div></div></div></div></div></div></main><footer id="footer" style="background-image: url(https://i.loli.net/2020/05/01/IuWi8QbHvzjlOPw.jpg)" data-type="photo"><div id="footer-wrap"><div class="copyright">&copy;2020 By X1do0</div><div class="framework-info"><span>Driven </span><a href="https://hexo.io" target="_blank" rel="noopener"><span>Hexo</span></a><span class="footer-separator">|</span><span>Theme </span><a href="https://github.com/jerryc127/hexo-theme-butterfly" target="_blank" rel="noopener"><span>Butterfly</span></a></div></div></footer></div><section class="rightside" id="rightside"><div id="rightside-config-hide"><a class="translate_chn_to_cht" id="translateLink" href="javascript:translatePage();" title="Traditional Chinese and Simplified Chinese Conversion" target="_self">繁</a><i class="darkmode fa fa-moon-o" id="darkmode" title="Dark Mode"></i></div><div id="rightside-config-show"><div id="rightside_config" title="Setting"><i class="fa fa-cog" aria-hidden="true"></i></div><i class="fa fa-arrow-up" id="go-up" title="Back to top" aria-hidden="true"></i></div></section><script src="https://cdn.jsdelivr.net/npm/jquery@latest/dist/jquery.min.js"></script><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/js/tw_cn.js"></script><script src="https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@latest/dist/jquery.fancybox.min.js"></script><script src="https://cdn.jsdelivr.net/npm/animejs@latest/anime.min.js"></script><script src="/js/third-party/fireworks.js"></script><script id="canvas_nest" color="0,0,255" opacity="0.7" zIndex="-1" count="99" mobile="true" src="/js/third-party/canvas-nest.js"></script><script async src="//busuanzi.ibruce.info/busuanzi/2.3/busuanzi.pure.mini.js"></script><script src="https://cdn.jsdelivr.net/npm/instant.page@3/instantpage.min.js" type="module"></script><script src="https://cdn.jsdelivr.net/npm/typed.js"></script><script>var subtitleEffect = true
-if (subtitleEffect) { 
-  var typed = new Typed("#subtitle", {
-    strings: '今日事&#44;今日畢,Never put off till tomorrow what you can do today'.split(","),
-    startDelay: 300,
-    typeSpeed: 150,
-    loop: false,
-    backSpeed: 50
-  })
-} else {
-  document.getElementById("subtitle").innerHTML = '今日事&#44;今日畢'
-}</script><script>var endLoading = function () {
-  document.body.style.overflow = 'auto';
-  document.getElementById('loading-box').classList.add("loaded")
-}
-window.addEventListener('load',endLoading)</script></body></html>
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2020-06-28T03:07:53.000Z" itemprop="datePublished">2020-06-28</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/2020/06/28/bulitDocker/">Ubuntu16.04 docker搭建</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2020-06-25T00:11:24.000Z" itemprop="datePublished">2020-06-25</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/2020/06/25/5space/">“第五空间”网络安全挑战赛wp(pwn)</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2020-06-08T06:24:31.000Z" itemprop="datePublished">2020-06-08</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/2020/06/08/software-engineering/">软件构造复习(JAVA)</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2020-05-29T14:58:17.000Z" itemprop="datePublished">2020-05-29</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/2020/05/29/WHUCTF/">WHUCTF(pwn)</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2020-04-16T01:29:07.000Z" itemprop="datePublished">2020-04-16</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/2020/04/16/magic/">magic (攻防世界)(pwn)</a>
+    
+
+
+</span>
+      </li>
+    
+      <li class="post-item">
+        
+    <div class="meta">
+      
+        
+          <time datetime="2020-04-14T11:00:57.000Z" itemprop="datePublished">2020-04-14</time>
+        
+      
+    </div>
+
+
+        <span>
+    
+        <a class="" href="/2020/04/14/echo-back/">echo_back (攻防世界)(pwn)</a>
+    
+
+
+</span>
+      </li>
+    
+  </ul>
+  
+    
+
+  
+</section>
+
+
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2019-2020
+    X1do0
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
