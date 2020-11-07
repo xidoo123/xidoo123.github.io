@@ -6,12 +6,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="为获取2.27libc下pwn环境，虚拟机过于麻烦，遂启用docker。 安装docker执行这个命令后，脚本就会自动的将一切准备工作做好，并且把Docker CE 的Edge版本安装在系统中 sudo apt install curl curl -fsSL get.docker.com -o get-docker.sh sudo sh get-docker.sh --mirror Aliyun">
+    <meta name="description" content="为获取2.27libc下pwn环境，虚拟机过于麻烦，遂启用docker。 安装docker执行这个命令后，脚本就会自动的将一切准备工作做好，并且把Docker CE 的Edge版本安装在系统中 123sudo apt install curlcurl -fsSL get.docker.com -o get-docker.shsudo sh get-docker.sh --mirror Aliyun">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Ubuntu16.04 docker搭建">
 <meta property="og:url" content="https://xidoo123.github.io/2020/06/28/bulitDocker/index.html">
 <meta property="og:site_name" content="Stay hungry">
-<meta property="og:description" content="为获取2.27libc下pwn环境，虚拟机过于麻烦，遂启用docker。 安装docker执行这个命令后，脚本就会自动的将一切准备工作做好，并且把Docker CE 的Edge版本安装在系统中 sudo apt install curl curl -fsSL get.docker.com -o get-docker.sh sudo sh get-docker.sh --mirror Aliyun">
+<meta property="og:description" content="为获取2.27libc下pwn环境，虚拟机过于麻烦，遂启用docker。 安装docker执行这个命令后，脚本就会自动的将一切准备工作做好，并且把Docker CE 的Edge版本安装在系统中 123sudo apt install curlcurl -fsSL get.docker.com -o get-docker.shsudo sh get-docker.sh --mirror Aliyun">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-06-28T03:07:53.000Z">
 <meta property="article:modified_time" content="2020-06-28T03:52:43.758Z">
@@ -146,46 +146,44 @@
   <div class="content" itemprop="articleBody">
     <p>为获取2.27libc下pwn环境，虚拟机过于麻烦，遂启用docker。</p>
 <h1 id="安装docker"><a href="#安装docker" class="headerlink" title="安装docker"></a>安装docker</h1><p>执行这个命令后，脚本就会自动的将一切准备工作做好，并且把Docker CE 的Edge版本安装在系统中</p>
-<pre><code class="bash">sudo apt install curl
-curl -fsSL get.docker.com -o get-docker.sh
-sudo sh get-docker.sh --mirror Aliyun</code></pre>
-<h1 id="启动docker服务"><a href="#启动docker服务" class="headerlink" title="启动docker服务"></a>启动docker服务</h1><pre><code class="bash">sudo systemctl enable docker
-sudo systemctl start docker</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install curl</span><br><span class="line">curl -fsSL get.docker.com -o get-docker.sh</span><br><span class="line">sudo sh get-docker.sh --mirror Aliyun</span><br></pre></td></tr></table></figure>
+
+<h1 id="启动docker服务"><a href="#启动docker服务" class="headerlink" title="启动docker服务"></a>启动docker服务</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl <span class="built_in">enable</span> docker</span><br><span class="line">sudo systemctl start docker</span><br></pre></td></tr></table></figure>
+
 <h1 id="建立docker用户组"><a href="#建立docker用户组" class="headerlink" title="建立docker用户组"></a>建立docker用户组</h1><p>这一步是必须的，并且必须将当前用户加入docker用户组，否则权限不够。</p>
-<pre><code class="bash">sudo groupadd docker
-sudo usermod -aG docker $USER</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo groupadd docker</span><br><span class="line">sudo usermod -aG docker <span class="variable">$USER</span></span><br></pre></td></tr></table></figure>
+
 <p>然后log out注销当前ubuntu用户，再log in，使其生效。</p>
-<h1 id="换源加速"><a href="#换源加速" class="headerlink" title="换源加速"></a>换源加速</h1><pre><code class="bash">sudo vi /etc/docker/daemon.json</code></pre>
+<h1 id="换源加速"><a href="#换源加速" class="headerlink" title="换源加速"></a>换源加速</h1><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo vi /etc/docker/daemon.json</span><br></pre></td></tr></table></figure>
+
 <p>按i进入插入模式后，在其中添加如下代码</p>
-<pre><code class="json">{
-    &quot;registry-mirrors&quot;: [
-        &quot;https://registry.docker-cn.com&quot;
-    ]
-}</code></pre>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"registry-mirrors"</span>: [</span><br><span class="line">        <span class="string">"https://registry.docker-cn.com"</span></span><br><span class="line">    ]</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>再重新启动服务即可</p>
-<pre><code class="bash">sudo systemctl daemon-reload
-sudo systemctl restart docker</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sudo systemctl daemon-reload</span><br><span class="line">sudo systemctl restart docker</span><br></pre></td></tr></table></figure>
+
 <h1 id="将镜像pull到本地"><a href="#将镜像pull到本地" class="headerlink" title="将镜像pull到本地"></a>将镜像pull到本地</h1><p>以pwndocker为例，<a href="https://github.com/voidzhakul/pwndocker" target="_blank" rel="noopener">https://github.com/voidzhakul/pwndocker</a></p>
-<pre><code class="bash">docker pull registry.cn-shenzhen.aliyuncs.com/zhakul/docker:pwndocker</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker pull registry.cn-shenzhen.aliyuncs.com/zhakul/docker:pwndocker</span><br></pre></td></tr></table></figure>
+
 <p>检查是否pull到本地，使用docker images命令查看本地镜像</p>
-<pre><code class="bash">$ docker images
-REPOSITORY                                        TAG                 IMAGE ID            CREATED             SIZE
-registry.cn-shenzhen.aliyuncs.com/zhakul/docker   pwndocker           cffec5c49ab5        2 months ago        1.66GB</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">$ docker images</span><br><span class="line">REPOSITORY                                        TAG                 IMAGE ID            CREATED             SIZE</span><br><span class="line">registry.cn-shenzhen.aliyuncs.com/zhakul/docker   pwndocker           cffec5c49ab5        2 months ago        1.66GB</span><br></pre></td></tr></table></figure>
+
 <h1 id="将本地目录挂载到镜像中"><a href="#将本地目录挂载到镜像中" class="headerlink" title="将本地目录挂载到镜像中"></a>将本地目录挂载到镜像中</h1><p>将我们需要在docker中执行的文件挂载，并运行docker</p>
-<pre><code class="bash">docker run -it -v /home/dock/Downloads:/usr/Downloads images /bin/bash</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker run -it -v /home/dock/Downloads:/usr/Downloads images /bin/bash</span><br></pre></td></tr></table></figure>
+
 <p>通过<code>-v</code>参数，冒号前为宿主机目录，必须为绝对路径，冒号后为镜像内挂载的路径，images使用上述提到的<code>REPOSITORY:TAG</code>格式。</p>
 <h1 id="退出、进入容器"><a href="#退出、进入容器" class="headerlink" title="退出、进入容器"></a>退出、进入容器</h1><p>退出容器</p>
-<pre><code class="bash">root@c8cb9d4168c7:# exit</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">root@c8cb9d4168c7:<span class="comment"># exit</span></span><br></pre></td></tr></table></figure>
+
 <p>查看所有产生的容器</p>
-<pre><code class="bash">$ docker ps -a
-CONTAINER ID        IMAGE                                                       COMMAND             CREATED             STATUS                      PORTS               NAMES
-c8cb9d4168c7        registry.cn-shenzhen.aliyuncs.com/zhakul/docker:pwndocker   &quot;/bin/bash&quot;         16 minutes ago      Exited (0) 6 minutes ago                        crazy_kilby
-f140ab8db11d        registry.cn-shenzhen.aliyuncs.com/zhakul/docker:pwndocker   &quot;/bin/bash&quot;         49 minutes ago      Exited (0) 46 minutes ago                       upbeat_davinci
-b43caf8776df        registry.cn-shenzhen.aliyuncs.com/zhakul/docker:pwndocker   &quot;/bin/bash&quot;         59 minutes ago      Exited (0) 19 minutes ago                       frosty_easley</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">$ docker ps -a</span><br><span class="line">CONTAINER ID        IMAGE                                                       COMMAND             CREATED             STATUS                      PORTS               NAMES</span><br><span class="line">c8cb9d4168c7        registry.cn-shenzhen.aliyuncs.com/zhakul/docker:pwndocker   <span class="string">"/bin/bash"</span>         16 minutes ago      Exited (0) 6 minutes ago                        crazy_kilby</span><br><span class="line">f140ab8db11d        registry.cn-shenzhen.aliyuncs.com/zhakul/docker:pwndocker   <span class="string">"/bin/bash"</span>         49 minutes ago      Exited (0) 46 minutes ago                       upbeat_davinci</span><br><span class="line">b43caf8776df        registry.cn-shenzhen.aliyuncs.com/zhakul/docker:pwndocker   <span class="string">"/bin/bash"</span>         59 minutes ago      Exited (0) 19 minutes ago                       frosty_easley</span><br></pre></td></tr></table></figure>
+
 <p>镜像是静态的。而容器是动态的，类似于镜像的一个实例。如果要重新进入某个容器crazy_kilby</p>
-<pre><code class="bash">docker start crazy_kilby</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker start crazy_kilby</span><br></pre></td></tr></table></figure>
+
 <p>其容器会在后台运行，attach后即可交互</p>
-<pre><code class="bash">docker attach crazy_kilby</code></pre>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">docker attach crazy_kilby</span><br></pre></td></tr></table></figure>
+
 
   </div>
 </article>

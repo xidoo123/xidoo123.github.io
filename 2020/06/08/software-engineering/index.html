@@ -343,16 +343,8 @@
 <p>StringBuilder是可变类型：</p>
 <p><img src="https://i.loli.net/2020/06/10/xSTt6CYX1RGF4i3.png" alt=""></p>
 <p>考察下列代码：</p>
-<pre><code class="java">public static void main(String[] args){
-        String s1 = &quot;abc&quot;;
-        List&lt;String&gt; list = new ArrayList&lt;&gt;();
-        list.add(s1);
-        s1 = s1.concat(&quot;d&quot;);
-        System.out.println(list.get(0));        //abd
-        String s2 = s1.concat(&quot;e&quot;);
-        list.set(0, s2);
-        System.out.println(list.get(0));        //abcde
-    }</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</span><br><span class="line">        String s1 = <span class="string">"abc"</span>;</span><br><span class="line">        List&lt;String&gt; list = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">        list.add(s1);</span><br><span class="line">        s1 = s1.concat(<span class="string">"d"</span>);</span><br><span class="line">        System.out.println(list.get(<span class="number">0</span>));		<span class="comment">//abd</span></span><br><span class="line">        String s2 = s1.concat(<span class="string">"e"</span>);</span><br><span class="line">        list.set(<span class="number">0</span>, s2);</span><br><span class="line">        System.out.println(list.get(<span class="number">0</span>));		<span class="comment">//abcde</span></span><br><span class="line">    &#125;</span><br></pre></td></tr></table></figure>
+
 <p>Snapshot与调试图如下，需要注意list.add以后并不是把s1直接放进list中，可以理解为做了拷贝</p>
 <table>
 <thead>
@@ -370,11 +362,11 @@
 <p>改变值：将当前指向的值的存储空间中写入一个新的值</p>
 <p><code>final</code> 关键词：修饰的变量无法改变引用；属于静态类型检测。</p>
 <p>所以如果用<code>final</code> 修饰不可变类型，则无法再次赋值</p>
-<pre><code class="java">final int a = 5;
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">final</span> <span class="keyword">int</span> a = <span class="number">5</span>;</span><br><span class="line"></span><br><span class="line">a = <span class="number">10</span>; (×)</span><br></pre></td></tr></table></figure>
 
-a = 10; (×)</code></pre>
 <h4 id="defensive-copy"><a href="#defensive-copy" class="headerlink" title="defensive copy"></a><font color=red>defensive copy</font></h4><p>为防止用户传入或者传出给用户一个不可变ADT里的可变类型的引用，进而让用户获得不可变ADT的改变能力，使用防御使拷贝，比如下列Date类型返回时的拷贝方式：</p>
-<pre><code class="java">return new Date(groundhogAnswer.getTime());</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">return</span> <span class="keyword">new</span> Date(groundhogAnswer.getTime());</span><br></pre></td></tr></table></figure>
+
 <h4 id="pre-post-condition"><a href="#pre-post-condition" class="headerlink" title="pre/post-condition"></a>pre/post-condition</h4><p>前置条件：对客户端的约束，在使用方法时必须满足的条件  </p>
 <p>后置条件：对开发者的约束，方法结束时必须满足的条件  </p>
 <p>Java的前置、后置条件写在规约的<code>@param</code> 与<code>@return</code> 中</p>
@@ -440,13 +432,11 @@ a = 10; (×)</code></pre>
 <p><font color=blue>下图为一个易错的例子，说明对象类型得看声明，而不是new赋值的对象；特别需要注意3</font></p>
 <p><img src="https://i.loli.net/2020/06/10/n6XA3UL2kvTmPBu.png" alt=""></p>
 <h4 id="泛型"><a href="#泛型" class="headerlink" title="泛型"></a>泛型</h4><p>泛型接口可以用泛型类实现，也可以用具体类实现</p>
-<pre><code class="java">public interface Set&lt;E&gt;{...}
-public class CharSet implements Set&lt;Character&gt;{...}
-public class HashSet implements Set&lt;E&gt;{...}</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Set</span>&lt;<span class="title">E</span>&gt;</span>&#123;...&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CharSet</span> <span class="keyword">implements</span> <span class="title">Set</span>&lt;<span class="title">Character</span>&gt;</span>&#123;...&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HashSet</span> <span class="keyword">implements</span> <span class="title">Set</span>&lt;<span class="title">E</span>&gt;</span>&#123;...&#125;</span><br></pre></td></tr></table></figure>
+
 <p>通配符?只能在使用泛型时使用，不能在定义时使用</p>
-<pre><code class="java">List&lt;?&gt; list = new ArrayList&lt;String&gt;();
-List&lt;? extends Animal&gt;
-List&lt;? super Animal&gt;</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">List&lt;?&gt; list = <span class="keyword">new</span> ArrayList&lt;String&gt;();</span><br><span class="line">List&lt;? extends Animal&gt;</span><br><span class="line">List&lt;? <span class="keyword">super</span> Animal&gt;</span><br></pre></td></tr></table></figure>
+
 <p><font color=blue>运行时泛型便消失了，被具体类型代替</font></p>
 <p><font color=blue>不能产生泛型数组</font></p>
 <h4 id="等价性"><a href="#等价性" class="headerlink" title="等价性"></a><font color=red>等价性</font></h4><p>等价关系需要满足自反、对称、传递</p>
@@ -471,24 +461,15 @@ List&lt;? super Animal&gt;</code></pre>
 <h4 id="不可变对象的引用等价性、对象等价性"><a href="#不可变对象的引用等价性、对象等价性" class="headerlink" title="不可变对象的引用等价性、对象等价性"></a>不可变对象的引用等价性、对象等价性</h4><p>不可变类型一定要重写这两个函数，使用对象等价性</p>
 <p>引用等价性一般指用==判定，对象等价性用equals()判断</p>
 <h4 id="Autoboxing机制"><a href="#Autoboxing机制" class="headerlink" title="Autoboxing机制"></a>Autoboxing机制</h4><p>比较饶人的几个例子：</p>
-<pre><code class="java">Integer a = new Integer(3);
-Integer b = new Integer(3);
-System.out.println(a==b);    // false
-System.out.println(a.equals(b));    //true
-System.out.println((int)a==(int b));    //true</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Integer a = <span class="keyword">new</span> Integer(<span class="number">3</span>);</span><br><span class="line">Integer b = <span class="keyword">new</span> Integer(<span class="number">3</span>);</span><br><span class="line">System.out.println(a==b);    <span class="comment">// false</span></span><br><span class="line">System.out.println(a.equals(b));	<span class="comment">//true</span></span><br><span class="line">System.out.println((<span class="keyword">int</span>)a==(<span class="keyword">int</span> b));	<span class="comment">//true</span></span><br></pre></td></tr></table></figure>
+
 <p>a==b是判断两个是否指向一块区域，显然new了两个Interger，所以是false</p>
 <p>a.equals(b)调试发现Integer重写了equals()，根据观察等价性判断(值是否相等），所以是true</p>
-<pre><code class="java">Map&lt;String, Integer&gt; a = new HashMap(),b = new HashMap();
-a.put(&quot;c&quot;,130)
-b.put(&quot;c&quot;,130)
-System.out.println(a.get(&quot;c&quot;)==b.get(&quot;c&quot;));    // false
-System.out.println(a.get(&quot;c&quot;).equals(b.get(&quot;c&quot;)));    //true</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;String, Integer&gt; a = <span class="keyword">new</span> HashMap(),b = <span class="keyword">new</span> HashMap();</span><br><span class="line">a.put(<span class="string">"c"</span>,<span class="number">130</span>)</span><br><span class="line">b.put(<span class="string">"c"</span>,<span class="number">130</span>)</span><br><span class="line">System.out.println(a.get(<span class="string">"c"</span>)==b.get(<span class="string">"c"</span>));    <span class="comment">// false</span></span><br><span class="line">System.out.println(a.get(<span class="string">"c"</span>).equals(b.get(<span class="string">"c"</span>)));	<span class="comment">//true</span></span><br></pre></td></tr></table></figure>
+
 <p>Autoboxing机制将130打包为Integer，所以不相等，用equals()同上</p>
-<pre><code class="java">Map&lt;String, Integer&gt; a = new HashMap(),b = new HashMap();
-a.put(&quot;c&quot;,1)
-b.put(&quot;c&quot;,1)
-System.out.println(a.get(&quot;c&quot;)==b.get(&quot;c&quot;));    // true
-System.out.println(a.get(&quot;c&quot;).equals(b.get(&quot;c&quot;)));    //true</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Map&lt;String, Integer&gt; a = <span class="keyword">new</span> HashMap(),b = <span class="keyword">new</span> HashMap();</span><br><span class="line">a.put(<span class="string">"c"</span>,<span class="number">1</span>)</span><br><span class="line">b.put(<span class="string">"c"</span>,<span class="number">1</span>)</span><br><span class="line">System.out.println(a.get(<span class="string">"c"</span>)==b.get(<span class="string">"c"</span>));    <span class="comment">// true</span></span><br><span class="line">System.out.println(a.get(<span class="string">"c"</span>).equals(b.get(<span class="string">"c"</span>)));	<span class="comment">//true</span></span><br></pre></td></tr></table></figure>
+
 <p><font color=blue>-128到127的整数只会自动打一个包</font>（当然可以手动打不止一个包），也就是说两个Integer(1)指向同一块地方</p>
 <h2 id="Unit-4"><a href="#Unit-4" class="headerlink" title="Unit 4"></a>Unit 4</h2><h3 id="Target-2"><a href="#Target-2" class="headerlink" title="Target"></a>Target</h3><ul>
 <li><input checked="" disabled="" type="checkbox"> Programing for/with reuse</li>
@@ -552,26 +533,16 @@ System.out.println(a.get(&quot;c&quot;).equals(b.get(&quot;c&quot;)));    //true
 </tbody></table>
 <p><font color=blue>需要注意Java并不能提供逆变，它会把上右图当作重载处理，所以在Java中应当忽略子类型的逆变要求。</font></p>
 <p><font color=blue>同时注意上左图，Java不会当作重载处理</font></p>
-<h4 id="数组的子类型化"><a href="#数组的子类型化" class="headerlink" title="数组的子类型化"></a>数组的子类型化</h4><pre><code class="java">// numbers是引用，类型为Number[]
-Number[] numbers = new Number[2];
-numbers[0] = new Integer(10);
-numbers[1] = new Double(3.14); //不会报错
+<h4 id="数组的子类型化"><a href="#数组的子类型化" class="headerlink" title="数组的子类型化"></a>数组的子类型化</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// numbers是引用，类型为Number[]</span></span><br><span class="line">Number[] numbers = <span class="keyword">new</span> Number[<span class="number">2</span>];</span><br><span class="line">numbers[<span class="number">0</span>] = <span class="keyword">new</span> Integer(<span class="number">10</span>);</span><br><span class="line">numbers[<span class="number">1</span>] = <span class="keyword">new</span> Double(<span class="number">3.14</span>); <span class="comment">//不会报错</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// myNumber是对象，与myInts类型相同，在运行时Java知道myNumber实际上是Integer[]</span></span><br><span class="line">Integer[] myInts = &#123;<span class="number">1</span>,<span class="number">2</span>,<span class="number">3</span>,<span class="number">4</span>&#125;;</span><br><span class="line">Number[] myNumber = myInts;</span><br><span class="line">myNumber[<span class="number">0</span>] = <span class="number">3.14</span>; 	<span class="comment">//run-time error!</span></span><br></pre></td></tr></table></figure>
 
-// myNumber是对象，与myInts类型相同，在运行时Java知道myNumber实际上是Integer[]
-Integer[] myInts = {1,2,3,4};
-Number[] myNumber = myInts;
-myNumber[0] = 3.14;     //run-time error!</code></pre>
 <p>区分：对象的类型 vs. 引用的类型</p>
 <h4 id="泛型的子类型化与通配符"><a href="#泛型的子类型化与通配符" class="headerlink" title="泛型的子类型化与通配符"></a><font color=red>泛型的子类型化</font>与通配符</h4><p><code>ArrayList&lt;String&gt;</code> 是<code>List&lt;String&gt;</code>的子类型</p>
 <p><code>List&lt;String&gt;</code> 不是 <code>List&lt;Object&gt;</code>  的子类型</p>
 <p><code>List&lt;Number&gt;</code>是<code>List&lt;?&gt;</code>的子类型</p>
 <p><code>List&lt;Number&gt;</code>是<code>List&lt;? extends Object&gt;</code>的子类型</p>
 <p><code>List&lt;Object&gt;</code>是<code>List&lt;? super String&gt;</code>的子类型</p>
-<pre><code class="java">List&lt;Integer&gt; myInts = new ArrayList&lt;Integer&gt;();
-myInts.add(1);
-myInts.add(2);
-List&lt;Number&gt; myNums = myInts;    //compiler error！
-myNums.add(3.14);</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; myInts = <span class="keyword">new</span> ArrayList&lt;Integer&gt;();</span><br><span class="line">myInts.add(<span class="number">1</span>);</span><br><span class="line">myInts.add(<span class="number">2</span>);</span><br><span class="line">List&lt;Number&gt; myNums = myInts;	<span class="comment">//compiler error！</span></span><br><span class="line">myNums.add(<span class="number">3.14</span>);</span><br></pre></td></tr></table></figure>
+
 <p>泛型的具体化不是协变，Java运行时会对泛型做类型擦除处理，如下图</p>
 <table>
 <thead>
@@ -603,38 +574,11 @@ myNums.add(3.14);</code></pre>
 </tr>
 </tbody></table>
 <p>方法二：实现Comparator接口并override compare()函数</p>
-<pre><code class="java">public class EdgeComparator    implements Comparator&lt;Edge&gt;{
-@Override
-public int compare(Edge o1, Edge o2) {
-    if(o1.getWeight() &gt; o2.getWeight())
-    return 1;
-    else if (.. == ..) return 0;
-    else return -1;
-    }
-}
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">EdgeComparator</span>	<span class="keyword">implements</span> <span class="title">Comparator</span>&lt;<span class="title">Edge</span>&gt;</span>&#123;</span><br><span class="line"><span class="meta">@Override</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compare</span><span class="params">(Edge o1, Edge o2)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span>(o1.getWeight() &gt; o2.getWeight())</span><br><span class="line">	<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span> (.. == ..) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 实现后需要新建一个Comparator</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sort</span><span class="params">(List&lt;Edge&gt; edges)</span> </span>&#123;</span><br><span class="line">	Comparator comparator = <span class="keyword">new</span> EdgeComparator();</span><br><span class="line">	Collections.sort(edges, comparator);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-// 实现后需要新建一个Comparator
-public void sort(List&lt;Edge&gt; edges) {
-    Comparator comparator = new EdgeComparator();
-    Collections.sort(edges, comparator);
-}</code></pre>
 <p>方法三：实现Comparable接口并override compareTo() 方法  </p>
-<pre><code class="java">public class Edge implements Comparable&lt;Edge&gt; {
-    Vertex s, t;
-    double weight;
-    ...
-    public int compareTo(Edge o) {
-        if(this.getWeight() &gt; o.getWeight())
-            return 1;
-        else if (.. == ..) return 0;
-        else return -1;
-    }
-}
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Edge</span> <span class="keyword">implements</span> <span class="title">Comparable</span>&lt;<span class="title">Edge</span>&gt; </span>&#123;</span><br><span class="line">	Vertex s, t;</span><br><span class="line">	<span class="keyword">double</span> weight;</span><br><span class="line">	...</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">compareTo</span><span class="params">(Edge o)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(<span class="keyword">this</span>.getWeight() &gt; o.getWeight())</span><br><span class="line">			<span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">		<span class="keyword">else</span> <span class="keyword">if</span> (.. == ..) <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">		<span class="keyword">else</span> <span class="keyword">return</span> -<span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//	不需要构建新的Comparator类，比较代码放在ADT内部</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">sort</span><span class="params">(List&lt;Edge&gt; edges)</span> </span>&#123;</span><br><span class="line">	Collections.sort(edges);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-//    不需要构建新的Comparator类，比较代码放在ADT内部
-public void sort(List&lt;Edge&gt; edges) {
-    Collections.sort(edges);
-}</code></pre>
 <h4 id="CRP"><a href="#CRP" class="headerlink" title="CRP"></a><font color=red>CRP</font></h4><p>Composite/Aggregate Reuse Principle(CARP)：尽量使用合成/聚合达到复用，尽量少用继承</p>
 <table>
 <thead>
@@ -654,72 +598,15 @@ public void sort(List&lt;Edge&gt; edges) {
 <p>Behavioral patterns 行为类模式 ：Strategy、Template method、Iterator</p>
 <h4 id="Adaptor模式"><a href="#Adaptor模式" class="headerlink" title="Adaptor模式"></a><font color=red>Adaptor模式</font></h4><p>适配器模式：将某个类/接口转换为client期望的其他形式  </p>
 <p>实现方式：通过增加一个接口，将已存在的子类封装起来， client面向接口编程，从而隐藏了具体子类  </p>
-<pre><code class="java">class LegacyRectangle {
-    void display(int x1, int y1, int w, int h) {... }
-}
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LegacyRectangle</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">display</span><span class="params">(<span class="keyword">int</span> x1, <span class="keyword">int</span> y1, <span class="keyword">int</span> w, <span class="keyword">int</span> h)</span> </span>&#123;... &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 接口不匹配</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Client</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">display</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">new</span> LegacyRectangle().display(x1, y1, x2, y2);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-// 接口不匹配
-class Client {
-    public display() {
-        new LegacyRectangle().display(x1, y1, x2, y2);
-    }
-}</code></pre>
 <p>添加Adaptor类Rectangle实现抽象接口，并完成适配</p>
-<pre><code class="java">interface Shape {
-    void display(int x1, int y1, int x2, int y2);
-}
-// Adaptor
-class Rectangle implements Shape {
-    void display(int x1, int y1, int x2, int y2) {
-        new LegacyRectangle().display(x1, y1, x2-x1, y2-y1);
-    }
-}
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Shape</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">display</span><span class="params">(<span class="keyword">int</span> x1, <span class="keyword">int</span> y1, <span class="keyword">int</span> x2, <span class="keyword">int</span> y2)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Adaptor</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Rectangle</span> <span class="keyword">implements</span> <span class="title">Shape</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">display</span><span class="params">(<span class="keyword">int</span> x1, <span class="keyword">int</span> y1, <span class="keyword">int</span> x2, <span class="keyword">int</span> y2)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">new</span> LegacyRectangle().display(x1, y1, x2-x1, y2-y1);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">LegacyRectangle</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">display</span><span class="params">(<span class="keyword">int</span> x1, <span class="keyword">int</span> y1, <span class="keyword">int</span> w, <span class="keyword">int</span> h)</span> </span>&#123;...&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Client</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 适配</span></span><br><span class="line">	Shape shape = <span class="keyword">new</span> Rectangle();</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">display</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		shape.display(x1, y1, x2, y2);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-class LegacyRectangle {
-    void display(int x1, int y1, int w, int h) {...}
-}
-class Client {
-    // 适配
-    Shape shape = new Rectangle();
-    public display() {
-        shape.display(x1, y1, x2, y2);
-    }
-}</code></pre>
 <h4 id="Decorator模式"><a href="#Decorator模式" class="headerlink" title="Decorator模式"></a><font color=red>Decorator模式</font></h4><p>装饰器模式：为对象增加不同侧面的特性  </p>
 <p>实现方式：对每一个特性构造子类，通过委派机制增加到对象上  </p>
-<pre><code class="java">// 包装stack得到Decorator基本类
-public abstract class StackDecorator implements Stack {
-    protected final Stack stack;
-    public StackDecorator(Stack stack) {
-        this.stack = stack;
-    }
-    public void push(Item e) {
-        stack.push(e);
-    }
-    public Item pop() {
-        return stack.pop();
-    }
-    ...
-}
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 包装stack得到Decorator基本类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">StackDecorator</span> <span class="keyword">implements</span> <span class="title">Stack</span> </span>&#123;</span><br><span class="line">	<span class="keyword">protected</span> <span class="keyword">final</span> Stack stack;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">StackDecorator</span><span class="params">(Stack stack)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.stack = stack;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">push</span><span class="params">(Item e)</span> </span>&#123;</span><br><span class="line">		stack.push(e);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> Item <span class="title">pop</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> stack.pop();</span><br><span class="line">	&#125;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 对其进行包装</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UndoStack</span> <span class="keyword">extends</span> <span class="title">StackDecorator</span> <span class="keyword">implements</span> <span class="title">Stack</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">final</span> UndoLog log = <span class="keyword">new</span> UndoLog();</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">UndoStack</span><span class="params">(Stack stack)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">super</span>(stack);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">push</span><span class="params">(Item e)</span> </span>&#123;</span><br><span class="line">		log.append(UndoLog.PUSH, e); <span class="comment">//新特性</span></span><br><span class="line">		<span class="keyword">super</span>.push(e);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">undo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="comment">//implement decorator behaviors on stack</span></span><br><span class="line">	&#125;</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//使用</span></span><br><span class="line">Stack t = <span class="keyword">new</span> UndoStack(<span class="keyword">new</span> ArrayStack());</span><br></pre></td></tr></table></figure>
 
-// 对其进行包装
-public class UndoStack extends StackDecorator implements Stack {
-    private final UndoLog log = new UndoLog();
-    public UndoStack(Stack stack) {
-        super(stack);
-    }
-    public void push(Item e) {
-        log.append(UndoLog.PUSH, e); //新特性
-        super.push(e);
-    }
-    public void undo() {
-        //implement decorator behaviors on stack
-    }
-    ...
-}
-
-//使用
-Stack t = new UndoStack(new ArrayStack());</code></pre>
 <h4 id="Facade模式"><a href="#Facade模式" class="headerlink" title="Facade模式"></a><font color=red>Facade模式</font></h4><p>外观（门面）模式：客户端需要通过一个简化的接口来访问复杂系统内的功能  </p>
 <p>实现方式：提供一个统一的接口来取代一系列小接口调用，相当于对复杂系统做了一个封装，简化客户端使用</p>
 <p>例子略</p>
@@ -728,108 +615,14 @@ Stack t = new UndoStack(new ArrayStack());</code></pre>
 <p>例子略</p>
 <h4 id="Template模式"><a href="#Template模式" class="headerlink" title="Template模式"></a><font color=red>Template模式</font></h4><p>模板模式：不同的客户做事情的步骤一样，但具体方法有些相同有些不同  </p>
 <p>实现方式：共性的步骤在抽象类内公共实现，差异化的步骤在各个子类中实现  </p>
-<pre><code class="java">// 抽象父类
-public abstract class OrderProcessTemplate{
-    public boolean isGift;
-    public abstract void doSelect();
-    public abstract void doPayment();
-    // 相同的步骤操作在抽象父类中直接实现
-    public final void giftWrap() {
-        System.out.println(&quot;Gift wrap done.&quot;);
-    }
-    public abstract void doDelivery();
-    // 步骤模板
-    public final void processOrder() {
-        doSelect();
-        doPayment();
-        if (isGift)
-            giftWrap();
-        doDelivery();
-    }
-}
-// 子类重写父类的非公共操作
-public class NetOrder extends OrderProcessTemplate {
-    @Override
-    public void doSelect() { … }
-    @Override
-    public void doPayment() { … }
-    @Override
-    public void doDelivery() { … }
-}</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 抽象父类</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">OrderProcessTemplate</span></span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">boolean</span> isGift;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">doSelect</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">doPayment</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">// 相同的步骤操作在抽象父类中直接实现</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">giftWrap</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">"Gift wrap done."</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">doDelivery</span><span class="params">()</span></span>;</span><br><span class="line">    <span class="comment">// 步骤模板</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">processOrder</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		doSelect();</span><br><span class="line">		doPayment();</span><br><span class="line">		<span class="keyword">if</span> (isGift)</span><br><span class="line">			giftWrap();</span><br><span class="line">		doDelivery();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 子类重写父类的非公共操作</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">NetOrder</span> <span class="keyword">extends</span> <span class="title">OrderProcessTemplate</span> </span>&#123;</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doSelect</span><span class="params">()</span> </span>&#123; … &#125;</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doPayment</span><span class="params">()</span> </span>&#123; … &#125;</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">doDelivery</span><span class="params">()</span> </span>&#123; … &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <h4 id="Iterator模式"><a href="#Iterator模式" class="headerlink" title="Iterator模式"></a><font color=red>Iterator模式</font></h4><p>迭代器模式：设计了一个容器/集合类的对象，提供一种方法访问一个容器（container）对象中各个元素，而又不需暴露该对象的内部细节</p>
 <p>实现方式课间与网上资料有些不同：</p>
 <p>实现Iterable接口，并实现自己的独特Iterator迭代器(hasNext, next, remove)，并允许客户端利用（ppt）</p>
 <p>自己写实现Iterator（网上资料），如下</p>
-<pre><code class="java">// 接口
-public interface Iterator {
-    public Object next(); 
-    public boolean hasNext();
-}
-// 实现Interator
-public class ConcreteIterator implements Iterator {
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 接口</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Iterator</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> Object <span class="title">next</span><span class="params">()</span></span>; </span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">hasNext</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 实现Interator</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ConcreteIterator</span> <span class="keyword">implements</span> <span class="title">Iterator</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> List list = <span class="keyword">new</span> ArrayList();</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">int</span> cursor = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">ConcreteIterator</span><span class="params">(List list)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.list = list;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Object <span class="title">next</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        Object obj = <span class="keyword">null</span>;</span><br><span class="line">        <span class="keyword">if</span> (<span class="keyword">this</span>.hasNext()) &#123;</span><br><span class="line">            obj = <span class="keyword">this</span>.list.get(cursor++);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> obj;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">hasNext</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (cursor == list.size()) &#123;</span><br><span class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 抽象容器</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Aggregate</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">add</span><span class="params">(Object obj)</span></span>;  </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">remove</span><span class="params">(Object obj)</span></span>;  </span><br><span class="line">    <span class="function"><span class="keyword">public</span> Iterator <span class="title">iterator</span><span class="params">()</span></span>; </span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 在容器中添加Iterator获取</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ConcreteAggregate</span> <span class="keyword">implements</span> <span class="title">Aggregate</span> </span>&#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> List list = <span class="keyword">new</span> ArrayList();  </span><br><span class="line">    </span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">add</span><span class="params">(Object obj)</span> </span>&#123;</span><br><span class="line">        list.add(obj);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">remove</span><span class="params">(Object obj)</span> </span>&#123;</span><br><span class="line">        list.remove(obj);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> Iterator <span class="title">iterator</span><span class="params">()</span> </span>&#123;</span><br><span class="line">         <span class="keyword">return</span> <span class="keyword">new</span> ConcreteIterator(list); </span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 客户端使用</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Client</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">        Aggregate ag = <span class="keyword">new</span> ConcreteAggregate();</span><br><span class="line">        ag.add(<span class="string">"小明"</span>);</span><br><span class="line">        ag.add(<span class="string">"小红"</span>);</span><br><span class="line">        ag.add(<span class="string">"小刚"</span>);</span><br><span class="line">        Iterator it = ag.iterator();</span><br><span class="line">        <span class="keyword">while</span> (it.hasNext()) &#123;</span><br><span class="line">            String str = (String) it.next();</span><br><span class="line">            System.out.println(str);</span><br><span class="line">        &#125;</span><br><span class="line">      &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    private List list = new ArrayList();
-    private int cursor = 0;
-
-    public ConcreteIterator(List list) {
-        this.list = list;
-    }
-
-    @Override
-    public Object next() {
-        Object obj = null;
-        if (this.hasNext()) {
-            obj = this.list.get(cursor++);
-        }
-        return obj;
-    }
-
-    @Override
-    public boolean hasNext() {
-        if (cursor == list.size()) {
-            return false;
-        }
-        return true;
-    }
-}
-// 抽象容器
-public interface Aggregate {
-    public void add(Object obj);  
-    public void remove(Object obj);  
-    public Iterator iterator(); 
-}
-// 在容器中添加Iterator获取
-public class ConcreteAggregate implements Aggregate {
-
-    private List list = new ArrayList();  
-
-    @Override
-    public void add(Object obj) {
-        list.add(obj);
-    }
-    @Override
-    public void remove(Object obj) {
-        list.remove(obj);
-    }
-    @Override
-    public Iterator iterator() {
-         return new ConcreteIterator(list); 
-    }
-}
-// 客户端使用
-public class Client {
-    public static void main(String[] args) {
-        Aggregate ag = new ConcreteAggregate();
-        ag.add(&quot;小明&quot;);
-        ag.add(&quot;小红&quot;);
-        ag.add(&quot;小刚&quot;);
-        Iterator it = ag.iterator();
-        while (it.hasNext()) {
-            String str = (String) it.next();
-            System.out.println(str);
-        }
-      }
-}</code></pre>
 <h2 id="Unit-5"><a href="#Unit-5" class="headerlink" title="Unit 5"></a>Unit 5</h2><h3 id="Target-3"><a href="#Target-3" class="headerlink" title="Target"></a>Target</h3><ul>
 <li><input checked="" disabled="" type="checkbox"> 可维护性的常见度量指标</li>
 <li><input checked="" disabled="" type="checkbox"> 聚合度与耦合度</li>
@@ -847,70 +640,16 @@ public class Client {
 <h4 id="面向对象编程原则：SOLID"><a href="#面向对象编程原则：SOLID" class="headerlink" title="面向对象编程原则：SOLID"></a>面向对象编程原则：SOLID</h4><ul>
 <li>(SRP) The Single Responsibility Principle 单一责任原则：一个类，一个责任  </li>
 </ul>
-<pre><code class="java">// 两个责任：Connection Management 、Data Communication
-interface Modem {
-    public void dial(String pno);
-    public void hangup();
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 两个责任：Connection Management 、Data Communication</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Modem</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">dial</span><span class="params">(String pno)</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">hangup</span><span class="params">()</span></span>;</span><br><span class="line">    </span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">send</span><span class="params">(<span class="keyword">char</span> c)</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">char</span> <span class="title">recv</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 应该分开</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">DataChannel</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">send</span><span class="params">(<span class="keyword">char</span> c)</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">char</span> <span class="title">recv</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">Connection</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">dial</span><span class="params">(String phn)</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">char</span> <span class="title">hangup</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    public void send(char c);
-    public char recv();
-}
-
-// 应该分开
-interface DataChannel {
-    public void send(char c);
-    public char recv();
-}
-interface Connection {
-    public void dial(String phn);
-    public char hangup();
-}</code></pre>
 <ul>
 <li>(OCP) The Open-Closed Principle 开放-封闭原则：模块行为是可扩展的，修改的时候不要修改原有的代码</li>
 </ul>
 <blockquote>
 <p> 比如有多种不同类型的Server，那么每出现一种新的Server，就需要修改Server内部代码；而如果使用抽象的Server类做父类，其中包含公共部分，而将特殊部分交给子类实现便可以实现OCP；</p>
 </blockquote>
-<pre><code class="java">public void drawShape(Shape s) {
-    if (s.m_type==1)        // if-else将导致扩展新行为时改变原有代码
-        drawRectangle(s);
-    else if (s.m_type==2)
-    drawCircle(s);
-}
-    public void drawCircle(Circle r)
-    {....}
-    public void drawRectangle(Rectangle r)
-    {....}
-}
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">drawShape</span><span class="params">(Shape s)</span> </span>&#123;</span><br><span class="line">	<span class="keyword">if</span> (s.m_type==<span class="number">1</span>)		<span class="comment">// if-else将导致扩展新行为时改变原有代码</span></span><br><span class="line">		drawRectangle(s);</span><br><span class="line">	<span class="keyword">else</span> <span class="keyword">if</span> (s.m_type==<span class="number">2</span>)</span><br><span class="line">	drawCircle(s);</span><br><span class="line">&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">drawCircle</span><span class="params">(Circle r)</span></span></span><br><span class="line"><span class="function">	</span>&#123;....&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">drawRectangle</span><span class="params">(Rectangle r)</span></span></span><br><span class="line"><span class="function">	</span>&#123;....&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Shape</span> </span>&#123;</span><br><span class="line">	<span class="keyword">int</span> m_type;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Rectangle</span> <span class="keyword">extends</span> <span class="title">Shape</span> </span>&#123;</span><br><span class="line">	Rectangle() &#123;</span><br><span class="line">		<span class="keyword">super</span>.m_type=<span class="number">1</span>;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Circle</span> <span class="keyword">extends</span> <span class="title">Shape</span> </span>&#123;</span><br><span class="line">	Circle() &#123;</span><br><span class="line">		<span class="keyword">super</span>.m_type=<span class="number">2</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 将不同功能封装到不同形状中可以实现OCP</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">GraphicEditor</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">drawShape</span><span class="params">(Shape s)</span> </span>&#123;</span><br><span class="line">		s.draw();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Shape</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">draw</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Rectangle</span> <span class="keyword">extends</span> <span class="title">Shape</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">draw</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	<span class="comment">// draw the rectangle</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-class Shape {
-    int m_type;
-}
-class Rectangle extends Shape {
-    Rectangle() {
-        super.m_type=1;
-    }
-}
-class Circle extends Shape {
-    Circle() {
-        super.m_type=2;
-    }
-}
-
-// 将不同功能封装到不同形状中可以实现OCP
-class GraphicEditor {
-    public void drawShape(Shape s) {
-        s.draw();
-    }
-}
-class Shape {
-    abstract void draw();
-}
-class Rectangle extends Shape {
-    public void draw() {
-    // draw the rectangle
-    }
-}</code></pre>
 <ul>
 <li>(LSP) The Liskov Substitution Principle Liskov替换原则：略</li>
 <li>(DIP) The Dependency Inversion Principle 依赖转置原则：只对接口编程，依赖于抽象而不依赖于具体。</li>
@@ -918,39 +657,8 @@ class Rectangle extends Shape {
 <blockquote>
 <p>依赖倒置原则在java中表现就是，模块间依赖通过抽象发生，实现类之间不发生直接依赖关系，其依赖关系是通过接口或者抽象类产生的。如果类与类直接依赖细节，那么就会直接耦合。如此一来当修改时，就会同时修改依赖者代码，这样限制了可拓展性。</p>
 </blockquote>
-<pre><code class="java">//文学经典类
-public class LiteraryClassic{
-    //阅读文学经典
-    public void read(){
-       System.out.println(&quot;文学经典阅读，滋润自己的内心心灵&quot;);
-    }
-}
-//小明类
-public class XiaoMing{
-    //阅读文学经典
-    public void read(LiteraryClassic literaryClassic){
-        literaryClassic.read();
-    }
-}
-// 场景
-public class Client{
-   public static void main(Strings[] args){
-      XiaoMing xiaoming = new XiaoMing();
-      LiteraryClassic literaryClassic = new LiteraryClassic();
-      //小明阅读文学经典
-      xiaoming.read(literaryClassic);
-   }
-}
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//文学经典类</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">LiteraryClassic</span></span>&#123;</span><br><span class="line">    <span class="comment">//阅读文学经典</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">read</span><span class="params">()</span></span>&#123;</span><br><span class="line">       System.out.println(<span class="string">"文学经典阅读，滋润自己的内心心灵"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//小明类</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">XiaoMing</span></span>&#123;</span><br><span class="line">    <span class="comment">//阅读文学经典</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">read</span><span class="params">(LiteraryClassic literaryClassic)</span></span>&#123;</span><br><span class="line">        literaryClassic.read();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 场景</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Client</span></span>&#123;</span><br><span class="line">   <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(Strings[] args)</span></span>&#123;</span><br><span class="line">      XiaoMing xiaoming = <span class="keyword">new</span> XiaoMing();</span><br><span class="line">      LiteraryClassic literaryClassic = <span class="keyword">new</span> LiteraryClassic();</span><br><span class="line">      <span class="comment">//小明阅读文学经典</span></span><br><span class="line">      xiaoming.read(literaryClassic);</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//但小明想看小说时，发现中委托实现依赖LiteraryClassic具体类</span></span><br><span class="line"><span class="comment">//小说类</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Novel</span></span>&#123;</span><br><span class="line">    <span class="comment">//阅读小说</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">read</span><span class="params">()</span></span>&#123;</span><br><span class="line">       System.out.println(<span class="string">"阅读小说，放松自己"</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//正确的做法应该是创建小说与文学经典的父类Book，小明委托Book中的read</span></span><br></pre></td></tr></table></figure>
 
-//但小明想看小说时，发现中委托实现依赖LiteraryClassic具体类
-//小说类
-public class Novel{
-    //阅读小说
-    public void read(){
-       System.out.println(&quot;阅读小说，放松自己&quot;);
-    }
-}
-//正确的做法应该是创建小说与文学经典的父类Book，小明委托Book中的read</code></pre>
 <ul>
 <li>(ISP) The Interface Segregation Principle 接口聚合原则 ：使用多个隔离的接口，比使用单个“胖”接口要好</li>
 </ul>
@@ -959,279 +667,29 @@ public class Novel{
 <p>Behavioral patterns  ：observer、visitor</p>
 <p>基于状态的构造模式：Memento、state</p>
 <h4 id="Factory-Method-pattern"><a href="#Factory-Method-pattern" class="headerlink" title="Factory Method pattern  "></a><font color=red>Factory Method pattern  </font></h4><p>工厂方法：定义一个用于创建对象的接口，让其子类来决定实例化哪一个类  </p>
-<pre><code class="java">// 产品接口
-public interface Trace { // turn on and off debugging
-    public void setDebug( boolean debug );
-    // write out a debug message
-    public void debug( String message );
-    // write out an error message
-    public void error( String message );
-}
-// 具体实现类1
-public class FileTrace implements Trace {
-    ...
-}
-// 具体实现类2
-public class SystemTrace implements Trace {
-    ...
-}
-// Client使用只能绑定到具体的类
-Trace log = new SystemTrace();
-log.debug( &quot;entering log&quot; );
-Trace log2 = new FileTrace();
-log.debug(“...”);
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 产品接口</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Trace</span> </span>&#123; <span class="comment">// turn on and off debugging</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setDebug</span><span class="params">( <span class="keyword">boolean</span> debug )</span></span>;</span><br><span class="line">	<span class="comment">// write out a debug message</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">debug</span><span class="params">( String message )</span></span>;</span><br><span class="line">    <span class="comment">// write out an error message</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">error</span><span class="params">( String message )</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 具体实现类1</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FileTrace</span> <span class="keyword">implements</span> <span class="title">Trace</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 具体实现类2</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SystemTrace</span> <span class="keyword">implements</span> <span class="title">Trace</span> </span>&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Client使用只能绑定到具体的类</span></span><br><span class="line">Trace log = <span class="keyword">new</span> SystemTrace();</span><br><span class="line">log.debug( <span class="string">"entering log"</span> );</span><br><span class="line">Trace log2 = <span class="keyword">new</span> FileTrace();</span><br><span class="line">log.debug(“...”);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 如果使用工厂方法</span></span><br><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">TraceFactory</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> Trace <span class="title">getTrace</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> Trace <span class="title">getTrace</span><span class="params">(String type)</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">otherOperation</span><span class="params">()</span></span>&#123;&#125;;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Factory</span> <span class="keyword">implements</span> <span class="title">TraceFactory</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> Trace <span class="title">getTrace</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">new</span> SystemTrace();</span><br><span class="line">	&#125;    </span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">getTrace</span><span class="params">(String type)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(type.equals(“file”)</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">new</span> FileTrace();</span><br><span class="line">		<span class="keyword">else</span> <span class="keyword">if</span> (type.equals(“system”)</span><br><span class="line">			<span class="keyword">return</span> <span class="keyword">new</span> SystemTrace();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">              </span><br><span class="line"><span class="comment">// 客户端无需绑定到具体类</span></span><br><span class="line">Trace log1 = <span class="keyword">new</span> Factory1().getTrace();</span><br><span class="line">log1.setDebug(<span class="keyword">true</span>);</span><br><span class="line">log1.debug( <span class="string">"entering log"</span> );</span><br><span class="line">Trace log2 = <span class="keyword">new</span> Factory2().getTrace(<span class="string">"system"</span>);</span><br><span class="line">log2.setDebug(<span class="keyword">false</span>);</span><br><span class="line">log2.debug(<span class="string">"..."</span>);</span><br></pre></td></tr></table></figure>
 
-// 如果使用工厂方法
-interface TraceFactory {
-    public Trace getTrace();
-    public Trace getTrace(String type);
-    void otherOperation(){};
-}
-public class Factory implements TraceFactory {
-    public Trace getTrace() {
-        return new SystemTrace();
-    }    
-    public getTrace(String type) {
-        if(type.equals(“file”)
-            return new FileTrace();
-        else if (type.equals(“system”)
-            return new SystemTrace();
-    }
-}
-
-// 客户端无需绑定到具体类
-Trace log1 = new Factory1().getTrace();
-log1.setDebug(true);
-log1.debug( &quot;entering log&quot; );
-Trace log2 = new Factory2().getTrace(&quot;system&quot;);
-log2.setDebug(false);
-log2.debug(&quot;...&quot;);</code></pre>
 <p>静态工厂方法略</p>
 <p>抽象工厂方法：可以看到上述Factory中的if-else可能违反了开闭原则，所以通过定义抽象工厂父类，每个子类工厂实现某个具体产品类的创建，这便是抽象工厂方法。同时如果有多个顺序确定的产品需要创建，可利用工厂辅助类确定顺序</p>
-<pre><code class="java">// 抽象工厂
-public interface AbstractWidgetFactory{
-    public Window createWindow();
-    public Scrollbar createScrollbar();
-}
-// 具体工厂1
-public class WidgetFactory1 implements AbstractWidgetFactory{
-    public Window createWindow(){
-        ...
-    }
-    public Scrollbar createScrollbar(){...}
-}
-// 具体工厂2
-public class WidgetFactory2 implements AbstractWidgetFactory{
-    public Window createWindow(){
-        ...
-    }
-    public Scrollbar createScrollbar(){...}
-}
-// 辅助类用来确定顺序
-public class GUIBuilder{
-    public void buildWindow(AbstractWidgetFactory widgetFactory){
-        //先创建window
-        Window window = widgetFactory.createWindow();
-        //再创建scrollbar
-        Scrollbar scrollbar = widgetFactory.createScrollbar();
-        window.setTitle(&quot;New Window&quot;);
-        window.addScrollbar(scrollbar);
-    }
-}
-// Client
-GUIBuilder builder = new GUIBuilder();
-AbstractWidgetFactory widgetFactory = null;
-if(“Motif”)
-    widgetFactory = new WidgetFactory2();
-else
-    widgetFactory = new WidgetFactory1();
-// 利用辅助类创建
-builder.buildWindow(widgetFactory);</code></pre>
-<h4 id="proxy-pattern"><a href="#proxy-pattern" class="headerlink" title="proxy pattern"></a><font color=red>proxy pattern</font></h4><p>代理模式：某个对象比较“敏感” /“私密” /“贵重”，不希望被client直接访问到，在二者之间建立防火墙  </p>
-<pre><code class="java">public interface Image {
-    void display();
-}
-public class RealImage implements Image {
-    private String fileName;
-    public RealImage(String fileName){
-        this.fileName = fileName;
-        loadFromDisk(fileName);
-    }
-    @Override
-    public void display() {…}
-    private void loadFromDisk(String fileName){…}
-}
-// 隐藏RealImage类
-public class ProxyImage implements Image {
-    private Image realImage;
-    private String fileName;
-    public ProxyImage(String fileName){
-        this.fileName = fileName;
-    }
-    @Override
-    public void display() {
-        if(realImage == null){
-        realImage = new RealImage(fileName);
-    }
-    realImage.display();
-    }
-}
-//Client:
-Image image = new ProxyImage(“pic.jpg&quot;);
-image.display();
-image.display();</code></pre>
-<h4 id="Observer-pattern"><a href="#Observer-pattern" class="headerlink" title="Observer pattern  "></a><font color=red>Observer pattern  </font></h4><p>观察者模式：实现一对多广播</p>
-<pre><code class="java">// 广播者，偶像
-public class Subject {
-    // 粉丝
-    private List&lt;Observer&gt; observers = new ArrayList&lt;Observer&gt;();
-    private int state;
-    public int getState() {return state;}
-    public void setState(int state) {
-        this.state = state;
-        notifyAllObservers();
-    }
-    // 绑定粉丝
-    public void attach(Observer observer){observers.add(observer);}
-    private void notifyAllObservers(){ // 一对多广播
-        for (Observer observer : observers) {
-            // 通过委托实现
-            observer.update();
-        }
-    }
-}
-// 接受广播者， 粉丝
-public abstract class Observer {
-    protected Subject subject;
-    public abstract void update();
-}
-// 具体粉丝
-public class BinaryObserver extends Observer{
-    // 通过偶像创建
-    public BinaryObserver(Subject subject){
-        this.subject = subject;
-        this.subject.attach(this);
-    }
-    @Override
-    public void update() {
-        System.out.println( &quot;Binary String:&quot;+Integer.toBinaryString(subject.getState()));
-    }
-}
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 抽象工厂</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">AbstractWidgetFactory</span></span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> Window <span class="title">createWindow</span><span class="params">()</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> Scrollbar <span class="title">createScrollbar</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 具体工厂1</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WidgetFactory1</span> <span class="keyword">implements</span> <span class="title">AbstractWidgetFactory</span></span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> Window <span class="title">createWindow</span><span class="params">()</span></span>&#123;</span><br><span class="line">		...</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> Scrollbar <span class="title">createScrollbar</span><span class="params">()</span></span>&#123;...&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 具体工厂2</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">WidgetFactory2</span> <span class="keyword">implements</span> <span class="title">AbstractWidgetFactory</span></span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> Window <span class="title">createWindow</span><span class="params">()</span></span>&#123;</span><br><span class="line">		...</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> Scrollbar <span class="title">createScrollbar</span><span class="params">()</span></span>&#123;...&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 辅助类用来确定顺序</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">GUIBuilder</span></span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">buildWindow</span><span class="params">(AbstractWidgetFactory widgetFactory)</span></span>&#123;</span><br><span class="line">        <span class="comment">//先创建window</span></span><br><span class="line">		Window window = widgetFactory.createWindow();</span><br><span class="line">        <span class="comment">//再创建scrollbar</span></span><br><span class="line">		Scrollbar scrollbar = widgetFactory.createScrollbar();</span><br><span class="line">		window.setTitle(<span class="string">"New Window"</span>);</span><br><span class="line">		window.addScrollbar(scrollbar);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Client</span></span><br><span class="line">GUIBuilder builder = <span class="keyword">new</span> GUIBuilder();</span><br><span class="line">AbstractWidgetFactory widgetFactory = <span class="keyword">null</span>;</span><br><span class="line"><span class="keyword">if</span>(“Motif”)</span><br><span class="line">	widgetFactory = <span class="keyword">new</span> WidgetFactory2();</span><br><span class="line"><span class="keyword">else</span></span><br><span class="line">	widgetFactory = <span class="keyword">new</span> WidgetFactory1();</span><br><span class="line"><span class="comment">// 利用辅助类创建</span></span><br><span class="line">builder.buildWindow(widgetFactory);</span><br></pre></td></tr></table></figure>
 
-// Client
-Subject subject = new Subject();
-new HexaObserver(subject);
-new OctalObserver(subject);
-new BinaryObserver(subject);
-attach...
-System.out.println(&quot;First state change: 15&quot;);
-subject.setState(15);
-System.out.println(&quot;Second state change: 10&quot;);
-subject.setState(10);</code></pre>
+<h4 id="proxy-pattern"><a href="#proxy-pattern" class="headerlink" title="proxy pattern"></a><font color=red>proxy pattern</font></h4><p>代理模式：某个对象比较“敏感” /“私密” /“贵重”，不希望被client直接访问到，在二者之间建立防火墙  </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Image</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">void</span> <span class="title">display</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">RealImage</span> <span class="keyword">implements</span> <span class="title">Image</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> String fileName;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">RealImage</span><span class="params">(String fileName)</span></span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.fileName = fileName;</span><br><span class="line">		loadFromDisk(fileName);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">display</span><span class="params">()</span> </span>&#123;…&#125;</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">loadFromDisk</span><span class="params">(String fileName)</span></span>&#123;…&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 隐藏RealImage类</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ProxyImage</span> <span class="keyword">implements</span> <span class="title">Image</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> Image realImage;</span><br><span class="line">	<span class="keyword">private</span> String fileName;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">ProxyImage</span><span class="params">(String fileName)</span></span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.fileName = fileName;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">display</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">if</span>(realImage == <span class="keyword">null</span>)&#123;</span><br><span class="line">		realImage = <span class="keyword">new</span> RealImage(fileName);</span><br><span class="line">	&#125;</span><br><span class="line">	realImage.display();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//Client:</span></span><br><span class="line">Image image = <span class="keyword">new</span> ProxyImage(“pic.jpg<span class="string">");</span></span><br><span class="line"><span class="string">image.display();</span></span><br><span class="line"><span class="string">image.display();</span></span><br></pre></td></tr></table></figure>
+
+<h4 id="Observer-pattern"><a href="#Observer-pattern" class="headerlink" title="Observer pattern  "></a><font color=red>Observer pattern  </font></h4><p>观察者模式：实现一对多广播</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 广播者，偶像</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Subject</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 粉丝</span></span><br><span class="line">	<span class="keyword">private</span> List&lt;Observer&gt; observers = <span class="keyword">new</span> ArrayList&lt;Observer&gt;();</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">int</span> state;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getState</span><span class="params">()</span> </span>&#123;<span class="keyword">return</span> state;&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setState</span><span class="params">(<span class="keyword">int</span> state)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.state = state;</span><br><span class="line">		notifyAllObservers();</span><br><span class="line">	&#125;</span><br><span class="line">    <span class="comment">// 绑定粉丝</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">attach</span><span class="params">(Observer observer)</span></span>&#123;observers.add(observer);&#125;</span><br><span class="line">	<span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">notifyAllObservers</span><span class="params">()</span></span>&#123; <span class="comment">// 一对多广播</span></span><br><span class="line">		<span class="keyword">for</span> (Observer observer : observers) &#123;</span><br><span class="line">			<span class="comment">// 通过委托实现</span></span><br><span class="line">            observer.update();</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 接受广播者， 粉丝</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">Observer</span> </span>&#123;</span><br><span class="line">	<span class="keyword">protected</span> Subject subject;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">update</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 具体粉丝</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">BinaryObserver</span> <span class="keyword">extends</span> <span class="title">Observer</span></span>&#123;</span><br><span class="line">    <span class="comment">// 通过偶像创建</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">BinaryObserver</span><span class="params">(Subject subject)</span></span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.subject = subject;</span><br><span class="line">		<span class="keyword">this</span>.subject.attach(<span class="keyword">this</span>);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="meta">@Override</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">update</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		System.out.println( <span class="string">"Binary String:"</span>+Integer.toBinaryString(subject.getState()));</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// Client</span></span><br><span class="line">Subject subject = <span class="keyword">new</span> Subject();</span><br><span class="line"><span class="keyword">new</span> HexaObserver(subject);</span><br><span class="line"><span class="keyword">new</span> OctalObserver(subject);</span><br><span class="line"><span class="keyword">new</span> BinaryObserver(subject);</span><br><span class="line">attach...</span><br><span class="line">System.out.println(<span class="string">"First state change: 15"</span>);</span><br><span class="line">subject.setState(<span class="number">15</span>);</span><br><span class="line">System.out.println(<span class="string">"Second state change: 10"</span>);</span><br><span class="line">subject.setState(<span class="number">10</span>);</span><br></pre></td></tr></table></figure>
+
 <p>Java里已经实现了该模式</p>
 <ul>
 <li>Observable 抽象类，直接派生子类 即可构造“偶像”</li>
 <li>Observer接口，实现该接口，构造“粉丝”  </li>
 </ul>
 <h4 id="Visitor-pattern"><a href="#Visitor-pattern" class="headerlink" title="Visitor pattern"></a><font color=red>Visitor pattern</font></h4><p>访问者模式：在特定ADT上执行某种特定操作，但该操作不在ADT内部实现，而是delegate到独立的visitor对象，客户端可灵活扩展/改变visitor的操作算法，而不影响ADT  </p>
-<pre><code class="java">// 数据结构
-public interface ItemElement {
-    public int accept(ShoppingCartVisitor visitor);
-}
-// 具体数据结构1
-public class Book implements ItemElement{
-    private double price;
-    ...
-    int accept(ShoppingCartVisitor visitor) {
-        // 委托ShoppingCartVisitor类
-        visitor.visit(this);
-    }
-}
-// 具体数据结构2
-public class Fruit implements ItemElement{
-    private double weight;
-    ...
-    int accept(ShoppingCartVisitor visitor) {
-        // 委托ShoppingCartVisitor类
-        visitor.visit(this);
-    }
-}
-// visitor抽象类
-public interface ShoppingCartVisitor {
-    int visit(Book book);
-    int visit(Fruit fruit);
-}
-// visitor实现类，实现操作与数据结构的分离
-public class ShoppingCartVisitorImpl implements ShoppingCartVisitor {
-    public int visit(Book book) {
-        // 操作细节
-        int cost=0;
-        if(book.getPrice() &gt; 50){
-            cost = book.getPrice()-5;
-        }else
-        cost = book.getPrice();
-        System.out.println(&quot;Book ISBN::&quot;+book.getIsbnNumber() + &quot; cost =&quot;+cost);
-        return cost;
-    }
-    public int visit(Fruit fruit) {
-        int cost = fruit.getPricePerKg()*fruit.getWeight();
-        System.out.println(fruit.getName() + &quot; cost = &quot;+cost);
-        return cost;
-    }
-}</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 数据结构</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ItemElement</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">accept</span><span class="params">(ShoppingCartVisitor visitor)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 具体数据结构1</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Book</span> <span class="keyword">implements</span> <span class="title">ItemElement</span></span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">double</span> price;</span><br><span class="line">	...</span><br><span class="line">	<span class="function"><span class="keyword">int</span> <span class="title">accept</span><span class="params">(ShoppingCartVisitor visitor)</span> </span>&#123;</span><br><span class="line">		<span class="comment">// 委托ShoppingCartVisitor类</span></span><br><span class="line">        visitor.visit(<span class="keyword">this</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 具体数据结构2</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Fruit</span> <span class="keyword">implements</span> <span class="title">ItemElement</span></span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">double</span> weight;</span><br><span class="line">	...</span><br><span class="line">	<span class="function"><span class="keyword">int</span> <span class="title">accept</span><span class="params">(ShoppingCartVisitor visitor)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 委托ShoppingCartVisitor类</span></span><br><span class="line">		visitor.visit(<span class="keyword">this</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// visitor抽象类</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">ShoppingCartVisitor</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">int</span> <span class="title">visit</span><span class="params">(Book book)</span></span>;</span><br><span class="line">	<span class="function"><span class="keyword">int</span> <span class="title">visit</span><span class="params">(Fruit fruit)</span></span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// visitor实现类，实现操作与数据结构的分离</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ShoppingCartVisitorImpl</span> <span class="keyword">implements</span> <span class="title">ShoppingCartVisitor</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">visit</span><span class="params">(Book book)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 操作细节</span></span><br><span class="line">		<span class="keyword">int</span> cost=<span class="number">0</span>;</span><br><span class="line">		<span class="keyword">if</span>(book.getPrice() &gt; <span class="number">50</span>)&#123;</span><br><span class="line">			cost = book.getPrice()-<span class="number">5</span>;</span><br><span class="line">		&#125;<span class="keyword">else</span></span><br><span class="line">		cost = book.getPrice();</span><br><span class="line">		System.out.println(<span class="string">"Book ISBN::"</span>+book.getIsbnNumber() + <span class="string">" cost ="</span>+cost);</span><br><span class="line">		<span class="keyword">return</span> cost;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">visit</span><span class="params">(Fruit fruit)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">int</span> cost = fruit.getPricePerKg()*fruit.getWeight();</span><br><span class="line">		System.out.println(fruit.getName() + <span class="string">" cost = "</span>+cost);</span><br><span class="line">		<span class="keyword">return</span> cost;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <h4 id="Memento-pattern"><a href="#Memento-pattern" class="headerlink" title="Memento pattern"></a><font color=red>Memento pattern</font></h4><p>备忘录模式：记住对象的历史状态，以便于“回滚”  </p>
-<pre><code class="java">// 
-class Memento {
-    private State state; 
-    public Memento(State state) {
-        this.state = state;
-    }
-    public State getState() {
-        return state;
-    }
-}
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// </span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Memento</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> State state; </span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">Memento</span><span class="params">(State state)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">this</span>.state = state;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> State <span class="title">getState</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> state;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Originator</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> State state;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setState</span><span class="params">(State state)</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">"Originator: Setting state to "</span> + state.toString());</span><br><span class="line">		<span class="keyword">this</span>.state = state;</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> Memento <span class="title">save</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">"Originator: Saving to Memento."</span>);</span><br><span class="line">		<span class="keyword">return</span> <span class="keyword">new</span> Memento(state);</span><br><span class="line">	&#125;</span><br><span class="line">    <span class="comment">// 恢复历史记录</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">restore</span><span class="params">(Memento m)</span> </span>&#123;</span><br><span class="line">		state = m.getState();</span><br><span class="line">		System.out.println(<span class="string">"Originator: State after restoring from Memento: "</span> + state);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Caretaker</span> </span>&#123;</span><br><span class="line">	<span class="keyword">private</span> List&lt;Memento&gt; mementos	= <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addMemento</span><span class="params">(Memento m)</span> </span>&#123;</span><br><span class="line">		mementos.add(m);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> Memento <span class="title">getMemento</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">return</span> mementos.get(?);  <span class="comment">//具体需要回滚到那个版本</span></span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// Client</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">	Caretaker caretaker = <span class="keyword">new</span> Caretaker();</span><br><span class="line">	Originator originator = <span class="keyword">new</span> Originator();</span><br><span class="line">	originator.setState(<span class="string">"State1"</span>);</span><br><span class="line">	originator.setState(<span class="string">"State2"</span>);</span><br><span class="line">    <span class="comment">// 存档</span></span><br><span class="line">	caretaker.addMemento( originator.save() );</span><br><span class="line">	originator.setState(<span class="string">"State3"</span>);</span><br><span class="line">    <span class="comment">// 存档</span></span><br><span class="line">	caretaker.addMemento( originator.save() );</span><br><span class="line">	originator.setState(<span class="string">"State4"</span>);</span><br><span class="line">    <span class="comment">// 恢复</span></span><br><span class="line">	originator.restore( caretaker.getMemento() );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-class Originator {
-    private State state;
-    public void setState(State state) {
-        System.out.println(&quot;Originator: Setting state to &quot; + state.toString());
-        this.state = state;
-    }
-    public Memento save() {
-        System.out.println(&quot;Originator: Saving to Memento.&quot;);
-        return new Memento(state);
-    }
-    // 恢复历史记录
-    public void restore(Memento m) {
-        state = m.getState();
-        System.out.println(&quot;Originator: State after restoring from Memento: &quot; + state);
-    }
-}
-
-class Caretaker {
-    private List&lt;Memento&gt; mementos    = new ArrayList&lt;&gt;();
-    public void addMemento(Memento m) {
-        mementos.add(m);
-    }
-    public Memento getMemento() {
-        return mementos.get(?);  //具体需要回滚到那个版本
-    }
-}
-// Client
-public static void main(String[] args) {
-    Caretaker caretaker = new Caretaker();
-    Originator originator = new Originator();
-    originator.setState(&quot;State1&quot;);
-    originator.setState(&quot;State2&quot;);
-    // 存档
-    caretaker.addMemento( originator.save() );
-    originator.setState(&quot;State3&quot;);
-    // 存档
-    caretaker.addMemento( originator.save() );
-    originator.setState(&quot;State4&quot;);
-    // 恢复
-    originator.restore( caretaker.getMemento() );
-}</code></pre>
 <h4 id="State-pattern"><a href="#State-pattern" class="headerlink" title="State pattern"></a><font color=red>State pattern</font></h4><p>略，见实验</p>
 <h4 id="语法"><a href="#语法" class="headerlink" title="语法"></a><font color=red>语法</font></h4><p>语法解析树    非终止节点 \ 终止节点</p>
 <p>常见操作：</p>
@@ -1245,13 +703,8 @@ public static void main(String[] args) {
 <li><code>x ::= [aeiou]</code>，aeiou中的某个字符  </li>
 <li><code>x ::= [^a-c]</code>，除了从a到c以外的某个字符</li>
 </ul>
-<pre><code class="java">root = (A B)+
-A = [Aa] // 字符A与a
-B = [Bb] 
-    //aaaBBB ×
-    //abababab √
-    //aBAbabAB √
-    //AbAbAbA ×</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">root = (A B)+</span><br><span class="line">A = [Aa] <span class="comment">// 字符A与a</span></span><br><span class="line">B = [Bb] </span><br><span class="line">    <span class="comment">//aaaBBB ×</span></span><br><span class="line">	<span class="comment">//abababab √</span></span><br><span class="line">	<span class="comment">//aBAbabAB √</span></span><br><span class="line">	<span class="comment">//AbAbAbA ×</span></span><br></pre></td></tr></table></figure>
+
 <h4 id="正则表达式"><a href="#正则表达式" class="headerlink" title="正则表达式"></a><font color=red>正则表达式</font></h4><ul>
 <li><code>.</code>，代表任意一个字符</li>
 <li><code>\d</code>  ，即<code>[0-9]</code></li>
@@ -1295,52 +748,22 @@ B = [Bb]
 <h4 id="checked异常的处理操作"><a href="#checked异常的处理操作" class="headerlink" title="checked异常的处理操作"></a>checked异常的处理操作</h4><p>try、catch、finally、throws、throw  </p>
 <p>throws用于方法声明，注意要写进spec中，代表此方法只抛出而不处理某个异常，而是把它交给调用者处理；</p>
 <p>在try中throw异常，会直接跳到catch代码块；可以一个try多个catch，也可以没有catch只有finally；也可以在catch中rethrow异常</p>
-<pre><code class="java">try {
-    access the database...
-}
-catch (SQLException e) {
-    // rethrow
-    throw new ServletException(&quot;database error: &quot; + e.getMessage());
-}</code></pre>
-<p>finally代码块不管try中是否throw异常都会执行，甚至在return后也会执行</p>
-<pre><code class="java">try{
-    ...
-    return true;
-}finally{
-    ...        //不管怎么样都会执行到finally，都会返回false
-    return false;
-}
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> &#123;</span><br><span class="line">	access the database...</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">catch</span> (SQLException e) &#123;</span><br><span class="line">    <span class="comment">// rethrow</span></span><br><span class="line">	<span class="keyword">throw</span> <span class="keyword">new</span> ServletException(<span class="string">"database error: "</span> + e.getMessage());</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-int a=1;
-try{
-    ...
-    return true;
-}finally{
-    ...        //不管怎么样都会执行到finally，方法返回true，但是a会变为2
-    a=2;
-}</code></pre>
+<p>finally代码块不管try中是否throw异常都会执行，甚至在return后也会执行</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">	...</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;<span class="keyword">finally</span>&#123;</span><br><span class="line">    ...		<span class="comment">//不管怎么样都会执行到finally，都会返回false</span></span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">int</span> a=<span class="number">1</span>;</span><br><span class="line"><span class="keyword">try</span>&#123;</span><br><span class="line">	...</span><br><span class="line">	<span class="keyword">return</span> <span class="keyword">true</span>;</span><br><span class="line">&#125;<span class="keyword">finally</span>&#123;</span><br><span class="line">    ...		<span class="comment">//不管怎么样都会执行到finally，方法返回true，但是a会变为2</span></span><br><span class="line">    a=<span class="number">2</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <p>try-with-resource相当于finally中把resource关掉</p>
-<pre><code class="java">try (Scanner in = new Scanner(new FileInputStream(&quot;/dict/words&quot;)),&quot;UTF-8&quot;) {
-    while (in.hasNext())
-    System.out.println(in.next());
-}catch(){
-    ...
-}//结束后会自动调用in.close()</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">try</span> (Scanner in = <span class="keyword">new</span> Scanner(<span class="keyword">new</span> FileInputStream(<span class="string">"/dict/words"</span>)),<span class="string">"UTF-8"</span>) &#123;</span><br><span class="line">	<span class="keyword">while</span> (in.hasNext())</span><br><span class="line">	System.out.println(in.next());</span><br><span class="line">&#125;<span class="keyword">catch</span>()&#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;<span class="comment">//结束后会自动调用in.close()</span></span><br></pre></td></tr></table></figure>
+
 <h4 id="自定义异常类"><a href="#自定义异常类" class="headerlink" title=" 自定义异常类"></a><font color=red> 自定义异常类</font></h4><p>通过继承Exception类或其子类来自定义异常</p>
-<pre><code class="java">public class FooException extends Exception {
-    public FooException() { super(); }
-    public FooException(String message) { super(message); }
-    public FooException(String message, Throwable cause) {
-        super(message, cause);
-    }
-    public FooException(Throwable cause) { super(cause); }
-}</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">FooException</span> <span class="keyword">extends</span> <span class="title">Exception</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">FooException</span><span class="params">()</span> </span>&#123; <span class="keyword">super</span>(); &#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">FooException</span><span class="params">(String message)</span> </span>&#123; <span class="keyword">super</span>(message); &#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">FooException</span><span class="params">(String message, Throwable cause)</span> </span>&#123;</span><br><span class="line">		<span class="keyword">super</span>(message, cause);</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="title">FooException</span><span class="params">(Throwable cause)</span> </span>&#123; <span class="keyword">super</span>(cause); &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
 <h4 id="断言的作用、-应用场合"><a href="#断言的作用、-应用场合" class="headerlink" title="断言的作用、 应用场合"></a>断言的作用、 应用场合</h4><p>断言：在开发阶段的代码中嵌入，检验某些“假设”是否成立。若成立，表明程序运行正常，否则表明存在错误  </p>
 <p><font color=blue>注意断言机制在产品中一般会被关闭，所以断言只是开发者在开发阶段用来调试内部bug的</font></p>
 <p>换句话说，断言即是对代码中程序员所做假设的文档化，也不会影响运行时性能。一般用于检测内部不变性、表示不变性、方法的前置条件、后置条件等。</p>
-<pre><code class="java">//两种格式
-assert (something_should_be_true);
-assert (something_should_be_true):&quot;print something you want&quot;</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//两种格式</span></span><br><span class="line"><span class="keyword">assert</span> (something_should_be_true);</span><br><span class="line"><span class="keyword">assert</span> (something_should_be_true):<span class="string">"print something you want"</span></span><br></pre></td></tr></table></figure>
+
 <p>在开发阶段，使用异常来处理“预料到可以发生”的不正常情况；使用断言处理“绝不应该发生”的情况；如果参数来自于外部（不受自己控制），使用异常处理；如果来自于自己所写的其他代码，可以使用断言来帮助发现错误    </p>
 <h4 id="调试的基本过程和方法"><a href="#调试的基本过程和方法" class="headerlink" title="调试的基本过程和方法"></a>调试的基本过程和方法</h4><p>略（貌似都是废话？</p>
 <h4 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h4><p>按层次：单元测试  、集成测试  、系统测试</p>
@@ -1350,34 +773,11 @@ assert (something_should_be_true):&quot;print something you want&quot;</code></p
 <h4 id="JUNIT单元测试相关内容"><a href="#JUNIT单元测试相关内容" class="headerlink" title="JUNIT单元测试相关内容"></a>JUNIT单元测试相关内容</h4><p>略，见实验</p>
 <h4 id="黑盒测试及用例设计"><a href="#黑盒测试及用例设计" class="headerlink" title="黑盒测试及用例设计"></a><font color=red>黑盒测试及用例设计</font></h4><p>黑盒测试：用于检查代码的功能，不关心内部实现细节  </p>
 <p>利用等价类划分来设计测试用例，<font color=blue>对方法的每个参数逐个考虑等价类</font></p>
-<pre><code class="java">/**
-* Reverses the end of a string.
-*
-* 012345 012345
-* For example: reverseEnd(&quot;Hello, world&quot;, 5) returns &quot;Hellodlrow ,&quot;
-* &lt;-----&gt; &lt;-----&gt;
-*
-* With start == 0, reverses the entire text.
-* With start == text.length(), reverses nothing.
-*
-* @param text non-null String that will have its end reversed
-* @param start the index at which the remainder of the input is reversed,
-* requires 0 &lt;= start &lt;= text.length()
-* @return input text with the substring from start to the end of the string
-* reversed
-*/
-public static String reverseEnd(String text, int start)
-   //等价类划分
-   //对于start参数：start = 0, 0 &lt; start &lt; text.length(), start = text.length()
-   //对于text参数：text.length() = 0; text.length()-start is odd; text.length()-start is even</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment">* Reverses the end of a string.</span></span><br><span class="line"><span class="comment">*</span></span><br><span class="line"><span class="comment">* 012345 012345</span></span><br><span class="line"><span class="comment">* For example: reverseEnd("Hello, world", 5) returns "Hellodlrow ,"</span></span><br><span class="line"><span class="comment">* &lt;-----&gt; &lt;-----&gt;</span></span><br><span class="line"><span class="comment">*</span></span><br><span class="line"><span class="comment">* With start == 0, reverses the entire text.</span></span><br><span class="line"><span class="comment">* With start == text.length(), reverses nothing.</span></span><br><span class="line"><span class="comment">*</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> text non-null String that will have its end reversed</span></span><br><span class="line"><span class="comment">* <span class="doctag">@param</span> start the index at which the remainder of the input is reversed,</span></span><br><span class="line"><span class="comment">* requires 0 &lt;= start &lt;= text.length()</span></span><br><span class="line"><span class="comment">* <span class="doctag">@return</span> input text with the substring from start to the end of the string</span></span><br><span class="line"><span class="comment">* reversed</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">reverseEnd</span><span class="params">(String text, <span class="keyword">int</span> start)</span></span></span><br><span class="line"><span class="function">   <span class="comment">//等价类划分</span></span></span><br><span class="line"><span class="function">   <span class="comment">//对于start参数：start = 0, 0 &lt; start &lt; text.length(), start = text.length()</span></span></span><br><span class="line"><span class="function">   <span class="comment">//对于text参数：text.length() = 0; text.length()-start is odd; text.length()-start is even</span></span></span><br></pre></td></tr></table></figure>
+
 <p>边界值分析是对等价类划分方法的补充  </p>
-<pre><code class="java"> max(int a,int b) : int × int → int
-     //等价类划分
-     // a,b间的关系：a&gt;b;a&lt;b;a==b
-     //    a的值：a&lt;0;a=0;a&gt;0;a是最小整数、a是最大整数
-     // b的值：b&lt;0;b=0;b&gt;0;b是最小整数、b是最大整数
-     //  笛卡尔积测试：3*5*5个测试用例
-     //     非笛卡尔积测试：3+5+5个测试用例以内</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">max(<span class="keyword">int</span> a,<span class="keyword">int</span> b) : <span class="keyword">int</span> × <span class="keyword">int</span> → <span class="keyword">int</span></span><br><span class="line">    <span class="comment">//等价类划分</span></span><br><span class="line">    <span class="comment">// a,b间的关系：a&gt;b;a&lt;b;a==b</span></span><br><span class="line">    <span class="comment">//	a的值：a&lt;0;a=0;a&gt;0;a是最小整数、a是最大整数</span></span><br><span class="line">    <span class="comment">// b的值：b&lt;0;b=0;b&gt;0;b是最小整数、b是最大整数</span></span><br><span class="line">    <span class="comment">//  笛卡尔积测试：3*5*5个测试用例</span></span><br><span class="line">    <span class="comment">//	 非笛卡尔积测试：3+5+5个测试用例以内</span></span><br></pre></td></tr></table></figure>
+
 <p>测试用例的编写分为笛卡尔积（全覆盖），覆盖每个取值（每个维度的每个取值至少被1个测试用例覆盖一次）    </p>
 <p><font color=blue>不在规约范围内的数据不需要测试。但注意，在测试Exception的时候可能会故意输入错误数据，这也是测试的一部分。</font>这也并不矛盾，毕竟异常本就是规约的一部分。</p>
 <h4 id="白盒测试"><a href="#白盒测试" class="headerlink" title="白盒测试"></a>白盒测试</h4><p>白盒测试：根据程序执行路径设计测试用例 ，是穷举路径的测试。</p>
@@ -1417,62 +817,17 @@ public static String reverseEnd(String text, int start)
 </tr>
 </tbody></table>
 <h4 id="线程的创建和启动，-runnable"><a href="#线程的创建和启动，-runnable" class="headerlink" title="线程的创建和启动， runnable"></a><font color=red>线程的创建和启动， runnable</font></h4><p>方法一：继承Thread类，重写Thread.run()即可开启新进程</p>
-<pre><code class="java">public class HelloThread extends Thread {
-    // 只需重写run方法
-    public void run() {
-        System.out.println(&quot;Hello from a thread!&quot;);
-    }
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloThread</span> <span class="keyword">extends</span> <span class="title">Thread</span> </span>&#123;</span><br><span class="line">	<span class="comment">// 只需重写run方法</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">"Hello from a thread!"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//启动该线程的两个方式</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> </span>&#123;</span><br><span class="line">		HelloThread p = <span class="keyword">new</span> HelloThread();</span><br><span class="line">		p.start();</span><br><span class="line">	&#125;</span><br><span class="line">	</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> </span>&#123;</span><br><span class="line">		(<span class="keyword">new</span> HelloThread()).start();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-    //启动该线程的两个方式
-    public static void main(String args[]) {
-        HelloThread p = new HelloThread();
-        p.start();
-    }
-
-    public static void main(String args[]) {
-        (new HelloThread()).start();
-    }
-}</code></pre>
 <p>方法二：实现Runnable.run()，注意Runnable类启动线程的方式</p>
-<pre><code class="java">public class HelloRunnable implements Runnable {
-    public void run() {
-        System.out.println(&quot;Hello from a thread!&quot;);
-    }
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">HelloRunnable</span> <span class="keyword">implements</span> <span class="title">Runnable</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">"Hello from a thread!"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">    </span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String args[])</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 启动线程</span></span><br><span class="line">		(<span class="keyword">new</span> Thread(<span class="keyword">new</span> HelloRunnable())).start();</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 也可简写</span></span><br><span class="line"><span class="keyword">new</span> Thread(<span class="keyword">new</span> Runnable() &#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		System.out.println(<span class="string">"Hello"</span>);</span><br><span class="line">	&#125;</span><br><span class="line">&#125;).start();</span><br></pre></td></tr></table></figure>
 
-    public static void main(String args[]) {
-        // 启动线程
-        (new Thread(new HelloRunnable())).start();
-    }
-}
-
-// 也可简写
-new Thread(new Runnable() {
-    public void run() {
-        System.out.println(&quot;Hello&quot;);
-    }
-}).start();</code></pre>
 <p><font color=blue>注意上述代码，写的是Runnable.run()，调用的是Thread.start()。</font>也很容易理解，如果直接调用Thread.run()它只会打印，可以看出start()中包含了启动线程的所有底层操作，其中也会调用run()来执行用户操作</p>
 <h4 id="时间分片、交错执行、竞争条件"><a href="#时间分片、交错执行、竞争条件" class="headerlink" title="时间分片、交错执行、竞争条件"></a><font color=red>时间分片、交错执行、竞争条件</font></h4><p>虽然有多线程，但只有一个核，每个时刻只能执行一个线程；即使是多核CPU，进程/线程的数目也往往大于核的数目；通过时间分片，在多个进程/线程之间共享处理器，它是由OS自动调度的。下图为两核三线程的例子，可以看到多个线程是交错执行的。</p>
 <p><img src="https://i.loli.net/2020/06/14/2m3MxjTUL7b9qcP.png" alt=""></p>
 <p>条件竞争的产生原因：单行、单条语句都未必是原子的  （是否原子，由JVM确定  ）</p>
-<pre><code class="java">private static int x = 1;
-public static void methodA() {
-    x *= 2;
-    x *= 3;
-}
-public static void methodB() {
-    x *= 5;
-}
-//    x *= 2的原子操作为：
-//        1.取出x放入寄存器
-//        2.寄存器值*2
-//        3.将寄存器的值写回x
-//
-// 并行运行A、B，最终x可能为5，6，10，30
-//    5：B取出x=1 ---&gt; A方法执行结束 ---&gt; B寄存器值*5 ---&gt; 写回x=5
-//    6: A执行x*=2后x=2 ---&gt; A取出x=2 ---&gt; B方法执行结束 ---&gt; A寄存器值*3 ---&gt; 写回x=6
-//    10: A执行x*=2后x=2 ---&gt; B取出X=2 ---&gt; A方法执行x*=3 ---&gt; B寄存器值*5 ---&gt; 写回x=10
-//    30: 顺序执行即可</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> x = <span class="number">1</span>;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">methodA</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	x *= <span class="number">2</span>;</span><br><span class="line">	x *= <span class="number">3</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">methodB</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	x *= <span class="number">5</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">//	x *= 2的原子操作为：</span></span><br><span class="line"><span class="comment">//		1.取出x放入寄存器</span></span><br><span class="line"><span class="comment">//		2.寄存器值*2</span></span><br><span class="line"><span class="comment">//		3.将寄存器的值写回x</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// 并行运行A、B，最终x可能为5，6，10，30</span></span><br><span class="line"><span class="comment">//	5：B取出x=1 ---&gt; A方法执行结束 ---&gt; B寄存器值*5 ---&gt; 写回x=5</span></span><br><span class="line"><span class="comment">//	6: A执行x*=2后x=2 ---&gt; A取出x=2 ---&gt; B方法执行结束 ---&gt; A寄存器值*3 ---&gt; 写回x=6</span></span><br><span class="line"><span class="comment">//	10: A执行x*=2后x=2 ---&gt; B取出X=2 ---&gt; A方法执行x*=3 ---&gt; B寄存器值*5 ---&gt; 写回x=10</span></span><br><span class="line"><span class="comment">//	30: 顺序执行即可</span></span><br></pre></td></tr></table></figure>
+
 <p>由于发送者在等待接受消息时并没有停止工作，所以消息传递机制也无法解决竞争条件问题  </p>
 <p>很常见的问题就是Iterator，不能在用Iterator遍历的时候调用remove()</p>
 <h4 id="线程的休眠、中断"><a href="#线程的休眠、中断" class="headerlink" title="线程的休眠、中断"></a><font color=red>线程的休眠、中断</font></h4><ul>
@@ -1486,71 +841,14 @@ public static void methodB() {
 </li>
 </ul>
 <p><font color=blue>但进程接收到中断信号并不会立即中断。正常运行期间，即使接收到中断信号，也不理会 ！</font></p>
-<pre><code class="java">class Task implements Runnable{
-    private double d = 0.0;
-    public void run() {
-        try{
-            while (true) {
-                // 正常运行时就算接收到中断信号也不理会，继续执行
-                for (int i = 0; i &lt; 900000; i++)
-                    d = d + (Math.PI + Math.E) / d;
-                // 直到sleep()时才会检测是否收到中断信号，如果收到则自动抛出中断异常
-                Thread.sleep(500);
-                // 或者直接用Thread.interrupted或者isInterrupted检测
-                //if (Thread.interrupted()) {
-                //    throw new InterruptedException();
-                //}
-            }
-              //进入异常处理执行return后，线程才真正终止
-        } catch(InterruptedException e) {return;}
-    }
-}
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Task</span> <span class="keyword">implements</span> <span class="title">Runnable</span></span>&#123;</span><br><span class="line">	<span class="keyword">private</span> <span class="keyword">double</span> d = <span class="number">0.0</span>;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">		<span class="keyword">try</span>&#123;</span><br><span class="line">			<span class="keyword">while</span> (<span class="keyword">true</span>) &#123;</span><br><span class="line">                <span class="comment">// 正常运行时就算接收到中断信号也不理会，继续执行</span></span><br><span class="line">				<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; <span class="number">900000</span>; i++)</span><br><span class="line">					d = d + (Math.PI + Math.E) / d;</span><br><span class="line">                <span class="comment">// 直到sleep()时才会检测是否收到中断信号，如果收到则自动抛出中断异常</span></span><br><span class="line">				Thread.sleep(<span class="number">500</span>);</span><br><span class="line">                <span class="comment">// 或者直接用Thread.interrupted或者isInterrupted检测</span></span><br><span class="line">                <span class="comment">//if (Thread.interrupted()) &#123;</span></span><br><span class="line">				<span class="comment">//	throw new InterruptedException();</span></span><br><span class="line">				<span class="comment">//&#125;</span></span><br><span class="line">			&#125;</span><br><span class="line">          	<span class="comment">//进入异常处理执行return后，线程才真正终止</span></span><br><span class="line">		&#125; <span class="keyword">catch</span>(InterruptedException e) &#123;<span class="keyword">return</span>;&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">Thread t = <span class="keyword">new</span> Thread(<span class="keyword">new</span> Task());</span><br><span class="line">t.start();</span><br><span class="line">Thread.sleep(<span class="number">100</span>); <span class="comment">//当前线程休眠</span></span><br><span class="line">t.interrupt(); <span class="comment">//试图中断t线程</span></span><br></pre></td></tr></table></figure>
 
-Thread t = new Thread(new Task());
-t.start();
-Thread.sleep(100); //当前线程休眠
-t.interrupt(); //试图中断t线程</code></pre>
 <p><font color=blue>需要注意的是，interrupt本身不会直接结束线程，它只是发个信号，在待中断线程中使用sleep或isInterrupted() 接受这个信号并抛出异常，并在异常处理中return才会结束这个进程</font></p>
 <ul>
 <li>t.join() 调用方法的进程暂停，直到进程t执行结束</li>
 </ul>
-<pre><code class="java">public class JoinExample2 {
-    // 三个进程操作之间的执行次序并不确定
-    public static void main(String[] args) {
-        Thread th1 = new Thread(new MyClass2(), &quot;th1&quot;);
-        Thread th2 = new Thread(new MyClass2(), &quot;th2&quot;);
-        Thread th3 = new Thread(new MyClass2(), &quot;th3&quot;);
-        th1.start();
-        th2.start();
-        th3.start();
-        }
-}
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JoinExample2</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 三个进程操作之间的执行次序并不确定</span></span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		Thread th1 = <span class="keyword">new</span> Thread(<span class="keyword">new</span> MyClass2(), <span class="string">"th1"</span>);</span><br><span class="line">		Thread th2 = <span class="keyword">new</span> Thread(<span class="keyword">new</span> MyClass2(), <span class="string">"th2"</span>);</span><br><span class="line">		Thread th3 = <span class="keyword">new</span> Thread(<span class="keyword">new</span> MyClass2(), <span class="string">"th3"</span>);</span><br><span class="line">		th1.start();</span><br><span class="line">		th2.start();</span><br><span class="line">		th3.start();</span><br><span class="line">		&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 三个进程操作执行次序确定，th1所有操作顺序执行结束 --&gt; th2... --&gt; th3...</span></span><br><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JoinExample</span> </span>&#123;</span><br><span class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span> </span>&#123;</span><br><span class="line">		Thread th1 = <span class="keyword">new</span> Thread(<span class="keyword">new</span> MyClass(), <span class="string">"th1"</span>);</span><br><span class="line">		Thread th2 = <span class="keyword">new</span> Thread(<span class="keyword">new</span> MyClass(), <span class="string">"th2"</span>);</span><br><span class="line">		Thread th3 = <span class="keyword">new</span> Thread(<span class="keyword">new</span> MyClass(), <span class="string">"th3"</span>);</span><br><span class="line">        </span><br><span class="line">		th1.start();</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">            <span class="comment">// main进程不会继续执行，直到th1执行结束</span></span><br><span class="line">            <span class="comment">// join过程中也会接受中断信号并自动抛出异常</span></span><br><span class="line">			th1.join();</span><br><span class="line">		&#125; <span class="keyword">catch</span> (InterruptedException ie) &#123;&#125;</span><br><span class="line">        </span><br><span class="line">		th2.start();</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			th2.join();</span><br><span class="line">		&#125; <span class="keyword">catch</span> (InterruptedException ie) &#123;&#125;</span><br><span class="line">        </span><br><span class="line">		th3.start();</span><br><span class="line">		<span class="keyword">try</span> &#123;</span><br><span class="line">			th3.join();</span><br><span class="line">		&#125; <span class="keyword">catch</span> (InterruptedException ie) &#123;&#125;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-// 三个进程操作执行次序确定，th1所有操作顺序执行结束 --&gt; th2... --&gt; th3...
-public class JoinExample {
-    public static void main(String[] args) {
-        Thread th1 = new Thread(new MyClass(), &quot;th1&quot;);
-        Thread th2 = new Thread(new MyClass(), &quot;th2&quot;);
-        Thread th3 = new Thread(new MyClass(), &quot;th3&quot;);
-
-        th1.start();
-        try {
-            // main进程不会继续执行，直到th1执行结束
-            // join过程中也会接受中断信号并自动抛出异常
-            th1.join();
-        } catch (InterruptedException ie) {}
-
-        th2.start();
-        try {
-            th2.join();
-        } catch (InterruptedException ie) {}
-
-        th3.start();
-        try {
-            th3.join();
-        } catch (InterruptedException ie) {}
-    }
-}</code></pre>
 <h4 id="线程安全threadsafe的四种策略"><a href="#线程安全threadsafe的四种策略" class="headerlink" title="线程安全threadsafe的四种策略"></a><font color=red>线程安全threadsafe的四种策略</font></h4><p>Confinement、 Immutability、 ThreadSafe类型、Synchronization/Lock</p>
 <h4 id="Confinement"><a href="#Confinement" class="headerlink" title="Confinement  "></a><font color=red>Confinement  </font></h4><p> Confinement：限制数据共享</p>
 <p>核心思想：线程之间不共享mutable数据类型、避免全局变量  </p>
@@ -1561,35 +859,15 @@ public class JoinExample {
 <h4 id="Using-Threadsafe-Types-Data"><a href="#Using-Threadsafe-Types-Data" class="headerlink" title="Using Threadsafe Types  Data"></a><font color=red>Using Threadsafe Types  Data</font></h4><p> 如果必须要用mutable的数据类型在多线程之间共享数据，要使用线程安全的数据类型。 </p>
 <p> 一般来说，JDK同时提供两个相同功能的类，一个是threadsafe，另一个不是。原因： threadsafe的类一般性能上受影响  </p>
 <p>比如集合类都是线程不安全的。Java API提供了进一步的decorator。对它们的每一个操作调用，都以原子方式执行。但在使用synchronizedMap(hashMap)之后，不要再把参数hashMap共享给其他线程，不要保留别名，一定要彻底销毁        </p>
-<pre><code class="java">private static Map&lt;Integer,Boolean&gt; cache =Collections.synchronizedMap(new HashMap&lt;&gt;());</code></pre>
-<p><font color=blue>但即使在线程安全的集合类上，使用iterator也是不安全的；即使是线程安全的collection类，仍可能产生竞争。</font>因为执行其上某个操作是threadsafe的，但如果多个操作放在一起，仍旧不安全      </p>
-<pre><code class="java">方法A:
-if ( ! lst.isEmpty()) {
-    String s = lst.get(0);
-    ...
-}
-方法B:
- //释放lst
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">private</span> <span class="keyword">static</span> Map&lt;Integer,Boolean&gt; cache =Collections.synchronizedMap(<span class="keyword">new</span> HashMap&lt;&gt;());</span><br></pre></td></tr></table></figure>
 
-//A与B并行时，A方法中判断lst非空后，B方法将其释放，在A方法get(0)就会访问空指针报错
-//虽然lst是threadsafe的，但多个操作之间仍然不可靠，</code></pre>
+<p><font color=blue>但即使在线程安全的集合类上，使用iterator也是不安全的；即使是线程安全的collection类，仍可能产生竞争。</font>因为执行其上某个操作是threadsafe的，但如果多个操作放在一起，仍旧不安全      </p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">方法A:</span><br><span class="line"><span class="keyword">if</span> ( ! lst.isEmpty()) &#123;</span><br><span class="line">	String s = lst.get(<span class="number">0</span>);</span><br><span class="line">	...</span><br><span class="line">&#125;</span><br><span class="line">方法B:</span><br><span class="line"> <span class="comment">//释放lst</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//A与B并行时，A方法中判断lst非空后，B方法将其释放，在A方法get(0)就会访问空指针报错</span></span><br><span class="line"><span class="comment">//虽然lst是threadsafe的，但多个操作之间仍然不可靠，</span></span><br></pre></td></tr></table></figure>
+
 <h4 id="Synchronization-Lock"><a href="#Synchronization-Lock" class="headerlink" title="Synchronization/Lock"></a><font color=red>Synchronization/Lock</font></h4><p>程序员来负责多线程之间对mutable数据的共享操作，通过“同步”策略，避免多线程同时访问数据 </p>
 <p>Lock是Java语言提供的内嵌机制,<font color=blue>每个object都有相关联的lock</font>，拥有lock的线程可独占式的执行该部分代码。使用同一个lock的操作是线程互斥的，但同步机制给性能带来极大影响  </p>
-<pre><code class="java">Object lock = new Object();
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">Object lock = <span class="keyword">new</span> Object();</span><br><span class="line"></span><br><span class="line"><span class="comment">//方法A:</span></span><br><span class="line"><span class="keyword">synchronized</span> (lock) &#123; <span class="comment">// thread blocks here until lock is free</span></span><br><span class="line">	<span class="comment">// now this thread has the lock</span></span><br><span class="line">	balance = balance + <span class="number">1</span>;</span><br><span class="line">	<span class="comment">// exiting the block releases the lock</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//方法B:</span></span><br><span class="line"><span class="keyword">synchronized</span> (lock) &#123;</span><br><span class="line">    ...</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 类似于在lock对象的锁位上置1</span></span><br><span class="line"><span class="comment">// 如果先执行方法A的锁，方法B检测到lock已经被置1便无法执行，直到A执行结束，锁释放</span></span><br></pre></td></tr></table></figure>
 
-//方法A:
-synchronized (lock) { // thread blocks here until lock is free
-    // now this thread has the lock
-    balance = balance + 1;
-    // exiting the block releases the lock
-}
-
-//方法B:
-synchronized (lock) {
-    ...
-}
-// 类似于在lock对象的锁位上置1
-// 如果先执行方法A的锁，方法B检测到lock已经被置1便无法执行，直到A执行结束，锁释放</code></pre>
 <p>Monitor模式： ADT所有方法都是互斥访问，并且用ADT自己做lock  </p>
 <table>
 <thead>
@@ -1608,21 +886,10 @@ synchronized (lock) {
 <p>不过静态方法加锁锁住的只是static synchronized块，synchronized块锁不住，而不加锁的方法更加锁不住</p>
 </blockquote>
 <p>注意只有两个加锁部分的代码块是互斥的，并不是说把充当锁的对象的操作都变成了并行互斥的。</p>
-<pre><code class="java">//Thread A
-public void run() {
-    …
-    synchronized(lst) {
-    … }
-}
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//Thread A</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	…</span><br><span class="line">	<span class="keyword">synchronized</span>(lst) &#123;</span><br><span class="line">	… &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//Thread B</span></span><br><span class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span> </span>&#123;</span><br><span class="line">	…</span><br><span class="line">	lst.add(…);</span><br><span class="line">	lst.size();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// A、B线程可以并行</span></span><br></pre></td></tr></table></figure>
 
-//Thread B
-public void run() {
-    …
-    lst.add(…);
-    lst.size();
-}
 
-// A、B线程可以并行</code></pre>
+
 <p>应该尽可能减小lock的范围，避免在方法spec中加synchronized，而是在方法代码内部更加精细的区分哪些代码行可能有threadsafe风险，为其加锁    </p>
 <h4 id="以注释的形式撰写线程安全策略-ThreadSafe-Argument"><a href="#以注释的形式撰写线程安全策略-ThreadSafe-Argument" class="headerlink" title="以注释的形式撰写线程安全策略 (ThreadSafe Argument)"></a>以注释的形式撰写线程安全策略 (ThreadSafe Argument)</h4><p>在代码中以注释的形式增加说明：该ADT采取了什么设计决策来保证线程安全  </p>
 <ul>
@@ -1642,11 +909,8 @@ public void run() {
 </tr>
 </tbody></table>
 <h4 id="死锁"><a href="#死锁" class="headerlink" title="死锁"></a>死锁</h4><p>死锁：多个线程竞争lock，相互等待对方释放lock  </p>
-<pre><code class="java">// 如果进入到A，把a锁上的同时进入到B，把b锁上
-// 这样方法A等待B释放b，方法B等待A释放a
-// 就会造成死锁
-Method A: synchronized(a){ synchronized(b){ … } }
-Method B: synchronized(b){ synchronized(a){ … } }</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 如果进入到A，把a锁上的同时进入到B，把b锁上</span></span><br><span class="line"><span class="comment">// 这样方法A等待B释放b，方法B等待A释放a</span></span><br><span class="line"><span class="comment">// 就会造成死锁</span></span><br><span class="line">Method A: <span class="keyword">synchronized</span>(a)&#123; <span class="keyword">synchronized</span>(b)&#123; … &#125; &#125;</span><br><span class="line">Method B: <span class="keyword">synchronized</span>(b)&#123; <span class="keyword">synchronized</span>(a)&#123; … &#125; &#125;</span><br></pre></td></tr></table></figure>
+
 
   </div>
 </article>

