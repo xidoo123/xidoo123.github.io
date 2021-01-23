@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+    <!-- so meta -->
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="HandheldFriendly" content="True">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+    <meta name="description" content="qemu是GNU&#x2F;linux上十分常用的模拟处理器，可以在ubuntu下跑arm\mips甚至riscv等几乎所有架构的可执行文件，一台机器上可以虚拟化为多种架构的机器。  system mode：系统模式，模拟整个电脑系统，包括中央处理器及其他周边设备。它使得跨平台编写程序得测试与debug工作变得更容易，但是配置比较麻烦，需要在里面起一个linux虚拟机 user mode：用户模式，模拟解析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="qemu安装与使用">
+<meta property="og:url" content="https://xidoo123.github.io/2021/01/23/qemu/index.html">
+<meta property="og:site_name" content="Stay hungry">
+<meta property="og:description" content="qemu是GNU&#x2F;linux上十分常用的模拟处理器，可以在ubuntu下跑arm\mips甚至riscv等几乎所有架构的可执行文件，一台机器上可以虚拟化为多种架构的机器。  system mode：系统模式，模拟整个电脑系统，包括中央处理器及其他周边设备。它使得跨平台编写程序得测试与debug工作变得更容易，但是配置比较麻烦，需要在里面起一个linux虚拟机 user mode：用户模式，模拟解析">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2021-01-23T13:22:33.000Z">
+<meta property="article:modified_time" content="2021-01-23T13:51:43.674Z">
+<meta property="article:author" content="X1do0">
+<meta name="twitter:card" content="summary">
+    
+    
+      
+        
+          <link rel="shortcut icon" href="/images/veg.ico">
+        
+      
+      
+        
+          <link rel="icon" type="image/png" href="/images/favicon-192x192.png" sizes="192x192">
+        
+      
+      
+        
+          <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon.png">
+        
+      
+    
+    <!-- title -->
+    <title>qemu安装与使用</title>
+    <!-- styles -->
+    
+<link rel="stylesheet" href="/css/style.css">
+
+    <!-- persian styles -->
+    
+      
+<link rel="stylesheet" href="/css/rtl.css">
+
+    
+    <!-- rss -->
+    
+    
+<meta name="generator" content="Hexo 4.2.0"></head>
+
+<body class="max-width mx-auto px3 ltr">
+    
+      <div id="header-post">
+  <a id="menu-icon" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="menu-icon-tablet" href="#"><i class="fas fa-bars fa-lg"></i></a>
+  <a id="top-icon-tablet" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');" style="display:none;"><i class="fas fa-chevron-up fa-lg"></i></a>
+  <span id="menu">
+    <span id="nav">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+        
+      </ul>
+    </span>
+    <br/>
+    <span id="actions">
+      <ul>
+        
+        
+        <li><a class="icon" href="/2021/01/12/befunge/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        
+        <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
+        <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
+      </ul>
+      <span id="i-prev" class="info" style="display:none;">Previous post</span>
+      <span id="i-next" class="info" style="display:none;">Next post</span>
+      <span id="i-top" class="info" style="display:none;">Back to top</span>
+      <span id="i-share" class="info" style="display:none;">Share post</span>
+    </span>
+    <br/>
+    <div id="share" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://xidoo123.github.io/2021/01/23/qemu/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://xidoo123.github.io/2021/01/23/qemu/&text=qemu安装与使用" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://xidoo123.github.io/2021/01/23/qemu/&title=qemu安装与使用" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://xidoo123.github.io/2021/01/23/qemu/&is_video=false&description=qemu安装与使用" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=qemu安装与使用&body=Check out this article: https://xidoo123.github.io/2021/01/23/qemu/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://xidoo123.github.io/2021/01/23/qemu/&title=qemu安装与使用" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://xidoo123.github.io/2021/01/23/qemu/&title=qemu安装与使用" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://xidoo123.github.io/2021/01/23/qemu/&title=qemu安装与使用" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://xidoo123.github.io/2021/01/23/qemu/&title=qemu安装与使用" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://xidoo123.github.io/2021/01/23/qemu/&name=qemu安装与使用&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://xidoo123.github.io/2021/01/23/qemu/&t=qemu安装与使用" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+    <div id="toc">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#安装"><span class="toc-number">1.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#成功"><span class="toc-number">2.</span> <span class="toc-text">成功</span></a></li></ol>
+    </div>
+  </span>
+</div>
+
+    
+    <div class="content index py4">
+        
+        <article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+  <header>
+    
+    <h1 class="posttitle" itemprop="name headline">
+        qemu安装与使用
+    </h1>
+
+
+
+    <div class="meta">
+      <span class="author" itemprop="author" itemscope itemtype="http://schema.org/Person">
+        <span itemprop="name">X1do0</span>
+      </span>
+      
+    <div class="postdate">
+      
+        <time datetime="2021-01-23T13:22:33.000Z" itemprop="datePublished">2021-01-23</time>
+        
+      
+    </div>
+
+
+      
+
+      
+
+    </div>
+  </header>
+  
+
+  <div class="content" itemprop="articleBody">
+    <p>qemu是GNU/linux上十分常用的模拟处理器，可以在ubuntu下跑arm\mips甚至riscv等几乎所有架构的可执行文件，一台机器上可以虚拟化为多种架构的机器。</p>
+<ul>
+<li>system mode：系统模式，模拟整个电脑系统，包括中央处理器及其他周边设备。它使得跨平台编写程序得测试与debug工作变得更容易，但是配置比较麻烦，需要在里面起一个linux虚拟机</li>
+<li>user mode：用户模式，模拟解析可执行文件的指令，比较方便且功能够用，暂时只记录user模式</li>
+</ul>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>ubuntu下</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install qemu</span><br></pre></td></tr></table></figure>
+
+<p>user模式支持的架构下载，暂时完全够用了</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install qemu-user</span><br></pre></td></tr></table></figure>
+
+<p>下载static版本（可选）</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install -y qemu-user-static</span><br></pre></td></tr></table></figure>
+
+<p>下载完成后，qemu-自动补全可以看到其支持的架构十分全面</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">(base) pwn@ubuntu:~$ qemu-</span><br><span class="line">qemu-aarch64              qemu-mips                 qemu-riscv32</span><br><span class="line">qemu-aarch64_be           qemu-mips64               qemu-riscv32-static</span><br><span class="line">qemu-aarch64_be-static    qemu-mips64el             qemu-riscv64</span><br><span class="line">qemu-aarch64-static       qemu-mips64el-static      qemu-riscv64-static</span><br><span class="line">qemu-alpha                qemu-mips64-static        qemu-s390x</span><br><span class="line">qemu-alpha-static         qemu-mipsel               qemu-s390x-static</span><br><span class="line">qemu-arm                  qemu-mipsel-static        qemu-sh4</span><br><span class="line">qemu-armeb                qemu-mipsn32              qemu-sh4eb</span><br><span class="line">qemu-armeb-static         qemu-mipsn32el            qemu-sh4eb-static</span><br><span class="line">qemu-arm-static           qemu-mipsn32el-static     qemu-sh4-static</span><br><span class="line">qemu-cris                 qemu-mipsn32-static       qemu-sparc</span><br><span class="line">qemu-cris-static          qemu-mips-static          qemu-sparc32plus</span><br><span class="line">qemu-debootstrap          qemu-nbd                  qemu-sparc32plus-static</span><br><span class="line">qemu-hppa                 qemu-nios2                qemu-sparc64</span><br><span class="line">qemu-hppa-static          qemu-nios2-static         qemu-sparc64-static</span><br><span class="line">qemu-i386                 qemu-or1k                 qemu-sparc-static</span><br><span class="line">qemu-i386-static          qemu-or1k-static          qemu-system-aarch64</span><br><span class="line">qemu-img                  qemu-ppc                  qemu-system-arm</span><br><span class="line">qemu-io                   qemu-ppc64                qemu-tilegx</span><br><span class="line">qemu-m68k                 qemu-ppc64abi32           qemu-tilegx-static</span><br><span class="line">qemu-m68k-static          qemu-ppc64abi32-static    qemu-x86_64</span><br><span class="line">qemu-make-debian-root     qemu-ppc64le              qemu-x86_64-static</span><br><span class="line">qemu-microblaze           qemu-ppc64le-static       qemu-xtensa</span><br><span class="line">(base) pwn@ubuntu:~$</span><br></pre></td></tr></table></figure>
+
+<h3 id="成功"><a href="#成功" class="headerlink" title="成功"></a>成功</h3><p>最近*ctf2021中遇到一题名为babypac，是arm64架构</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">(pwn) pwn@ubuntu:~/share/starctf/babypac$ ls</span><br><span class="line">chall  chall.i64  chall_patched  cmd  ld-linux-aarch64.so.1  lib  libc.so.6</span><br><span class="line">(pwn) pwn@ubuntu:~/share/starctf/babypac$ checksec ./chall</span><br><span class="line">[*] <span class="string">'/mnt/hgfs/linux_share/starctf/babypac/chall'</span></span><br><span class="line">    Arch:     aarch64-64-little</span><br><span class="line">    RELRO:    Full RELRO</span><br><span class="line">    Stack:    No canary found</span><br><span class="line">    NX:       NX enabled</span><br><span class="line">    PIE:      No PIE (0x400000)</span><br></pre></td></tr></table></figure>
+
+<p>可以自己配环境，把库全部加到<code>/lib</code>以后用如下命令启动</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-aarch64 ./chall</span><br></pre></td></tr></table></figure>
+
+<p>也可以指定路径参数等，具体见<code>-h</code></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">$ qemu-aarch64 -h</span><br><span class="line">usage: qemu-aarch64 [options] program [arguments...]</span><br><span class="line">Linux CPU emulator (compiled <span class="keyword">for</span> aarch64 emulation)</span><br><span class="line"></span><br><span class="line">Options and associated environment variables:</span><br><span class="line"></span><br><span class="line">Argument             Env-variable      Description</span><br><span class="line">-h                                     <span class="built_in">print</span> this <span class="built_in">help</span></span><br><span class="line">-<span class="built_in">help</span>                                  </span><br><span class="line">-g port              QEMU_GDB          <span class="built_in">wait</span> gdb connection to <span class="string">'port'</span></span><br><span class="line">-L path              QEMU_LD_PREFIX    <span class="built_in">set</span> the elf interpreter prefix to <span class="string">'path'</span></span><br><span class="line">-s size              QEMU_STACK_SIZE   <span class="built_in">set</span> the stack size to <span class="string">'size'</span> bytes</span><br><span class="line">-cpu model           QEMU_CPU          select CPU (-cpu <span class="built_in">help</span> <span class="keyword">for</span> list)</span><br><span class="line">-E var=value         QEMU_SET_ENV      sets targets environment variable (see below)</span><br><span class="line">-U var               QEMU_UNSET_ENV    unsets targets environment variable (see below)</span><br><span class="line">-0 argv0             QEMU_ARGV0        forces target process argv[0] to be <span class="string">'argv0'</span></span><br><span class="line">-r uname             QEMU_UNAME        <span class="built_in">set</span> qemu uname release string to <span class="string">'uname'</span></span><br><span class="line">-B address           QEMU_GUEST_BASE   <span class="built_in">set</span> guest_base address to <span class="string">'address'</span></span><br><span class="line">-R size              QEMU_RESERVED_VA  reserve <span class="string">'size'</span> bytes <span class="keyword">for</span> guest virtual address space</span><br><span class="line">-d item[,...]        QEMU_LOG          <span class="built_in">enable</span> logging of specified items (use <span class="string">'-d help'</span> <span class="keyword">for</span> a list of items)</span><br><span class="line">-dfilter range[,...] QEMU_DFILTER      filter logging based on address range</span><br><span class="line">-D logfile           QEMU_LOG_FILENAME write logs to <span class="string">'logfile'</span> (default stderr)</span><br><span class="line">-p pagesize          QEMU_PAGESIZE     <span class="built_in">set</span> the host page size to <span class="string">'pagesize'</span></span><br><span class="line">-singlestep          QEMU_SINGLESTEP   run <span class="keyword">in</span> singlestep mode</span><br><span class="line">-strace              QEMU_STRACE       <span class="built_in">log</span> system calls</span><br><span class="line">-seed                QEMU_RAND_SEED    Seed <span class="keyword">for</span> pseudo-random number generator</span><br><span class="line">-trace               QEMU_TRACE        [[<span class="built_in">enable</span>=]&lt;pattern&gt;][,events=&lt;file&gt;][,file=&lt;file&gt;]</span><br><span class="line">-version             QEMU_VERSION      display version information and <span class="built_in">exit</span></span><br><span class="line"></span><br><span class="line">Defaults:</span><br><span class="line">QEMU_LD_PREFIX  = /etc/qemu-binfmt/aarch64</span><br><span class="line">QEMU_STACK_SIZE = 8388608 byte</span><br><span class="line"></span><br><span class="line">You can use -E and -U options or the QEMU_SET_ENV and</span><br><span class="line">QEMU_UNSET_ENV environment variables to <span class="built_in">set</span> and <span class="built_in">unset</span></span><br><span class="line">environment variables <span class="keyword">for</span> the target process.</span><br><span class="line">It is possible to provide several variables by separating them</span><br><span class="line">by commas <span class="keyword">in</span> getsubopt(3) style. Additionally it is possible to</span><br><span class="line">provide the -E and -U options multiple <span class="built_in">times</span>.</span><br><span class="line">The following lines are equivalent:</span><br><span class="line">    -E var1=val2 -E var2=val2 -U LD_PRELOAD -U LD_DEBUG</span><br><span class="line">    -E var1=val2,var2=val2 -U LD_PRELOAD,LD_DEBUG</span><br><span class="line">    QEMU_SET_ENV=var1=val2,var2=val2 QEMU_UNSET_ENV=LD_PRELOAD,LD_DEBUG</span><br><span class="line">Note that <span class="keyword">if</span> you provide several changes to a single variable</span><br><span class="line">the last change will stay <span class="keyword">in</span> effect.</span><br><span class="line"></span><br><span class="line">See &lt;https://qemu.org/contribute/report<span class="_">-a</span>-bug&gt; <span class="keyword">for</span> how to report bugs.</span><br><span class="line">More information on the QEMU project at &lt;https://qemu.org&gt;.</span><br></pre></td></tr></table></figure>
+
+<p>当然，出题人帮我们写了个启动脚本，只要正确安装qemu并且有aarch64架构便能直接运行。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">(pwn) pwn@ubuntu:~/share/starctf/babypac$ ./cmd</span><br><span class="line"></span><br><span class="line"> <span class="comment">#   #    ####    #####  ######</span></span><br><span class="line">  <span class="comment"># #    #    #     #    #</span></span><br><span class="line"><span class="comment">### ###  #          #    #####</span></span><br><span class="line">  <span class="comment"># #    #          #    #</span></span><br><span class="line"> <span class="comment">#   #   #    #     #    #</span></span><br><span class="line">          <span class="comment">####      #    #</span></span><br></pre></td></tr></table></figure>
+
+  </div>
+</article>
+
+
+
+        
+          <div id="footer-post-container">
+  <div id="footer-post">
+
+    <div id="nav-footer" style="display: none">
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+        
+      </ul>
+    </div>
+
+    <div id="toc-footer" style="display: none">
+      <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#安装"><span class="toc-number">1.</span> <span class="toc-text">安装</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#成功"><span class="toc-number">2.</span> <span class="toc-text">成功</span></a></li></ol>
+    </div>
+
+    <div id="share-footer" style="display: none">
+      <ul>
+  <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://xidoo123.github.io/2021/01/23/qemu/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://xidoo123.github.io/2021/01/23/qemu/&text=qemu安装与使用" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://xidoo123.github.io/2021/01/23/qemu/&title=qemu安装与使用" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://xidoo123.github.io/2021/01/23/qemu/&is_video=false&description=qemu安装与使用" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=qemu安装与使用&body=Check out this article: https://xidoo123.github.io/2021/01/23/qemu/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://xidoo123.github.io/2021/01/23/qemu/&title=qemu安装与使用" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://xidoo123.github.io/2021/01/23/qemu/&title=qemu安装与使用" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://xidoo123.github.io/2021/01/23/qemu/&title=qemu安装与使用" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://xidoo123.github.io/2021/01/23/qemu/&title=qemu安装与使用" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://xidoo123.github.io/2021/01/23/qemu/&name=qemu安装与使用&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://xidoo123.github.io/2021/01/23/qemu/&t=qemu安装与使用" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+</ul>
+
+    </div>
+
+    <div id="actions-footer">
+        <a id="menu" class="icon" href="#" onclick="$('#nav-footer').toggle();return false;"><i class="fas fa-bars fa-lg" aria-hidden="true"></i> Menu</a>
+        <a id="toc" class="icon" href="#" onclick="$('#toc-footer').toggle();return false;"><i class="fas fa-list fa-lg" aria-hidden="true"></i> TOC</a>
+        <a id="share" class="icon" href="#" onclick="$('#share-footer').toggle();return false;"><i class="fas fa-share-alt fa-lg" aria-hidden="true"></i> Share</a>
+        <a id="top" style="display:none" class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up fa-lg" aria-hidden="true"></i> Top</a>
+    </div>
+
+  </div>
+</div>
+
+        
+        <footer id="footer">
+  <div class="footer-left">
+    Copyright &copy;
+    
+    
+    2019-2021
+    X1do0
+  </div>
+  <div class="footer-right">
+    <nav>
+      <ul>
+         
+          <li><a href="/">Home</a></li>
+         
+          <li><a href="/about/">About</a></li>
+         
+          <li><a href="/archives/">Writing</a></li>
+        
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+    </div>
+    <!-- styles -->
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+
+<link rel="stylesheet" href="/lib/justified-gallery/css/justifiedGallery.min.css">
+
+
+    <!-- jquery -->
+
+<script src="/lib/jquery/jquery.min.js"></script>
+
+
+<script src="/lib/justified-gallery/js/jquery.justifiedGallery.min.js"></script>
+
+<!-- clipboard -->
+
+  
+<script src="/lib/clipboard/clipboard.min.js"></script>
+
+  <script type="text/javascript">
+  $(function() {
+    // copy-btn HTML
+    var btn = "<span class=\"btn-copy tooltipped tooltipped-sw\" aria-label=\"Copy to clipboard!\">";
+    btn += '<i class="far fa-clone"></i>';
+    btn += '</span>'; 
+    // mount it!
+    $(".highlight table").before(btn);
+    var clip = new ClipboardJS('.btn-copy', {
+      text: function(trigger) {
+        return Array.from(trigger.nextElementSibling.querySelectorAll('.code')).reduce((str,it)=>str+it.innerText+'\n','')
+      }
+    });
+    clip.on('success', function(e) {
+      e.trigger.setAttribute('aria-label', "Copied!");
+      e.clearSelection();
+    })
+  })
+  </script>
+
+
+<script src="/js/main.js"></script>
+
+<!-- search -->
+
+<!-- Google Analytics -->
+
+<!-- Baidu Analytics -->
+
+<!-- Umami Analytics -->
+
+<!-- Disqus Comments -->
+
+
+</body>
+</html>
