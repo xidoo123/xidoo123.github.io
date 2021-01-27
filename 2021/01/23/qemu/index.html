@@ -8,14 +8,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
     <meta name="description" content="qemu是GNU&#x2F;linux上十分常用的模拟处理器，可以在ubuntu下跑arm\mips甚至riscv等几乎所有架构的可执行文件，一台机器上可以虚拟化为多种架构的机器。  system mode：系统模式，模拟整个电脑系统，包括中央处理器及其他周边设备。它使得跨平台编写程序得测试与debug工作变得更容易，但是配置比较麻烦，需要在里面起一个linux虚拟机 user mode：用户模式，模拟解析">
 <meta property="og:type" content="article">
-<meta property="og:title" content="ARMpwn环境搭建与调试">
+<meta property="og:title" content="ARM pwn环境搭建与调试">
 <meta property="og:url" content="https://xidoo123.github.io/2021/01/23/qemu/index.html">
 <meta property="og:site_name" content="Stay hungry">
 <meta property="og:description" content="qemu是GNU&#x2F;linux上十分常用的模拟处理器，可以在ubuntu下跑arm\mips甚至riscv等几乎所有架构的可执行文件，一台机器上可以虚拟化为多种架构的机器。  system mode：系统模式，模拟整个电脑系统，包括中央处理器及其他周边设备。它使得跨平台编写程序得测试与debug工作变得更容易，但是配置比较麻烦，需要在里面起一个linux虚拟机 user mode：用户模式，模拟解析">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://i.loli.net/2021/01/24/RdO5slQmKYnPHiT.png">
 <meta property="article:published_time" content="2021-01-23T13:22:33.000Z">
-<meta property="article:modified_time" content="2021-01-24T15:25:16.555Z">
+<meta property="article:modified_time" content="2021-01-27T14:10:38.518Z">
 <meta property="article:author" content="X1do0">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="https://i.loli.net/2021/01/24/RdO5slQmKYnPHiT.png">
@@ -38,7 +38,7 @@
       
     
     <!-- title -->
-    <title>ARMpwn环境搭建与调试</title>
+    <title>ARM pwn环境搭建与调试</title>
     <!-- styles -->
     
 <link rel="stylesheet" href="/css/style.css">
@@ -79,7 +79,7 @@
         <li><a class="icon" href="/2021/01/23/starCTF2021/"><i class="fas fa-chevron-left" aria-hidden="true" onmouseover="$('#i-prev').toggle();" onmouseout="$('#i-prev').toggle();"></i></a></li>
         
         
-        <li><a class="icon" href="/2021/01/12/befunge/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
+        <li><a class="icon" href="/2021/01/22/ghidra/"><i class="fas fa-chevron-right" aria-hidden="true" onmouseover="$('#i-next').toggle();" onmouseout="$('#i-next').toggle();"></i></a></li>
         
         <li><a class="icon" href="#" onclick="$('html, body').animate({ scrollTop: 0 }, 'fast');"><i class="fas fa-chevron-up" aria-hidden="true" onmouseover="$('#i-top').toggle();" onmouseout="$('#i-top').toggle();"></i></a></li>
         <li><a class="icon" href="#"><i class="fas fa-share-alt" aria-hidden="true" onmouseover="$('#i-share').toggle();" onmouseout="$('#i-share').toggle();" onclick="$('#share').toggle();return false;"></i></a></li>
@@ -93,16 +93,16 @@
     <div id="share" style="display: none">
       <ul>
   <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://xidoo123.github.io/2021/01/23/qemu/" target="_blank" rel="noopener"><i class="fab fa-facebook " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=https://xidoo123.github.io/2021/01/23/qemu/&text=ARMpwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://xidoo123.github.io/2021/01/23/qemu/&title=ARMpwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://xidoo123.github.io/2021/01/23/qemu/&is_video=false&description=ARMpwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=ARMpwn环境搭建与调试&body=Check out this article: https://xidoo123.github.io/2021/01/23/qemu/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=https://xidoo123.github.io/2021/01/23/qemu/&title=ARMpwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=https://xidoo123.github.io/2021/01/23/qemu/&title=ARMpwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://xidoo123.github.io/2021/01/23/qemu/&title=ARMpwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=https://xidoo123.github.io/2021/01/23/qemu/&title=ARMpwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://xidoo123.github.io/2021/01/23/qemu/&name=ARMpwn环境搭建与调试&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://xidoo123.github.io/2021/01/23/qemu/&t=ARMpwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://xidoo123.github.io/2021/01/23/qemu/&text=ARM pwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-twitter " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://xidoo123.github.io/2021/01/23/qemu/&title=ARM pwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-linkedin " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://xidoo123.github.io/2021/01/23/qemu/&is_video=false&description=ARM pwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-pinterest " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=ARM pwn环境搭建与调试&body=Check out this article: https://xidoo123.github.io/2021/01/23/qemu/"><i class="fas fa-envelope " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://xidoo123.github.io/2021/01/23/qemu/&title=ARM pwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-get-pocket " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://xidoo123.github.io/2021/01/23/qemu/&title=ARM pwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-reddit " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://xidoo123.github.io/2021/01/23/qemu/&title=ARM pwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-stumbleupon " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://xidoo123.github.io/2021/01/23/qemu/&title=ARM pwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-digg " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://xidoo123.github.io/2021/01/23/qemu/&name=ARM pwn环境搭建与调试&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr " aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://xidoo123.github.io/2021/01/23/qemu/&t=ARM pwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-hacker-news " aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
@@ -119,7 +119,7 @@
   <header>
     
     <h1 class="posttitle" itemprop="name headline">
-        ARMpwn环境搭建与调试
+        ARM pwn环境搭建与调试
     </h1>
 
 
@@ -218,16 +218,16 @@
     <div id="share-footer" style="display: none">
       <ul>
   <li><a class="icon" href="http://www.facebook.com/sharer.php?u=https://xidoo123.github.io/2021/01/23/qemu/" target="_blank" rel="noopener"><i class="fab fa-facebook fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://twitter.com/share?url=https://xidoo123.github.io/2021/01/23/qemu/&text=ARMpwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://xidoo123.github.io/2021/01/23/qemu/&title=ARMpwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://xidoo123.github.io/2021/01/23/qemu/&is_video=false&description=ARMpwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="mailto:?subject=ARMpwn环境搭建与调试&body=Check out this article: https://xidoo123.github.io/2021/01/23/qemu/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://getpocket.com/save?url=https://xidoo123.github.io/2021/01/23/qemu/&title=ARMpwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://reddit.com/submit?url=https://xidoo123.github.io/2021/01/23/qemu/&title=ARMpwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://xidoo123.github.io/2021/01/23/qemu/&title=ARMpwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://digg.com/submit?url=https://xidoo123.github.io/2021/01/23/qemu/&title=ARMpwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://xidoo123.github.io/2021/01/23/qemu/&name=ARMpwn环境搭建与调试&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
-  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://xidoo123.github.io/2021/01/23/qemu/&t=ARMpwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://twitter.com/share?url=https://xidoo123.github.io/2021/01/23/qemu/&text=ARM pwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-twitter fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.linkedin.com/shareArticle?url=https://xidoo123.github.io/2021/01/23/qemu/&title=ARM pwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-linkedin fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://pinterest.com/pin/create/bookmarklet/?url=https://xidoo123.github.io/2021/01/23/qemu/&is_video=false&description=ARM pwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-pinterest fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="mailto:?subject=ARM pwn环境搭建与调试&body=Check out this article: https://xidoo123.github.io/2021/01/23/qemu/"><i class="fas fa-envelope fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://getpocket.com/save?url=https://xidoo123.github.io/2021/01/23/qemu/&title=ARM pwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-get-pocket fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://reddit.com/submit?url=https://xidoo123.github.io/2021/01/23/qemu/&title=ARM pwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-reddit fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.stumbleupon.com/submit?url=https://xidoo123.github.io/2021/01/23/qemu/&title=ARM pwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-stumbleupon fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://digg.com/submit?url=https://xidoo123.github.io/2021/01/23/qemu/&title=ARM pwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-digg fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="http://www.tumblr.com/share/link?url=https://xidoo123.github.io/2021/01/23/qemu/&name=ARM pwn环境搭建与调试&description=" target="_blank" rel="noopener"><i class="fab fa-tumblr fa-lg" aria-hidden="true"></i></a></li>
+  <li><a class="icon" href="https://news.ycombinator.com/submitlink?u=https://xidoo123.github.io/2021/01/23/qemu/&t=ARM pwn环境搭建与调试" target="_blank" rel="noopener"><i class="fab fa-hacker-news fa-lg" aria-hidden="true"></i></a></li>
 </ul>
 
     </div>
