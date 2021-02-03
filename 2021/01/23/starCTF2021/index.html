@@ -6,18 +6,18 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="HandheldFriendly" content="True">
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-    <meta name="description" content="赛前科恩那边说二进制的题应该没什么难度，我知道我很弱了不要再说了…放假比较闲那就慢慢复现学习一下吧 babyheap用的新libc2.27，添加了类似于2.29的tcache检测，最新的diff如下。提前已经知道了所以这题出的很快，可惜没抢到血。  由于edit改不了前面的8个字节，所以double free只能先打到堆上tcache结构体，使任意分配的同时将0x410的tcache的count填">
+    <meta name="description" content="赛前科恩那边说二进制的题应该没什么难度，我知道我很弱了不要再说了…放假比较闲那就慢慢复现学习一下吧  babyheap：tcache_struct, double free, 新libc babypac：ARMv8.3, pac, ROP fav arch1：RISC-V64 ROP fav arch2：qemu sandbox bypass, RISC-V ROP babygame： C++析构">
 <meta property="og:type" content="article">
 <meta property="og:title" content="starCTF2021 (pwn)">
 <meta property="og:url" content="https://xidoo123.github.io/2021/01/23/starCTF2021/index.html">
 <meta property="og:site_name" content="Stay hungry">
-<meta property="og:description" content="赛前科恩那边说二进制的题应该没什么难度，我知道我很弱了不要再说了…放假比较闲那就慢慢复现学习一下吧 babyheap用的新libc2.27，添加了类似于2.29的tcache检测，最新的diff如下。提前已经知道了所以这题出的很快，可惜没抢到血。  由于edit改不了前面的8个字节，所以double free只能先打到堆上tcache结构体，使任意分配的同时将0x410的tcache的count填">
+<meta property="og:description" content="赛前科恩那边说二进制的题应该没什么难度，我知道我很弱了不要再说了…放假比较闲那就慢慢复现学习一下吧  babyheap：tcache_struct, double free, 新libc babypac：ARMv8.3, pac, ROP fav arch1：RISC-V64 ROP fav arch2：qemu sandbox bypass, RISC-V ROP babygame： C++析构">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://i.loli.net/2021/01/23/xVwiAZBdIGS6Kco.png">
 <meta property="og:image" content="https://i.loli.net/2021/01/27/DwxjP4bmFdK9e8r.png">
 <meta property="og:image" content="https://i.loli.net/2021/02/01/VqiYQKltFafP6Xn.png">
 <meta property="article:published_time" content="2021-01-23T13:53:01.000Z">
-<meta property="article:modified_time" content="2021-02-01T13:49:47.550Z">
+<meta property="article:modified_time" content="2021-02-03T08:21:09.338Z">
 <meta property="article:author" content="X1do0">
 <meta property="article:tag" content="pwn">
 <meta name="twitter:card" content="summary">
@@ -153,6 +153,14 @@
 
   <div class="content" itemprop="articleBody">
     <p>赛前科恩那边说二进制的题应该没什么难度，我知道我很弱了不要再说了…放假比较闲那就慢慢复现学习一下吧</p>
+<ul>
+<li>babyheap：tcache_struct, double free, 新libc</li>
+<li>babypac：ARMv8.3, pac, ROP</li>
+<li>fav arch1：RISC-V64 ROP</li>
+<li>fav arch2：qemu sandbox bypass, RISC-V ROP</li>
+<li>babygame： C++析构函数, double free</li>
+<li>babyxv6：RISC-V, kernel, 自定义漏洞syscall</li>
+</ul>
 <h2 id="babyheap"><a href="#babyheap" class="headerlink" title="babyheap"></a>babyheap</h2><p>用的新libc2.27，添加了类似于2.29的tcache检测，最新的diff如下。提前已经知道了所以这题出的很快，可惜没抢到血。</p>
 <p><img src="https://i.loli.net/2021/01/23/xVwiAZBdIGS6Kco.png" alt=""></p>
 <p>由于edit改不了前面的8个字节，所以double free只能先打到堆上tcache结构体，使任意分配的同时将0x410的tcache的count填满，让输入name的chunk能直接进入unsorted bin去泄露libc地址，最后tcache poisoning去打free_hook（one_gadget没打通所以没打malloc_hook）</p>
