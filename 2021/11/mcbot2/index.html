@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>如何为 Minecraft 服务器添加一名播报员（二） - Stay Hungry</title><meta name="Description" content="This is My New Hugo Site"><meta property="og:title" content="如何为 Minecraft 服务器添加一名播报员（二）" />
+<meta property="og:description" content="这几天思索了一下需求，在脑中构思出了重定向IO的具体解决办法。这里采用python的subprocess模块起两个个进程跑这两个后端，通过Linux管道机制来实现两个后端的交互。（每次在外面恰饭都是大鱼大肉，，我想吃青菜啊😭😭）" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://xidoo.top/2021/11/mcbot2/" /><meta property="og:image" content="http://xidoo.top/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-11-21T13:56:15+08:00" />
+<meta property="article:modified_time" content="2021-11-21T13:56:15+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://xidoo.top/logo.png"/>
+
+<meta name="twitter:title" content="如何为 Minecraft 服务器添加一名播报员（二）"/>
+<meta name="twitter:description" content="这几天思索了一下需求，在脑中构思出了重定向IO的具体解决办法。这里采用python的subprocess模块起两个个进程跑这两个后端，通过Linux管道机制来实现两个后端的交互。（每次在外面恰饭都是大鱼大肉，，我想吃青菜啊😭😭）"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://xidoo.top/2021/11/mcbot2/" /><link rel="prev" href="http://xidoo.top/2021/11/fuzzing2/" /><link rel="next" href="http://xidoo.top/2021/12/mcbot3/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "如何为 Minecraft 服务器添加一名播报员（二）",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/xidoo.top\/2021\/11\/mcbot2\/"
+        },"genre": "posts","wordcount":  1220 ,
+        "url": "http:\/\/xidoo.top\/2021\/11\/mcbot2\/","datePublished": "2021-11-21T13:56:15+08:00","dateModified": "2021-11-21T13:56:15+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "x1do0"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('light' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'light' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/friends/"> Friends </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/friends/" title="">Friends</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">如何为 Minecraft 服务器添加一名播报员（二）</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>x1do0</a></span>&nbsp;<span class="post-category">included in <a href="/categories/general/"><i class="far fa-folder fa-fw"></i>General</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2021-11-21">2021-11-21</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;1220 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;6 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#第二半天开发进度">第二（半）天开发进度</a>
+          <ul>
+            <li><a href="#管道">管道</a></li>
+            <li><a href="#消息流一">消息流一</a></li>
+            <li><a href="#消息流二">消息流二</a></li>
+            <li><a href="#如何结合呢">如何结合呢？</a></li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>这几天思索了一下需求，在脑中构思出了重定向IO的具体解决办法。这里采用python的subprocess模块起两个个进程跑这两个后端，通过Linux管道机制来实现两个后端的交互。（每次在外面恰饭都是大鱼大肉，，我想吃青菜啊😭😭）</p>
+<p>继<a href="https://xidoo.top/2021/11/mcbot/" target="_blank" rel="noopener noreffer">前文</a>基础需求</p>
+<ol>
+<li>x1do0在QQ中说「balabala」，在MC聊天框中出现 <code>[Server] &lt;x1do0@QQ&gt; : balabala</code></li>
+<li>xdchase在MC中说「balabala」，在QQ群中出现   <code>xdchase@MC : balabala</code></li>
+</ol>
+<p>消息流一：从QQ到Minecraft，比较容易</p>
+<ol>
+<li>graia 收到QQ信息，送进管道stdin</li>
+<li>拿到stdout，graia 发送QQ消息</li>
+</ol>
+<p>消息流二：从Minecraft到QQ</p>
+<ol start="0">
+<li>py保持监听stdout，或者 py 以 2s 频率不断问询stdout，是否有需要播报的消息</li>
+<li>有需要播报的消息，py里写处理逻辑，得到指定格式info</li>
+<li>用 graia 直接发送 info 到QQ</li>
+</ol>
+<p>系统架构图</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/11/22/5PUGqgpOle7zQw3.png"
+        data-srcset="https://i.loli.net/2021/11/22/5PUGqgpOle7zQw3.png, https://i.loli.net/2021/11/22/5PUGqgpOle7zQw3.png 1.5x, https://i.loli.net/2021/11/22/5PUGqgpOle7zQw3.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/11/22/5PUGqgpOle7zQw3.png"
+        title="https://i.loli.net/2021/11/22/5PUGqgpOle7zQw3.png" /></p>
+<h3 id="第二半天开发进度">第二（半）天开发进度</h3>
+<h4 id="管道">管道</h4>
+<p>用子进程跑minecraft服务器，并将其输出输入全部用管道实现，成了！</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="k">class</span> <span class="nc">MCBackServer</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">server_env</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span> <span class="o">=</span> <span class="n">Popen</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">stdin</span><span class="o">=</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">PIPE</span><span class="p">)</span>
+        <span class="n">flags</span> <span class="o">=</span> <span class="n">fcntl</span><span class="o">.</span><span class="n">fcntl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">fcntl</span><span class="o">.</span><span class="n">F_GETFL</span><span class="p">)</span>
+        <span class="n">fcntl</span><span class="o">.</span><span class="n">fcntl</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="n">fcntl</span><span class="o">.</span><span class="n">F_SETFL</span><span class="p">,</span> <span class="n">flags</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">O_NONBLOCK</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">send</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">tail</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">):</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">data</span><span class="o">+</span><span class="n">tail</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">stdin</span><span class="o">.</span><span class="n">flush</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">recv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="mf">.1</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">pr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">stdout</span>
+        <span class="k">if</span> <span class="n">stderr</span><span class="p">:</span>
+            <span class="n">pr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process</span><span class="o">.</span><span class="n">stdout</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">select</span><span class="o">.</span><span class="n">select</span><span class="p">([</span><span class="n">pr</span><span class="p">],</span> <span class="p">[],</span> <span class="p">[],</span> <span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">pr</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">r</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>MineCraft 后台 &lt;-&gt; Bot.py(graia) &lt;-&gt; Mirai 后台 &lt;-&gt; QQ</p>
+<h4 id="消息流一">消息流一</h4>
+<p>Minecraft Console命令</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">help
+[13:57:52] [Server thread/INFO]: /advancement (grant|revoke)
+[13:57:52] [Server thread/INFO]: /attribute &lt;target&gt; &lt;attribute&gt; (get|base|modifier)
+[13:57:52] [Server thread/INFO]: /execute (run|if|unless|as|at|store|positioned|rotated|facing|align|anchored|in)
+[13:57:52] [Server thread/INFO]: /bossbar (add|remove|list|set|get)
+[13:57:52] [Server thread/INFO]: /clear [&lt;targets&gt;]
+[13:57:52] [Server thread/INFO]: /clone &lt;begin&gt; &lt;end&gt; &lt;destination&gt; [replace|masked|filtered]
+[13:57:52] [Server thread/INFO]: /data (merge|get|remove|modify)
+[13:57:52] [Server thread/INFO]: /datapack (enable|disable|list)
+[13:57:52] [Server thread/INFO]: /debug (start|stop|function)
+[13:57:52] [Server thread/INFO]: /defaultgamemode (survival|creative|adventure|spectator)
+[13:57:52] [Server thread/INFO]: /difficulty [peaceful|easy|normal|hard]
+[13:57:52] [Server thread/INFO]: /effect (clear|give)
+[13:57:52] [Server thread/INFO]: /me &lt;action&gt;
+[13:57:52] [Server thread/INFO]: /enchant &lt;targets&gt; &lt;enchantment&gt; [&lt;level&gt;]
+[13:57:52] [Server thread/INFO]: /experience (add|set|query)
+[13:57:52] [Server thread/INFO]: /xp -&gt; experience
+[13:57:52] [Server thread/INFO]: /fill &lt;from&gt; &lt;to&gt; &lt;block&gt; [replace|keep|outline|hollow|destroy]
+[13:57:52] [Server thread/INFO]: /forceload (add|remove|query)
+[13:57:52] [Server thread/INFO]: /function &lt;name&gt;
+[13:57:52] [Server thread/INFO]: /gamemode (survival|creative|adventure|spectator)
+[13:57:52] [Server thread/INFO]: /gamerule (announceAdvancements|commandBlockOutput|disableElytraMovementCheck|disableRaids|doDaylightCycle|doEntityDrops|doFireTick|doImmediateRespawn|doInsomnia|doLimitedCrafting|doMobLoot|doMobSpawning|doPatrolSpawning|doTileDrops|doTraderSpawning|doWeatherCycle|drowningDamage|fallDamage|fireDamage|forgiveDeadPlayers|freezeDamage|keepInventory|logAdminCommands|maxCommandChainLength|maxEntityCramming|mobGriefing|naturalRegeneration|playersSleepingPercentage|randomTickSpeed|reducedDebugInfo|sendCommandFeedback|showDeathMessages|spawnRadius|spectatorsGenerateChunks|universalAnger)
+[13:57:52] [Server thread/INFO]: /give &lt;targets&gt; &lt;item&gt; [&lt;count&gt;]
+[13:57:52] [Server thread/INFO]: /help [&lt;command&gt;]
+[13:57:52] [Server thread/INFO]: /item (replace|modify)
+[13:57:52] [Server thread/INFO]: /kick &lt;targets&gt; [&lt;reason&gt;]
+[13:57:52] [Server thread/INFO]: /kill [&lt;targets&gt;]
+[13:57:52] [Server thread/INFO]: /list [uuids]
+[13:57:52] [Server thread/INFO]: /locate (pillager_outpost|mineshaft|mansion|jungle_pyramid|desert_pyramid|igloo|ruined_portal|shipwreck|swamp_hut|stronghold|monument|ocean_ruin|fortress|endcity|buried_treasure|village|nether_fossil|bastion_remnant)
+[13:57:52] [Server thread/INFO]: /locatebiome &lt;biome&gt;
+[13:57:52] [Server thread/INFO]: /loot (replace|insert|give|spawn)
+[13:57:52] [Server thread/INFO]: /msg &lt;targets&gt; &lt;message&gt;
+[13:57:52] [Server thread/INFO]: /tell -&gt; msg
+[13:57:52] [Server thread/INFO]: /w -&gt; msg
+[13:57:52] [Server thread/INFO]: /particle &lt;name&gt; [&lt;pos&gt;]
+[13:57:52] [Server thread/INFO]: /playsound &lt;sound&gt; (master|music|record|weather|block|hostile|neutral|player|ambient|voice)
+[13:57:52] [Server thread/INFO]: /reload
+[13:57:52] [Server thread/INFO]: /recipe (give|take)
+[13:57:52] [Server thread/INFO]: /say &lt;message&gt;
+[13:57:52] [Server thread/INFO]: /schedule (function|clear)
+[13:57:52] [Server thread/INFO]: /scoreboard (objectives|players)
+[13:57:52] [Server thread/INFO]: /seed
+[13:57:52] [Server thread/INFO]: /setblock &lt;pos&gt; &lt;block&gt; [destroy|keep|replace]
+[13:57:52] [Server thread/INFO]: /spawnpoint [&lt;targets&gt;]
+[13:57:52] [Server thread/INFO]: /setworldspawn [&lt;pos&gt;]
+[13:57:52] [Server thread/INFO]: /spectate [&lt;target&gt;]
+[13:57:52] [Server thread/INFO]: /spreadplayers &lt;center&gt; &lt;spreadDistance&gt; &lt;maxRange&gt; (&lt;respectTeams&gt;|under)
+[13:57:52] [Server thread/INFO]: /stopsound &lt;targets&gt; [*|master|music|record|weather|block|hostile|neutral|player|ambient|voice]
+[13:57:52] [Server thread/INFO]: /summon &lt;entity&gt; [&lt;pos&gt;]
+[13:57:52] [Server thread/INFO]: /tag &lt;targets&gt; (add|remove|list)
+[13:57:52] [Server thread/INFO]: /team (list|add|remove|empty|join|leave|modify)
+[13:57:52] [Server thread/INFO]: /teammsg &lt;message&gt;
+[13:57:52] [Server thread/INFO]: /tm -&gt; teammsg
+[13:57:52] [Server thread/INFO]: /teleport (&lt;location&gt;|&lt;destination&gt;|&lt;targets&gt;)
+[13:57:52] [Server thread/INFO]: /tp -&gt; teleport
+[13:57:52] [Server thread/INFO]: /tellraw &lt;targets&gt; &lt;message&gt;
+[13:57:52] [Server thread/INFO]: /time (set|add|query)
+[13:57:52] [Server thread/INFO]: /title &lt;targets&gt; (clear|reset|title|subtitle|actionbar|times)
+[13:57:52] [Server thread/INFO]: /trigger &lt;objective&gt; [add|set]
+[13:57:52] [Server thread/INFO]: /weather (clear|rain|thunder)
+[13:57:52] [Server thread/INFO]: /worldborder (add|set|center|damage|get|warning)
+[13:57:52] [Server thread/INFO]: /ban-ip &lt;target&gt; [&lt;reason&gt;]
+[13:57:52] [Server thread/INFO]: /banlist [ips|players]
+[13:57:52] [Server thread/INFO]: /ban &lt;targets&gt; [&lt;reason&gt;]
+[13:57:52] [Server thread/INFO]: /deop &lt;targets&gt;
+[13:57:52] [Server thread/INFO]: /op &lt;targets&gt;
+[13:57:52] [Server thread/INFO]: /pardon &lt;targets&gt;
+[13:57:52] [Server thread/INFO]: /pardon-ip &lt;target&gt;
+[13:57:52] [Server thread/INFO]: /perf (start|stop)
+[13:57:52] [Server thread/INFO]: /save-all [flush]
+[13:57:52] [Server thread/INFO]: /save-off
+[13:57:52] [Server thread/INFO]: /save-on
+[13:57:52] [Server thread/INFO]: /setidletimeout &lt;minutes&gt;
+[13:57:52] [Server thread/INFO]: /stop
+[13:57:52] [Server thread/INFO]: /whitelist (on|off|list|add|remove|reload)
+
+
+发现后台只有服务器广播播报，不能以玩家身份广播。用` say &lt;x1do0@qq&gt;: balabala`命令即可实现需求一
+
+```python
+permittedCmd = [&#39;list&#39;, &#39;seed&#39;]
+happyEvent = [&#39;achievement&#39;]
+badEvent = [&#39;swim in lava&#39;]
+otherEvent = [&#39;joined the game&#39;, &#39;left the game&#39;]
+ServerArgs = [&#39;bash&#39;, &#39;/root/start_mc_server.sh&#39;]
+mcserver = MCBackServer(ServerArgs)
+
+class MCBackServer(object):
+
+    def __init__(self, args, server_env = None):
+        self.process = Popen(args, stdin=PIPE, stdout=PIPE)
+        flags = fcntl.fcntl(self.process.stdout, fcntl.F_GETFL)
+        fcntl.fcntl(self.process.stdout, fcntl.F_SETFL, flags | os.O_NONBLOCK)
+        print(&#34;[+] MC server start!&#34;)
+
+    def send(self, data, tail = &#39;\n&#39;):
+        msg = bytes(data+tail, encoding=&#39;utf-8&#39;)
+        self.process.stdin.write(msg)
+        self.process.stdin.flush()
+
+    def recv(self, t=.1, stderr=0):
+        r = &#39;&#39;
+        pr = self.process.stdout
+        if stderr:
+            pr = self.process.stdout
+        while True:
+            if not select.select([pr], [], [], 0)[0]:
+                time.sleep(t)
+                continue
+            r = pr.read()
+            return r.rstrip()
+        return r.rstrip()
+</code></pre></td></tr></table>
+</div>
+</div><p>已经可以从py这里与minecraft服务器交互了</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/11/21/3qNyl9OzHZLhBE4.png"
+        data-srcset="https://i.loli.net/2021/11/21/3qNyl9OzHZLhBE4.png, https://i.loli.net/2021/11/21/3qNyl9OzHZLhBE4.png 1.5x, https://i.loli.net/2021/11/21/3qNyl9OzHZLhBE4.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/11/21/3qNyl9OzHZLhBE4.png"
+        title="https://i.loli.net/2021/11/21/3qNyl9OzHZLhBE4.png" /></p>
+<h4 id="消息流二">消息流二</h4>
+<p>Mirai Console命令</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">&gt; help
+◆ /autoLogin add &lt;account&gt; &lt;password&gt; [passwordKind]    # 添加自动登录
+  /autoLogin clear    # 清除所有配置
+  /autoLogin list    # 查看自动登录账号列表
+  /autoLogin remove &lt;account&gt;    # 删除一个账号
+  /autoLogin removeConfig &lt;account&gt; &lt;configKey&gt;    # 删除一个账号的一个配置项
+  /autoLogin setConfig &lt;account&gt; &lt;configKey&gt; &lt;value&gt;    # 设置一个账号的一个配置项
+◆ /help     # 查看指令帮助
+◆ /login &lt;qq&gt; &lt;password&gt; [protocol]    # 登录一个账号
+◆ /permission cancel &lt;被许可人 ID&gt; &lt;权限 ID&gt;    # 撤销一个权限
+  /permission deny &lt;被许可人 ID&gt; &lt;权限 ID&gt;    # 撤销一个权限
+  /permission remove &lt;被许可人 ID&gt; &lt;权限 ID&gt;    # 撤销一个权限
+  /permission cancelAll &lt;被许可人 ID&gt; &lt;权限 ID&gt;    # 撤销一个权限及其所有子权限
+  /permission denyAll &lt;被许可人 ID&gt; &lt;权限 ID&gt;    # 撤销一个权限及其所有子权限
+  /permission removeAll &lt;被许可人 ID&gt; &lt;权限 ID&gt;    # 撤销一个权限及其所有子权限
+  /permission listPermissions    # 查看所有权限列表
+  /permission lp    # 查看所有权限列表
+  /permission permit &lt;被许可人 ID&gt; &lt;权限 ID&gt;    # 授权一个权限
+  /permission grant &lt;被许可人 ID&gt; &lt;权限 ID&gt;    # 授权一个权限
+  /permission add &lt;被许可人 ID&gt; &lt;权限 ID&gt;    # 授权一个权限
+  /permission permittedPermissions &lt;被许可人 ID&gt; [包括重复]    # 查看被授权权限列表
+  /permission pp &lt;被许可人 ID&gt; [包括重复]    # 查看被授权权限列表
+  /permission grantedPermissions &lt;被许可人 ID&gt; [包括重复]    # 查看被授权权限列表
+  /permission gp &lt;被许可人 ID&gt; [包括重复]    # 查看被授权权限列表
+◆ /status     # 获取 Mirai Console 运行状态
+◆ /stop     # 关闭 Mirai Console
+◆ /mclc &lt;MCL命令行参数&gt;
+◆ /mcl info &lt;package&gt;    # 获取包信息
+  /mcl install &lt;package&gt; [channel] [type] [version] [lock or unlock]    # 安装包
+  /mcl list    # 列出已安装的包
+  /mcl remove &lt;package&gt; [delete]    # 移除包
+  /mcl run &lt;script&gt;    # 执行脚本load阶段
+  /mcl update    # 执行updater脚本
+</code></pre></td></tr></table>
+</div>
+</div><p>下面我们做另一半：py 与 Mirai 交互</p>
+<p>实际上这一部分已经做好了，就是利用graia的http函数封装。我们需要翻阅 graia 手册，考察快速学习能力（指每次考试之前都弄些花里胡哨的东西&hellip;</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+<span class="n">bcc</span> <span class="o">=</span> <span class="n">Broadcast</span><span class="p">(</span><span class="n">loop</span><span class="o">=</span><span class="n">loop</span><span class="p">)</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">GraiaMiraiApplication</span><span class="p">(</span>
+                        <span class="n">broadcast</span><span class="o">=</span><span class="n">bcc</span><span class="p">,</span>
+                        <span class="n">connect_info</span><span class="o">=</span><span class="n">Session</span><span class="p">(</span>
+                            <span class="n">host</span><span class="o">=</span><span class="s2">&#34;http://localhost:8080&#34;</span><span class="p">,</span> <span class="c1"># 填入 httpapi 服务运行的地址</span>
+                            <span class="n">authKey</span><span class="o">=</span><span class="s2">&#34;xdchaseforever&#34;</span><span class="p">,</span> <span class="c1"># 填入 authKey</span>
+                            <span class="n">account</span><span class="o">=</span><span class="mi">768842556</span><span class="p">,</span> <span class="c1"># 你的机器人的 qq 号</span>
+                            <span class="n">websocket</span><span class="o">=</span><span class="kc">True</span> <span class="c1"># Graia 已经可以根据所配置的消息接收的方式来保证消息接收部分的正常运作.</span>
+                        <span class="p">)</span>
+                    <span class="p">)</span>
+
+<span class="nd">@bcc</span><span class="o">.</span><span class="n">receiver</span><span class="p">(</span><span class="s2">&#34;FriendMessage&#34;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">friend_message_listener</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">GraiaMiraiApplication</span><span class="p">,</span> <span class="n">friend</span><span class="p">:</span> <span class="n">Friend</span><span class="p">):</span>
+    <span class="k">await</span> <span class="n">app</span><span class="o">.</span><span class="n">sendFriendMessage</span><span class="p">(</span><span class="n">friend</span><span class="p">,</span> <span class="n">MessageChain</span><span class="o">.</span><span class="n">create</span><span class="p">([</span>
+        <span class="n">Plain</span><span class="p">(</span><span class="s2">&#34;施工中...&#34;</span><span class="p">)</span>
+    <span class="p">]))</span>
+
+<span class="nd">@bcc</span><span class="o">.</span><span class="n">receiver</span><span class="p">(</span><span class="s2">&#34;GroupMessage&#34;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">test</span><span class="p">(</span>
+    <span class="n">message</span><span class="p">:</span> <span class="n">MessageChain</span><span class="p">,</span>
+    <span class="n">app</span><span class="p">:</span> <span class="n">GraiaMiraiApplication</span><span class="p">,</span>
+    <span class="n">group</span><span class="p">:</span> <span class="n">Group</span><span class="p">,</span> <span class="n">member</span><span class="p">:</span> <span class="n">Member</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">targetGroup</span> <span class="o">=</span> <span class="n">Group</span>
+    <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">asDisplay</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&#34;!&#34;</span><span class="p">):</span>
+        <span class="n">ifPermitted</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">message</span><span class="o">.</span><span class="n">asDisplay</span><span class="p">()[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="n">msg</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;ping&#39;</span><span class="p">):</span>
+            <span class="k">await</span> <span class="n">app</span><span class="o">.</span><span class="n">sendGroupMessage</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">MessageChain</span><span class="o">.</span><span class="n">create</span><span class="p">([</span>
+                <span class="n">At</span><span class="p">(</span><span class="n">member</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="n">Plain</span><span class="p">(</span><span class="s2">&#34;pong&#34;</span><span class="p">)</span>
+            <span class="p">]))</span>
+            <span class="k">return</span> 
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">permittedCmd</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">msg</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+                <span class="n">ifPermitted</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+        <span class="k">if</span> <span class="n">ifPermitted</span><span class="p">:</span>
+            <span class="n">mcserver</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">mcserver</span><span class="o">.</span><span class="n">recv</span><span class="p">()</span>
+            <span class="k">await</span> <span class="n">app</span><span class="o">.</span><span class="n">sendGroupMessage</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">MessageChain</span><span class="o">.</span><span class="n">create</span><span class="p">([</span>
+                <span class="n">At</span><span class="p">(</span><span class="n">member</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="n">Plain</span><span class="p">(</span><span class="n">res</span><span class="p">)</span>
+            <span class="p">]))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">await</span> <span class="n">app</span><span class="o">.</span><span class="n">sendGroupMessage</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">MessageChain</span><span class="o">.</span><span class="n">create</span><span class="p">([</span>
+                <span class="n">At</span><span class="p">(</span><span class="n">member</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="n">Plain</span><span class="p">(</span><span class="s2">&#34;Sorry, Command Error! These are all we permitted : &#34;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">permittedCmd</span><span class="p">)</span>
+            <span class="p">]))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mcserver</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&#34;say &#34;</span> <span class="o">+</span> <span class="n">member</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s2">&#34;@QQ : &#34;</span> <span class="o">+</span> <span class="n">message</span><span class="o">.</span><span class="n">asDisplay</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">b</span><span class="s1">&#39;[+]&#39;</span> <span class="o">+</span> <span class="n">mcserver</span><span class="o">.</span><span class="n">recv</span><span class="p">())</span>
+</code></pre></td></tr></table>
+</div>
+</div><h4 id="如何结合呢">如何结合呢？</h4>
+<p>心路历程</p>
+<ol>
+<li>
+<p>本来用类封装得很好看，但是发现Mirai监听事件貌似得放全局变量。。于是又全部木大</p>
+</li>
+<li>
+<p>建议下载Graia时指定版本为0.19.0，版本信息如下。你不能苛求一个停止更新的项目能解决什么兼容问题。</p>
+<pre><code> (base) root@iZ2zefiis08efdfsj0cydeZ:~# pip3.9 show graia-application-mirai
+ Name: graia-application-mirai
+ Version: 0.19.0
+ Summary:
+ Home-page:
+ Author: GreyElaina
+ Author-email: GreyElaina@outlook.com
+ License: AGPL-3.0
+ Location: /usr/local/lib/python3.9/site-packages
+ Requires: aiohttp, regex, yarl, graia-broadcast, pydantic
+ Required-by:
+</code></pre>
+</li>
+</ol>
+<p>更多问题：</p>
+<ol>
+<li>
+<p>在执行完<code>app.launch_blocking()</code>后Mirai机器人开始工作，程序开始循环监听QQ后台，并且永远不会跳出。消息流一打开以后如何再打开消息流二？</p>
+</li>
+<li>
+<p>服务器后端有消息剩余，我想拿到的东西往往不在消息队首</p>
+</li>
+</ol>
+<p>问题一我考虑使用两个py文件来分别运行，但问题二的出现让我考虑到解决问题一带来的更大问题</p>
+<blockquote>
+<p>如何实现两个消息流的隔离？</p>
+</blockquote>
+<p>我暂时想到的是创建两个消息队列，分别处理。这个时候管道该如何写，暂时还没查到相关资料。但想想这应该是网络应用的基础需求，奈何我对web知识体系一窍不通&hellip;</p>
+<p>消息流一圆满完成之时已是深夜，草草截张图赶紧爬去睡觉了</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/11/22/qSPWKMIba5ZOUTH.png"
+        data-srcset="https://i.loli.net/2021/11/22/qSPWKMIba5ZOUTH.png, https://i.loli.net/2021/11/22/qSPWKMIba5ZOUTH.png 1.5x, https://i.loli.net/2021/11/22/qSPWKMIba5ZOUTH.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/11/22/qSPWKMIba5ZOUTH.png"
+        title="https://i.loli.net/2021/11/22/qSPWKMIba5ZOUTH.png" /></p>
+<p>明天开始复习逆向考试&hellip;又不是不能用！</p></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2021-11-21</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/2021/11/mcbot2/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://xidoo.top/2021/11/mcbot2/" data-title="如何为 Minecraft 服务器添加一名播报员（二）"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://xidoo.top/2021/11/mcbot2/"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on WhatsApp" data-sharer="whatsapp" data-url="http://xidoo.top/2021/11/mcbot2/" data-title="如何为 Minecraft 服务器添加一名播报员（二）" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://xidoo.top/2021/11/mcbot2/" data-title="如何为 Minecraft 服务器添加一名播报员（二）"><i data-svg-src="/lib/simple-icons/icons/line.min.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://xidoo.top/2021/11/mcbot2/" data-title="如何为 Minecraft 服务器添加一名播报员（二）"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="Share on Myspace" data-sharer="myspace" data-url="http://xidoo.top/2021/11/mcbot2/" data-title="如何为 Minecraft 服务器添加一名播报员（二）" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="Share on Blogger" data-sharer="blogger" data-url="http://xidoo.top/2021/11/mcbot2/" data-title="如何为 Minecraft 服务器添加一名播报员（二）" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="Share on Evernote" data-sharer="evernote" data-url="http://xidoo.top/2021/11/mcbot2/" data-title="如何为 Minecraft 服务器添加一名播报员（二）"><i class="fab fa-evernote fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/2021/11/fuzzing2/" class="prev" rel="prev" title="American Fuzzy Lop tutorial-Challenge #libxml2"><i class="fas fa-angle-left fa-fw"></i>American Fuzzy Lop tutorial-Challenge #libxml2</a>
+            <a href="/2021/12/mcbot3/" class="next" rel="next" title="如何为 Minecraft 服务器添加一名播报员（完）">如何为 Minecraft 服务器添加一名播报员（完）<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">🏴‍☠️ Love it, Make magic</div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2019 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">x1do0</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript" src="/lib/smooth-scroll/smooth-scroll.min.js"></script><script type="text/javascript" src="/lib/autocomplete/autocomplete.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.min.js"></script><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/sharer/sharer.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js"></script><script type="text/javascript" src="/lib/katex/auto-render.min.js"></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js"></script><script type="text/javascript" src="/lib/katex/mhchem.min.js"></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":15},"comment":{},"cookieconsent":{"content":{"dismiss":"Got it!","link":"Learn more","message":"This website uses Cookies to improve your experience."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

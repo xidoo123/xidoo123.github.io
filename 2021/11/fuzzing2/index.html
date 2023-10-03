@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>American Fuzzy Lop tutorial-Challenge #libxml2 - Stay Hungry</title><meta name="Description" content="This is My New Hugo Site"><meta property="og:title" content="American Fuzzy Lop tutorial-Challenge #libxml2" />
+<meta property="og:description" content="This is a white-box fuzzing libxml2 v2.9.2 challenge[1] to reproduce CVE-2015-8317[2]
+Congrats to QuiHao by the way, a brand new qemu 0day Orzzzz!!!" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://xidoo.top/2021/11/fuzzing2/" /><meta property="og:image" content="http://xidoo.top/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-11-14T11:38:18+08:00" />
+<meta property="article:modified_time" content="2021-11-14T11:38:18+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://xidoo.top/logo.png"/>
+
+<meta name="twitter:title" content="American Fuzzy Lop tutorial-Challenge #libxml2"/>
+<meta name="twitter:description" content="This is a white-box fuzzing libxml2 v2.9.2 challenge[1] to reproduce CVE-2015-8317[2]
+Congrats to QuiHao by the way, a brand new qemu 0day Orzzzz!!!"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://xidoo.top/2021/11/fuzzing2/" /><link rel="prev" href="http://xidoo.top/2021/11/fuzzing1/" /><link rel="next" href="http://xidoo.top/2021/11/mcbot2/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "American Fuzzy Lop tutorial-Challenge #libxml2",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/xidoo.top\/2021\/11\/fuzzing2\/"
+        },"genre": "posts","wordcount":  1288 ,
+        "url": "http:\/\/xidoo.top\/2021\/11\/fuzzing2\/","datePublished": "2021-11-14T11:38:18+08:00","dateModified": "2021-11-14T11:38:18+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "x1do0"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('light' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'light' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/friends/"> Friends </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/friends/" title="">Friends</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">American Fuzzy Lop tutorial-Challenge #libxml2</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>x1do0</a></span>&nbsp;<span class="post-category">included in <a href="/categories/course/"><i class="far fa-folder fa-fw"></i>Course</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2021-11-14">2021-11-14</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;1288 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;7 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#environment-setup">Environment Setup</a></li>
+        <li><a href="#find-target">Find target</a></li>
+        <li><a href="#write-harness">Write harness</a>
+          <ul>
+            <li><a href="#use-file-input-to-fuzz">Use file-input to fuzz</a></li>
+            <li><a href="#use-stdin-to-fuzz">Use <code>stdin</code> to fuzz</a></li>
+          </ul>
+        </li>
+        <li><a href="#results">Results</a></li>
+        <li><a href="#final-statistic">Final Statistic</a></li>
+        <li><a href="#references">References</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>This is a white-box fuzzing libxml2 v2.9.2 challenge[1] to reproduce CVE-2015-8317[2]</p>
+<p>Congrats to QuiHao by the way, a brand new qemu 0day Orzzzz!!!</p>
+<blockquote>
+<p>The xmlParseXMLDecl function in parser.c in libxml2 before 2.9.3 allows context-dependent attackers to obtain sensitive information via an (1) unterminated encoding value or (2) incomplete XML declaration in XML data, which triggers an out-of-bounds heap read.</p>
+</blockquote>
+<h3 id="environment-setup">Environment Setup</h3>
+<p>Download <code>libxml2 @ 726f67e</code> and check the version, build and instrument by running:</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">	<span class="nb">cd</span> libxml2
+    <span class="nv">CC</span><span class="o">=</span>afl-clang-fast ./autogen.sh
+    <span class="nv">AFL_USE_ASAN</span><span class="o">=</span><span class="m">1</span> make -j <span class="m">4</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>Here we go</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">x1do0@x1do0:~/fuzzing/afl-training/challenges/libxml2/libxml2.9.2$ ./testModule
+Success!
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="find-target">Find target</h3>
+<p>According to NVD, function <code>/parse.c/xmlParseXMLDecl</code> is to blame. But we cannot simply test this function because this is not the entrance for users. Hint:</p>
+<blockquote>
+<p>This functionality is exposed in the <a href="http://xmlsoft.org/html/libxml-parser.html" target="_blank" rel="noopener noreffer">parser</a> API, and whilst you could dig</p>
+<p>through this documentation, the easiest approach is to look at an example.</p>
+<p><a href="http://xmlsoft.org/examples/parse1.c" target="_blank" rel="noopener noreffer"><code>parse1.c</code></a> (also in the repo under doc/examples/parse1.c) shows two core</p>
+<p>functions: <code>xmlReadFile</code> followed by <code>xmlFreeDoc</code>.</p>
+</blockquote>
+<h3 id="write-harness">Write harness</h3>
+<p>To avoid forking process every time, AFL has a keyword <code>__AFL_LOOP()</code> to largely speed things up.</p>
+<blockquote>
+<p><code>__AFL_LOOP(1000)</code> is a macro that detects if the program is running under AFL. If it is, the loop will run 1000 times and 1000 different inputs will be fed to the library. After that, the process is torn down then restarted by AFL. This ensures we regularly replace the process to avoid memory leaks.</p>
+<p>But if the program runs on his own (i.e. launched with <code>./harness_persistent</code> and not AFL) the loop runs only once. This way we can process testcases from the command line without looping a thousand time. This mean we can use gdb or automated tools to inspect the crashes found by the fuzzer using the same binary.</p>
+</blockquote>
+<h4 id="use-file-input-to-fuzz">Use file-input to fuzz</h4>
+<p>In libxml2, <code>parse1</code> allow us to parse from a file.</p>
+<blockquote>
+<p><a href="http://xmlsoft.org/examples/parse1.c" target="_blank" rel="noopener noreffer">parse1.c</a>: Parse an XML file to a tree and free it</p>
+<p>Demonstrate the use of xmlReadFile() to read an XML file into a tree and xmlFreeDoc() to free the resulting tree</p>
+<p>Includes:</p>
+<ul>
+<li>(<a href="http://xmlsoft.org/html/libxml-tree.html" target="_blank" rel="noopener noreffer">http://xmlsoft.org/html/libxml-tree.html</a>)</li>
+<li>(<a href="http://xmlsoft.org/html/libxml-parser.html" target="_blank" rel="noopener noreffer">http://xmlsoft.org/html/libxml-parser.html</a>)</li>
+</ul>
+<p>Uses:</p>
+<ul>
+<li>line 24: Type <a href="http://xmlsoft.org/html/libxml-tree.html#xmlDocPtr" target="_blank" rel="noopener noreffer">xmlDocPtr</a> from tree.h</li>
+<li>line 26: Function <a href="http://xmlsoft.org/html/libxml-parser.html#xmlReadFile" target="_blank" rel="noopener noreffer">xmlReadFile</a> from parser.h</li>
+<li>line 31: Function <a href="http://xmlsoft.org/html/libxml-tree.html#xmlFreeDoc" target="_blank" rel="noopener noreffer">xmlFreeDoc</a> from tree.h</li>
+<li>line 45: Macro <a href="http://xmlsoft.org/html/libxml-xmlversion.html#LIBXML_TEST_VERSION" target="_blank" rel="noopener noreffer">LIBXML_TEST_VERSION</a> from xmlversion.h</li>
+<li>line 50: Function <a href="http://xmlsoft.org/html/libxml-parser.html#xmlCleanupParser" target="_blank" rel="noopener noreffer">xmlCleanupParser</a> from parser.h</li>
+<li>line 54: Function <a href="http://xmlsoft.org/html/libxml-xmlmemory.html#xmlMemoryDump" target="_blank" rel="noopener noreffer">xmlMemoryDump</a> from xmlmemory.h</li>
+</ul>
+<p>Usage:</p>
+<pre><code>  parse1 test1.xml
+</code></pre>
+<p>Author: Daniel Veillard</p>
+</blockquote>
+<p>I wrote a simple harness and start to fuzz.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;fcntl.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;libxml/tree.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;libxml/parser.h&gt;</span><span class="cp">
+</span><span class="cp"></span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+        <span class="k">if</span><span class="p">(</span><span class="n">argc</span><span class="o">==</span><span class="mi">2</span><span class="p">){</span>
+                <span class="k">while</span> <span class="p">(</span><span class="n">__AFL_LOOP</span><span class="p">(</span><span class="mi">1000</span><span class="p">))</span> <span class="p">{</span>
+                        <span class="n">xmlDocPtr</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">xmlReadFile</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="n">doc</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
+                                <span class="n">xmlFreeDoc</span><span class="p">(</span><span class="n">doc</span><span class="p">);</span>
+                <span class="p">}</span>
+                <span class="n">xmlCleanupParser</span><span class="p">();</span>
+        <span class="p">}</span>
+        <span class="k">else</span>
+                <span class="n">printf</span><span class="p">(</span><span class="s">&#34;Usage: %s filename</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>compile command line:</p>
+<p><code> AFL_USE_ASAN=1 afl-clang-fast ./harness.c -I libxml2.9.2/include libxml2.9.2/.libs/libxml2.a -lz -lm -o fuzzer</code></p>
+<p>Startup command line:</p>
+<p><code>afl-fuzz -i ./in -o ./out ./fuzzer @@</code></p>
+<h4 id="use-stdin-to-fuzz">Use <code>stdin</code> to fuzz</h4>
+<p>Another way, according to the HINTS, is to use  parse3</p>
+<blockquote>
+<p><a href="http://xmlsoft.org/examples/parse3.c" target="_blank" rel="noopener noreffer">parse3.c</a>: Parse an XML document in memory to a tree and free it</p>
+<p>Demonstrate the use of xmlReadMemory() to read an XML file into a tree and xmlFreeDoc() to free the resulting tree</p>
+<p>Includes:</p>
+<ul>
+<li>(<a href="http://xmlsoft.org/html/libxml-tree.html" target="_blank" rel="noopener noreffer">http://xmlsoft.org/html/libxml-tree.html</a>)</li>
+<li>(<a href="http://xmlsoft.org/html/libxml-parser.html" target="_blank" rel="noopener noreffer">http://xmlsoft.org/html/libxml-parser.html</a>)</li>
+</ul>
+<p>Uses:</p>
+<ul>
+<li>line 27: Type <a href="http://xmlsoft.org/html/libxml-tree.html#xmlDocPtr" target="_blank" rel="noopener noreffer">xmlDocPtr</a> from tree.h</li>
+<li>line 33: Function <a href="http://xmlsoft.org/html/libxml-parser.html#xmlReadMemory" target="_blank" rel="noopener noreffer">xmlReadMemory</a> from parser.h</li>
+<li>line 38: Function <a href="http://xmlsoft.org/html/libxml-tree.html#xmlFreeDoc" target="_blank" rel="noopener noreffer">xmlFreeDoc</a> from tree.h</li>
+<li>line 49: Macro <a href="http://xmlsoft.org/html/libxml-xmlversion.html#LIBXML_TEST_VERSION" target="_blank" rel="noopener noreffer">LIBXML_TEST_VERSION</a> from xmlversion.h</li>
+<li>line 54: Function <a href="http://xmlsoft.org/html/libxml-parser.html#xmlCleanupParser" target="_blank" rel="noopener noreffer">xmlCleanupParser</a> from parser.h</li>
+<li>line 58: Function <a href="http://xmlsoft.org/html/libxml-xmlmemory.html#xmlMemoryDump" target="_blank" rel="noopener noreffer">xmlMemoryDump</a> from xmlmemory.h</li>
+</ul>
+<p>Usage:</p>
+<pre><code>  parse3
+</code></pre>
+<p>Author: Daniel Veillard</p>
+</blockquote>
+<p>Check [4] for more information about how to use these functions</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;fcntl.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;libxml/tree.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;libxml/parser.h&gt;</span><span class="cp">
+</span><span class="cp"></span>
+<span class="kt">int</span> <span class="n">SIZE</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">;</span> <span class="c1">// fix buf size based on assumptions
+</span><span class="c1"></span>
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+        <span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="n">SIZE</span><span class="p">];</span>
+        <span class="n">ssize_t</span> <span class="n">length</span><span class="p">;</span>
+        <span class="k">while</span> <span class="p">(</span><span class="n">__AFL_LOOP</span><span class="p">(</span><span class="mi">1000</span><span class="p">))</span> <span class="p">{</span>
+                <span class="n">length</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">STDIN_FILENO</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="n">SIZE</span><span class="p">);</span>
+                <span class="n">xmlDocPtr</span> <span class="n">doc</span> <span class="o">=</span> <span class="n">xmlReadMemory</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="n">SIZE</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+                <span class="k">if</span><span class="p">(</span> <span class="n">doc</span><span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
+                        <span class="n">xmlFreeDoc</span><span class="p">(</span><span class="n">doc</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="n">xmlCleanupParser</span><span class="p">();</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>Compile command line:</p>
+<p><code> AFL_USE_ASAN=1 afl-clang-fast ./harness2.c -I libxml2.9.2/include libxml2.9.2/.libs/libxml2.a -lz -lm -o fuzzer2</code></p>
+<p>Startup command line:</p>
+<p><code>afl-fuzz -i ./in -o ./out2 ./fuzzer2</code></p>
+<h3 id="results">Results</h3>
+<p>In merely one hour, our first harness produces 5 unique crashes, which is actually the same one. ASAN reports a heap-buffer-overflow in <code>xmlDictComputeFastQKey /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/dict.c:489</code></p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/11/14/17PXBpM5JsQZOFi.png"
+        data-srcset="https://i.loli.net/2021/11/14/17PXBpM5JsQZOFi.png, https://i.loli.net/2021/11/14/17PXBpM5JsQZOFi.png 1.5x, https://i.loli.net/2021/11/14/17PXBpM5JsQZOFi.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/11/14/17PXBpM5JsQZOFi.png"
+        title="https://i.loli.net/2021/11/14/17PXBpM5JsQZOFi.png" /></p>
+<p>Check for the source code, we found a reference of array <code>name</code> with unchecked index, causing this OOB.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/11/14/ZqdbiDmR4Jht8sC.png"
+        data-srcset="https://i.loli.net/2021/11/14/ZqdbiDmR4Jht8sC.png, https://i.loli.net/2021/11/14/ZqdbiDmR4Jht8sC.png 1.5x, https://i.loli.net/2021/11/14/ZqdbiDmR4Jht8sC.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/11/14/ZqdbiDmR4Jht8sC.png"
+        title="https://i.loli.net/2021/11/14/ZqdbiDmR4Jht8sC.png" /></p>
+<p>So actually, we found CVE-2015-7497[5] accidentally XD, see patchwork[6]</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/11/14/laF1SPQmu8VXY4o.png"
+        data-srcset="https://i.loli.net/2021/11/14/laF1SPQmu8VXY4o.png, https://i.loli.net/2021/11/14/laF1SPQmu8VXY4o.png 1.5x, https://i.loli.net/2021/11/14/laF1SPQmu8VXY4o.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/11/14/laF1SPQmu8VXY4o.png"
+        title="https://i.loli.net/2021/11/14/laF1SPQmu8VXY4o.png" /></p>
+<p>After 2 hours, another unique crash pops out!</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/11/14/dDfBVAk3Ilot8m7.png"
+        data-srcset="https://i.loli.net/2021/11/14/dDfBVAk3Ilot8m7.png, https://i.loli.net/2021/11/14/dDfBVAk3Ilot8m7.png 1.5x, https://i.loli.net/2021/11/14/dDfBVAk3Ilot8m7.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/11/14/dDfBVAk3Ilot8m7.png"
+        title="https://i.loli.net/2021/11/14/dDfBVAk3Ilot8m7.png" /></p>
+<p>umm, sounds like this shallow bug hides CVE-2015-8317, according to [7]. Maybe AFL need more time.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/11/14/zBvqnK9ER1Muaps.png"
+        data-srcset="https://i.loli.net/2021/11/14/zBvqnK9ER1Muaps.png, https://i.loli.net/2021/11/14/zBvqnK9ER1Muaps.png 1.5x, https://i.loli.net/2021/11/14/zBvqnK9ER1Muaps.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/11/14/zBvqnK9ER1Muaps.png"
+        title="https://i.loli.net/2021/11/14/zBvqnK9ER1Muaps.png" /></p>
+<h3 id="final-statistic">Final Statistic</h3>
+<p>These are the screen shot for two harnesses right before I stopped.</p>
+<p>Harness 1 has a stability of 91.39% and find more crashes in less time.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/11/14/IPNGy6hJXkzS9El.png"
+        data-srcset="https://i.loli.net/2021/11/14/IPNGy6hJXkzS9El.png, https://i.loli.net/2021/11/14/IPNGy6hJXkzS9El.png 1.5x, https://i.loli.net/2021/11/14/IPNGy6hJXkzS9El.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/11/14/IPNGy6hJXkzS9El.png"
+        title="https://i.loli.net/2021/11/14/IPNGy6hJXkzS9El.png" /></p>
+<p>Harness 2 run for about 1.5 hour but find less crashes with pretty low stability.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/11/14/8iMbOftA5LGnZNm.png"
+        data-srcset="https://i.loli.net/2021/11/14/8iMbOftA5LGnZNm.png, https://i.loli.net/2021/11/14/8iMbOftA5LGnZNm.png 1.5x, https://i.loli.net/2021/11/14/8iMbOftA5LGnZNm.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/11/14/8iMbOftA5LGnZNm.png"
+        title="https://i.loli.net/2021/11/14/8iMbOftA5LGnZNm.png" /></p>
+<p>Also, I found 6 crashes which did not crash at all.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-shell" data-lang="shell">x1do0@x1do0:~/fuzzing/afl-training/challenges/libxml2$ cat ./out2/default/crashes/id<span class="se">\:</span>000000<span class="se">\,</span>sig<span class="se">\:</span>06<span class="se">\,</span>src<span class="se">\:</span>000803<span class="se">\,</span>time<span class="se">\:</span>1266536<span class="se">\,</span>op<span class="se">\:</span>havoc<span class="se">\,</span>rep<span class="se">\:</span><span class="m">4</span> <span class="p">|</span>
+&gt; ./fuzzer2
+Entity: line 1: parser error : Char 0x0 out of allowed range
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSh:
+                                                                               ^
+namespace error : Failed to parse QName <span class="s1">&#39;SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSjSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSCSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSh:&#39;</span>
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSh:
+                                                                               ^
+Entity: line 1: parser error : Char 0x0 out of allowed range
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSh:
+                                                                               ^
+Entity: line 1: parser error : Couldn<span class="err">&#39;</span>t find end of Start Tag SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSjSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSCSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSh: line <span class="m">1</span>
+SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSh:
+</code></pre></td></tr></table>
+</div>
+</div><p>And a bug where I did not figure out what happened.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1053695==ERROR: AddressSanitizer: SEGV on unknown address 0x618ffffffef6 (pc 0x5592fbf3a477 bp 0x000000000006 sp 0x7ffd30ec62e0 T0)
+==1053695==The signal is caused by a READ memory access.
+    #0 0x5592fbf3a476 in xmlDictComputeFastQKey /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/dict.c:489
+    #1 0x5592fbf42942 in xmlDictQLookup /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/dict.c:1093
+    #2 0x5592fbf5813f in xmlSAX2StartElementNs /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/SAX2.c:2238
+    #3 0x5592fbb9495f in xmlParseStartTag2 /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:9707
+    #4 0x5592fbbbae5e in xmlParseElement /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:10069
+    #5 0x5592fbbb763d in xmlParseContent /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:9982
+    #6 0x5592fbbbb5d9 in xmlParseElement /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:10155
+    #7 0x5592fbbb763d in xmlParseContent /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:9982
+    #8 0x5592fbbbb5d9 in xmlParseElement /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:10155
+    #9 0x5592fbbb763d in xmlParseContent /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:9982
+    #10 0x5592fbbbb5d9 in xmlParseElement /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:10155
+    #11 0x5592fbbb763d in xmlParseContent /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:9982
+    #12 0x5592fbbbb5d9 in xmlParseElement /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:10155
+    #13 0x5592fbbb763d in xmlParseContent /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:9982
+    #14 0x5592fbbbb5d9 in xmlParseElement /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:10155
+    #15 0x5592fbbb763d in xmlParseContent /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:9982
+    #16 0x5592fbbbb5d9 in xmlParseElement /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:10155
+    #17 0x5592fbbb763d in xmlParseContent /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:9982
+    #18 0x5592fbbbb5d9 in xmlParseElement /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:10155
+    #19 0x5592fbbb763d in xmlParseContent /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:9982
+    #20 0x5592fbbbb5d9 in xmlParseElement /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:10155
+    #21 0x5592fbbb763d in xmlParseContent /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:9982
+    #22 0x5592fbbbb5d9 in xmlParseElement /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:10155
+    #23 0x5592fbbdb56b in xmlParseDocument /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:10841
+    #24 0x5592fbbde0ba in xmlDoRead /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/parser.c:15298
+    #25 0x5592fbb0e99b in main harness.c:12
+    #26 0x7f460f7960b2 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x270b2)
+    #27 0x5592fbb0f45d in _start (/home/x1do0/fuzzing/afl-training/challenges/libxml2/fuzzer+0x6e45d)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/x1do0/fuzzing/afl-training/challenges/libxml2/libxml2.9.2/dict.c:489 in xmlDictComputeFastQKey
+==1053695==ABORTING
+</code></pre></td></tr></table>
+</div>
+</div><p>So please let me know if my <strong>harness2</strong> is wrong. What&rsquo;s more, someone found two more bugs. Check [7] for more details.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">Indirect leak of 48 byte(s) in 1 object(s) allocated from:
+    #0 0x4c250c in __interceptor_malloc
+    #1 0x5ef0fd in xmlNewDocElementContent valid.c:952:34
+    #2 0x532c2b in xmlParseElementMixedContentDecl parser.c:6200:16
+    #3 0x5367cd in xmlParseElementContentDecl parser.c:6624:16
+    #4 0x537843 in xmlParseElementDecl parser.c:6691:12
+    #5 0x538b84 in xmlParseMarkupDecl parser.c:6934:4
+    #6 0x562fd7 in xmlParseInternalSubset parser.c:8401:6
+    #7 0x56166e in xmlParseDocument parser.c:10809:6
+    #8 0x57fe49 in xmlDoRead parser.c:15298:5
+    #9 0x4f0f87 in LLVMFuzzerTestOneInput
+
+==235609==ERROR: AddressSanitizer: heap-use-after-free ...
+READ of size 1 at 0x625000002908 thread T0
+    #0 0x77503e in xmlDictComputeFastKey dict.c:448:13
+    #1 0x77503e in xmlDictLookup dict.c:848
+    #2 0x573b6f in xmlParseNCNameComplex parser.c:3506:12
+    #3 0x573b6f in xmlParseNCName parser.c:3565
+    #4 0x57283c in xmlParseQName parser.c:8815:9
+    #5 0x548877 in xmlParseStartTag2 parser.c:9336:17
+    #6 0x544bd0 in xmlParseElement parser.c:10069:16
+    #7 0x543a85 in xmlParseContent parser.c:9982:6
+    #8 0x5457bb in xmlParseElement parser.c:10155:5
+    #9 0x55540b in xmlParseDocument parser.c:10841:2
+    #10 0x5706c1 in xmlDoRead parser.c:15298:5
+    #11 0x4f7997 in LLVMFuzzerTestOneInput
+
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="references">References</h3>
+<p>[1] <a href="https://github.com/mykter/afl-training/tree/main/challenges/libxml2" target="_blank" rel="noopener noreffer">https://github.com/mykter/afl-training/tree/main/challenges/libxml2</a></p>
+<p>[2] <a href="https://nvd.nist.gov/vuln/detail/CVE-2015-8317" target="_blank" rel="noopener noreffer">https://nvd.nist.gov/vuln/detail/CVE-2015-8317</a></p>
+<p>[3] <a href="https://toastedcornflakes.github.io/articles/fuzzing_capstone_with_afl.html" target="_blank" rel="noopener noreffer">https://toastedcornflakes.github.io/articles/fuzzing_capstone_with_afl.html</a></p>
+<p>[4] <a href="http://xmlsoft.org/examples/index.html" target="_blank" rel="noopener noreffer">http://xmlsoft.org/examples/index.html</a></p>
+<p>[5] <a href="https://www.cvedetails.com/cve/CVE-2015-7497/" target="_blank" rel="noopener noreffer">https://www.cvedetails.com/cve/CVE-2015-7497/</a></p>
+<p>[6] <a href="https://github.com/GNOME/libxml2/compare/v2.9.2...CVE-2015-7497" target="_blank" rel="noopener noreffer">https://github.com/GNOME/libxml2/compare/v2.9.2...CVE-2015-7497</a></p>
+<p>[7] <a href="https://github.com/google/fuzzer-test-suite/tree/master/libxml2-v2.9.2" target="_blank" rel="noopener noreffer">https://github.com/google/fuzzer-test-suite/tree/master/libxml2-v2.9.2</a></p></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2021-11-14</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/2021/11/fuzzing2/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://xidoo.top/2021/11/fuzzing2/" data-title="American Fuzzy Lop tutorial-Challenge #libxml2"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://xidoo.top/2021/11/fuzzing2/"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on WhatsApp" data-sharer="whatsapp" data-url="http://xidoo.top/2021/11/fuzzing2/" data-title="American Fuzzy Lop tutorial-Challenge #libxml2" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://xidoo.top/2021/11/fuzzing2/" data-title="American Fuzzy Lop tutorial-Challenge #libxml2"><i data-svg-src="/lib/simple-icons/icons/line.min.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://xidoo.top/2021/11/fuzzing2/" data-title="American Fuzzy Lop tutorial-Challenge #libxml2"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="Share on Myspace" data-sharer="myspace" data-url="http://xidoo.top/2021/11/fuzzing2/" data-title="American Fuzzy Lop tutorial-Challenge #libxml2" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="Share on Blogger" data-sharer="blogger" data-url="http://xidoo.top/2021/11/fuzzing2/" data-title="American Fuzzy Lop tutorial-Challenge #libxml2" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="Share on Evernote" data-sharer="evernote" data-url="http://xidoo.top/2021/11/fuzzing2/" data-title="American Fuzzy Lop tutorial-Challenge #libxml2"><i class="fab fa-evernote fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/2021/11/fuzzing1/" class="prev" rel="prev" title="American Fuzzy Lop tutorial-basic"><i class="fas fa-angle-left fa-fw"></i>American Fuzzy Lop tutorial-basic</a>
+            <a href="/2021/11/mcbot2/" class="next" rel="next" title="如何为 Minecraft 服务器添加一名播报员（二）">如何为 Minecraft 服务器添加一名播报员（二）<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">🏴‍☠️ Love it, Make magic</div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2019 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">x1do0</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript" src="/lib/smooth-scroll/smooth-scroll.min.js"></script><script type="text/javascript" src="/lib/autocomplete/autocomplete.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.min.js"></script><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/sharer/sharer.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js"></script><script type="text/javascript" src="/lib/katex/auto-render.min.js"></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js"></script><script type="text/javascript" src="/lib/katex/mhchem.min.js"></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":15},"comment":{},"cookieconsent":{"content":{"dismiss":"Got it!","link":"Learn more","message":"This website uses Cookies to improve your experience."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

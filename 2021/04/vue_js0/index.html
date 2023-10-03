@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>Vue.js 初探 - Stay Hungry</title><meta name="Description" content="This is My New Hugo Site"><meta property="og:title" content="Vue.js 初探" />
+<meta property="og:description" content="最近写应用程序感觉 python,java 的 gui 太丑了，咨询了一波web爷爷。在一星期内从零开始入门了前后端分离的开发框架，并成功赶在实验截止日期前套用，治好了我的强迫症. 在这个过程中不成体系且稀碎地顺手记录了一下，权当纪念这段爆肝的日子。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://xidoo.top/2021/04/vue_js0/" /><meta property="og:image" content="http://xidoo.top/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-04-20T20:00:51+08:00" />
+<meta property="article:modified_time" content="2021-04-20T20:00:51+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://xidoo.top/logo.png"/>
+
+<meta name="twitter:title" content="Vue.js 初探"/>
+<meta name="twitter:description" content="最近写应用程序感觉 python,java 的 gui 太丑了，咨询了一波web爷爷。在一星期内从零开始入门了前后端分离的开发框架，并成功赶在实验截止日期前套用，治好了我的强迫症. 在这个过程中不成体系且稀碎地顺手记录了一下，权当纪念这段爆肝的日子。"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://xidoo.top/2021/04/vue_js0/" /><link rel="prev" href="http://xidoo.top/2021/02/diary0/" /><link rel="next" href="http://xidoo.top/2021/07/cve-2009-1759/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Vue.js 初探",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/xidoo.top\/2021\/04\/vue_js0\/"
+        },"genre": "posts","wordcount":  201 ,
+        "url": "http:\/\/xidoo.top\/2021\/04\/vue_js0\/","datePublished": "2021-04-20T20:00:51+08:00","dateModified": "2021-04-20T20:00:51+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "x1do0"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('light' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'light' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/friends/"> Friends </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/friends/" title="">Friends</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">Vue.js 初探</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>x1do0</a></span>&nbsp;<span class="post-category">included in <a href="/categories/pause-and-ponder/"><i class="far fa-folder fa-fw"></i>Pause And Ponder</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2021-04-20">2021-04-20</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;201 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;One minute&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#html">HTML</a></li>
+    <li><a href="#css">CSS</a></li>
+    <li><a href="#javascript">JavaScript</a></li>
+    <li><a href="#vue3electron">Vue3+electron</a>
+      <ul>
+        <li><a href="#day1">Day1</a></li>
+        <li><a href="#day2">Day2</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>最近写应用程序感觉 python,java 的 gui 太丑了，咨询了一波web爷爷。在一星期内从零开始入门了前后端分离的开发框架，并成功赶在实验截止日期前套用，治好了我的强迫症. 在这个过程中不成体系且稀碎地顺手记录了一下，权当纪念这段爆肝的日子。</p>
+<p>技术栈如下，主要学习量为vue.js</p>
+<ul>
+<li>前端
+<ul>
+<li>vue.js</li>
+<li>element-ui</li>
+<li>electron</li>
+</ul>
+</li>
+<li>后端
+<ul>
+<li>python flask</li>
+</ul>
+</li>
+</ul>
+<p>学习路线 (html, css, js) -&gt; Vue.js</p>
+<ul>
+<li><i class="far fa-check-square fa-fw"></i> html 4.20</li>
+<li><i class="far fa-check-square fa-fw"></i> css 4.21</li>
+<li><i class="far fa-check-square fa-fw"></i> Javascript 4.22-4.23</li>
+<li><i class="far fa-check-square fa-fw"></i> vue、electron  4.24-4.25</li>
+</ul>
+<p>整体来说对vue.js与electron还是一知半解，但也顺利地摸出了前端</p>
+<h2 id="html">HTML</h2>
+<p>HyperText Markup Language</p>
+<p><a href="https://www.runoob.com/html/html-tutorial.html" target="_blank" rel="noopener noreffer">https://www.runoob.com/html/html-tutorial.html</a></p>
+<ul>
+<li>HTML 不是一种编程语言，而是一种<strong>标记</strong>语言</li>
+<li>标记语言是一套<strong>标记标签</strong> (markup tag)</li>
+<li>Web浏览器用于读取HTML文件，不直接显示HTML标签，而是使用标签展示HTML页面内容</li>
+<li>vscode 安装open in browser插件，alt+b即可用默认游览器打开</li>
+</ul>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/04/20/UrNBaSPwpfqylY6.png"
+        data-srcset="https://i.loli.net/2021/04/20/UrNBaSPwpfqylY6.png, https://i.loli.net/2021/04/20/UrNBaSPwpfqylY6.png 1.5x, https://i.loli.net/2021/04/20/UrNBaSPwpfqylY6.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/04/20/UrNBaSPwpfqylY6.png"
+        title="https://i.loli.net/2021/04/20/UrNBaSPwpfqylY6.png" /></p>
+<p><strong>tips</strong></p>
+<ul>
+<li>属性值本身就含有双引号，那么您必须使用单引号，例如：name=&lsquo;John &ldquo;ShotGun&rdquo; Nelson&rsquo;</li>
+<li>当显示页面时，浏览器会移除源代码中多余的空格和空行。所有连续的空格或空行都会被算作一个空格。</li>
+<li>清华镜像站 bakground:#22222  白:white  蓝:#6793cf</li>
+<li>用&amp;#x表示特定字符，x为其ascii码</li>
+</ul>
+<h2 id="css">CSS</h2>
+<p>Cascading Style Sheets</p>
+<p><a href="https://www.runoob.com/css/css-intro.html" target="_blank" rel="noopener noreffer">https://www.runoob.com/css/css-intro.html</a></p>
+<p><strong>tips</strong></p>
+<ul>
+<li>（内联样式）Inline style &gt; （内部样式）Internal style sheet &gt;（外部样式）External style sheet &gt; 浏览器默认样式</li>
+<li>1em和当前字体大小相等，=16px</li>
+<li>盒子模型</li>
+</ul>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/04/22/UlkDeM4mvIG9Wdi.png"
+        data-srcset="https://i.loli.net/2021/04/22/UlkDeM4mvIG9Wdi.png, https://i.loli.net/2021/04/22/UlkDeM4mvIG9Wdi.png 1.5x, https://i.loli.net/2021/04/22/UlkDeM4mvIG9Wdi.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/04/22/UlkDeM4mvIG9Wdi.png"
+        title="https://i.loli.net/2021/04/22/UlkDeM4mvIG9Wdi.png" /></p>
+<h2 id="javascript">JavaScript</h2>
+<p><a href="https://www.runoob.com/js/js-statements.html" target="_blank" rel="noopener noreffer">https://www.runoob.com/js/js-statements.html</a></p>
+<p><strong>tips</strong></p>
+<ul>
+<li>
+<p>脚本语言，逐行执行，而不是先整体编译</p>
+</li>
+<li>
+<p>注释、一行后面有；、function格式</p>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-html" data-lang="html"><span class="p">&lt;</span><span class="nt">script</span><span class="p">&gt;</span>
+<span class="kd">function</span> <span class="nx">myfuc</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span>
+<span class="p">{</span>
+	<span class="c1">// document.getElementById(&#34;demo&#34;);
+</span><span class="c1"></span>    <span class="nx">alert</span><span class="p">(</span><span class="nx">a</span> <span class="o">+</span> <span class="nx">b</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="p">&lt;/</span><span class="nt">script</span><span class="p">&gt;</span>
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>document.write()直接写到html上。如果网页已经加载完了再触发该函数（比如onclick），将覆盖整个html</li>
+<li>大小写敏感，驼峰法的命名规则（eg. myFirstName）</li>
+<li>重新声明值不会丢</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-javascript" data-lang="javascript"><span class="kd">var</span> <span class="nx">carname</span><span class="o">=</span><span class="s2">&#34;Volvo&#34;</span><span class="p">;</span>
+<span class="kd">var</span> <span class="nx">carname</span><span class="p">;</span>  <span class="c1">// 仍然是&#34;Volvo&#34;
+</span></code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>
+<p>具有动态数据类型，</p>
+<ul>
+<li><strong>值类型(基本类型)</strong>：字符串（String）、数字(Number)、布尔(Boolean)、对空（Null）、未定义（Undefined）、Symbol。</li>
+<li><strong>引用数据类型</strong>：对象(Object)、数组(Array)、函数(Function)。</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-javascript" data-lang="javascript">    <span class="kd">var</span> <span class="nx">x</span><span class="p">;</span>               <span class="c1">// x 为 undefined
+</span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>           <span class="c1">// 现在 x 为数字
+</span><span class="c1"></span>    <span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="s2">&#34;John&#34;</span><span class="p">;</span>      <span class="c1">// 现在 x 为字符串
+</span></code></pre></td></tr></table>
+</div>
+</div><h2 id="vue3electron">Vue3+electron</h2>
+<p>开始摸实验了&hellip;</p>
+<ul>
+<li>python flask开后端服务器</li>
+<li>element ui组件库写前端组件</li>
+<li>electron打包</li>
+</ul>
+<h3 id="day1">Day1</h3>
+<ul>
+<li><i class="far fa-check-square fa-fw"></i> 前端
+<ul>
+<li><i class="far fa-check-square fa-fw"></i> vue启动</li>
+<li><i class="far fa-check-square fa-fw"></i> 注册、登录组件</li>
+<li><i class="far fa-check-square fa-fw"></i> 注册、登录初级校验</li>
+<li><i class="far fa-check-square fa-fw"></i> 传递参数给后端</li>
+<li><i class="far fa-check-square fa-fw"></i> 后端返回参数</li>
+</ul>
+</li>
+<li><i class="far fa-check-square fa-fw"></i> 后端
+<ul>
+<li><i class="far fa-check-square fa-fw"></i> flask启动</li>
+<li><i class="far fa-check-square fa-fw"></i> 从前端接收参数</li>
+<li><i class="far fa-check-square fa-fw"></i> 传输参数给后端</li>
+<li><i class="far fa-check-square fa-fw"></i> 注册、登录数据库校验</li>
+</ul>
+</li>
+</ul>
+<p>axios POST到python后端成功</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/04/24/iguJQBm9VP4qnAE.png"
+        data-srcset="https://i.loli.net/2021/04/24/iguJQBm9VP4qnAE.png, https://i.loli.net/2021/04/24/iguJQBm9VP4qnAE.png 1.5x, https://i.loli.net/2021/04/24/iguJQBm9VP4qnAE.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/04/24/iguJQBm9VP4qnAE.png"
+        title="https://i.loli.net/2021/04/24/iguJQBm9VP4qnAE.png" /></p>
+<h3 id="day2">Day2</h3>
+<ul>
+<li><i class="far fa-check-square fa-fw"></i> 前端</li>
+<li><i class="far fa-check-square fa-fw"></i> 后端</li>
+<li><i class="far fa-check-square fa-fw"></i> 打包</li>
+</ul>
+<p>把electron-quick-start git下来，进去修改main.js，直接把electron当作浏览器，先把vue跑起来，然后直接读这个端口。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-javascript" data-lang="javascript">  <span class="c1">// and load the index.html of the app.
+</span><span class="c1"></span>  <span class="nx">mainWindow</span><span class="p">.</span><span class="nx">loadURL</span><span class="p">(</span><span class="s1">&#39;http://127.0.0.1:8081&#39;</span><span class="p">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>如下命令跑起来</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">npm install
+npm start
+</code></pre></td></tr></table>
+</div>
+</div><p>用electron读取网页变为应用程序</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/04/25/HIjxFbqUPzLWAgf.png"
+        data-srcset="https://i.loli.net/2021/04/25/HIjxFbqUPzLWAgf.png, https://i.loli.net/2021/04/25/HIjxFbqUPzLWAgf.png 1.5x, https://i.loli.net/2021/04/25/HIjxFbqUPzLWAgf.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/04/25/HIjxFbqUPzLWAgf.png"
+        title="https://i.loli.net/2021/04/25/HIjxFbqUPzLWAgf.png" /></p>
+<p>下面我们把它彻底包成exe</p>
+<p>安装electron-packager</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">npm install -g electron-packager
+</code></pre></td></tr></table>
+</div>
+</div><p>进入electron-quick-start目录</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">electron.packager .
+</code></pre></td></tr></table>
+</div>
+</div><p>得到了彻底前后端分离的高端产物</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/04/25/At3jk6LpdsHeIUJ.png"
+        data-srcset="https://i.loli.net/2021/04/25/At3jk6LpdsHeIUJ.png, https://i.loli.net/2021/04/25/At3jk6LpdsHeIUJ.png 1.5x, https://i.loli.net/2021/04/25/At3jk6LpdsHeIUJ.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/04/25/At3jk6LpdsHeIUJ.png"
+        title="https://i.loli.net/2021/04/25/At3jk6LpdsHeIUJ.png" /></p>
+<p>至此，便完成了一整套开发流程。</p>
+<p>更多见 <a href="https://github.com/xidoo123/cp-lab5" target="_blank" rel="noopener noreffer">https://github.com/xidoo123/cp-lab5</a></p></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2021-04-20</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/2021/04/vue_js0/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://xidoo.top/2021/04/vue_js0/" data-title="Vue.js 初探"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://xidoo.top/2021/04/vue_js0/"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on WhatsApp" data-sharer="whatsapp" data-url="http://xidoo.top/2021/04/vue_js0/" data-title="Vue.js 初探" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://xidoo.top/2021/04/vue_js0/" data-title="Vue.js 初探"><i data-svg-src="/lib/simple-icons/icons/line.min.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://xidoo.top/2021/04/vue_js0/" data-title="Vue.js 初探"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="Share on Myspace" data-sharer="myspace" data-url="http://xidoo.top/2021/04/vue_js0/" data-title="Vue.js 初探" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="Share on Blogger" data-sharer="blogger" data-url="http://xidoo.top/2021/04/vue_js0/" data-title="Vue.js 初探" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="Share on Evernote" data-sharer="evernote" data-url="http://xidoo.top/2021/04/vue_js0/" data-title="Vue.js 初探"><i class="fab fa-evernote fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/2021/02/diary0/" class="prev" rel="prev" title="Wh1t3zZ 封禁3周年祭"><i class="fas fa-angle-left fa-fw"></i>Wh1t3zZ 封禁3周年祭</a>
+            <a href="/2021/07/cve-2009-1759/" class="next" rel="next" title="CVE-2009-1759 BT文件解析器栈溢出漏洞解析">CVE-2009-1759 BT文件解析器栈溢出漏洞解析<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">🏴‍☠️ Love it, Make magic</div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2019 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">x1do0</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript" src="/lib/smooth-scroll/smooth-scroll.min.js"></script><script type="text/javascript" src="/lib/autocomplete/autocomplete.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.min.js"></script><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/sharer/sharer.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js"></script><script type="text/javascript" src="/lib/katex/auto-render.min.js"></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js"></script><script type="text/javascript" src="/lib/katex/mhchem.min.js"></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":15},"comment":{},"cookieconsent":{"content":{"dismiss":"Got it!","link":"Learn more","message":"This website uses Cookies to improve your experience."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

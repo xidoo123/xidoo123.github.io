@@ -1,0 +1,93 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>All Posts - Stay Hungry</title>
+        <link>http://xidoo.top/posts/</link>
+        <description>All Posts | Stay Hungry</description>
+        <generator>Hugo -- gohugo.io</generator><language>en</language><lastBuildDate>Wed, 27 Sep 2023 20:25:19 &#43;0200</lastBuildDate><atom:link href="http://xidoo.top/posts/" rel="self" type="application/rss+xml" /><item>
+    <title>Contiki Re-hosting 小记</title>
+    <link>http://xidoo.top/2023/09/re-host/</link>
+    <pubDate>Wed, 27 Sep 2023 20:25:19 &#43;0200</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2023/09/re-host/</guid>
+    <description><![CDATA[<p>本文记录如何用 Unicorn 模拟执行操作系统 Contiki-NG，并在上面复现并利用 CVE-2023-23609 的故事。</p>]]></description>
+</item><item>
+    <title>逆向方法论</title>
+    <link>http://xidoo.top/2023/05/rev_main/</link>
+    <pubDate>Thu, 04 May 2023 16:04:33 &#43;0200</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2023/05/rev_main/</guid>
+    <description><![CDATA[<p>年初 SECCON CTF 22 final 上第二天出了一道 KoH 题：给定 binary 要求写出源码，判定标准为编译后与目标 binary 的 diff，越小则分数越高。每一小时更换一门语言，从 c,c++ 到 d, go, web assembly 等等。我读完题目就放弃了因为我知道我的逆向水平就是依托答辩，而队友也不负众望基本一整天都在爆杀全场。我在崇拜之余不由得思考起一个问题，逆向应该怎么学？</p>]]></description>
+</item><item>
+    <title>ACTF2022 kkk 赛后复现</title>
+    <link>http://xidoo.top/2022/07/actf2022-kkk/</link>
+    <pubDate>Sun, 17 Jul 2022 12:03:19 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2022/07/actf2022-kkk/</guid>
+    <description><![CDATA[<div class="details admonition info open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-info-circle fa-fw"></i>Info<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content">Yet another signin (kernel) pwn challenge. <strong>4 Solved</strong></div>
+        </div>
+    </div>
+<p>感谢 Nu1L 和 AAA 的几位师傅分享思路。</p>]]></description>
+</item><item>
+    <title>AFL 源码分析（完）变异详解</title>
+    <link>http://xidoo.top/2022/01/afl-rsc4/</link>
+    <pubDate>Fri, 28 Jan 2022 19:14:31 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2022/01/afl-rsc4/</guid>
+    <description><![CDATA[<p>本文将细致阐述 AFL 变异方式，包括各阶段的变异算子与次数等细节。变异模式是固定的，所以变异细节看上去繁琐又无趣。但正如白皮书中提到，“它被认为是一个被实践证实有效的 hack 行为集合，把这些行为以最简单、最健壮的形式实现便得到了 AFL”，经验主义的产物是不可小觑的。</p>]]></description>
+</item><item>
+    <title>AFL 源码分析（三）forkserver 详解</title>
+    <link>http://xidoo.top/2022/01/afl-rsc3/</link>
+    <pubDate>Wed, 26 Jan 2022 14:00:14 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2022/01/afl-rsc3/</guid>
+    <description><![CDATA[<p>AFL 源源不断地将变异得到的测试用例喂给待测试程序，这个过程中少不了 fork 与 execve. 为提高效率、减少开销，它实现了一套 forkserver 机制来反复运行并测试程序。</p>]]></description>
+</item><item>
+    <title>AFL 源码分析（二）路径覆盖信息 &amp; 队列优胜者</title>
+    <link>http://xidoo.top/2022/01/afl-rsc2/</link>
+    <pubDate>Sun, 23 Jan 2022 11:01:02 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2022/01/afl-rsc2/</guid>
+    <description><![CDATA[<p>紧接上一部分，本文将更进一步探讨 AFL 如何在运行时保存和分析路径覆盖信息，以及队列优胜者的选取思路。前者为启发式变异提供导向，后者为 <a href="https://xidoo.top/2022/01/afl-white-book/#4-%E8%AF%AD%E6%96%99%E5%BA%93%E7%B2%BE%E7%AE%80-culling-the-corpus" target="_blank" rel="noopener noreffer">culling the corpus</a> 的基础。</p>]]></description>
+</item><item>
+    <title>AFL 源码分析（一）从 0 到 1 再到 n</title>
+    <link>http://xidoo.top/2022/01/afl-rsc/</link>
+    <pubDate>Sun, 09 Jan 2022 21:05:21 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2022/01/afl-rsc/</guid>
+    <description><![CDATA[<p><a href="https://github.com/google/AFL/blob/master/afl-fuzz.c" target="_blank" rel="noopener noreffer">afl-fuzz.c</a> 概览，后续重点将放在 forkserver 和启发式变异细节上。</p>]]></description>
+</item><item>
+    <title>AFL 白皮书翻译与读书笔记</title>
+    <link>http://xidoo.top/2022/01/afl-white-book/</link>
+    <pubDate>Sat, 01 Jan 2022 21:39:39 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2022/01/afl-white-book/</guid>
+    <description><![CDATA[<p>原文地址 <a href="https://lcamtuf.coredump.cx/afl/technical_details.txt" target="_blank" rel="noopener noreffer">https://lcamtuf.coredump.cx/afl/technical_details.txt</a></p>]]></description>
+</item><item>
+    <title>如何为 Minecraft 服务器添加一名播报员（完）</title>
+    <link>http://xidoo.top/2021/12/mcbot3/</link>
+    <pubDate>Fri, 10 Dec 2021 15:40:43 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2021/12/mcbot3/</guid>
+    <description><![CDATA[<p>QQ Minecraft 协同机器人，完</p>
+<div class="details admonition danger open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-skull-crossbones fa-fw"></i>Danger<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content">log4j2 的洞可以在启动服务器时添加 -Dlog4j2.formatMsgNoLookups=true 选项来缓解。</div>
+        </div>
+    </div>]]></description>
+</item><item>
+    <title>如何为 Minecraft 服务器添加一名播报员（二）</title>
+    <link>http://xidoo.top/2021/11/mcbot2/</link>
+    <pubDate>Sun, 21 Nov 2021 13:56:15 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2021/11/mcbot2/</guid>
+    <description><![CDATA[<p>这几天思索了一下需求，在脑中构思出了重定向IO的具体解决办法。这里采用python的subprocess模块起两个个进程跑这两个后端，通过Linux管道机制来实现两个后端的交互。（每次在外面恰饭都是大鱼大肉，，我想吃青菜啊😭😭）</p>]]></description>
+</item></channel>
+</rss>

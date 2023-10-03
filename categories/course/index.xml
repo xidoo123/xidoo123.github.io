@@ -1,0 +1,33 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>Course - Category - Stay Hungry</title>
+        <link>http://xidoo.top/categories/course/</link>
+        <description>Course - Category - Stay Hungry</description>
+        <generator>Hugo -- gohugo.io</generator><language>en</language><lastBuildDate>Sun, 14 Nov 2021 11:38:18 &#43;0800</lastBuildDate><atom:link href="http://xidoo.top/categories/course/" rel="self" type="application/rss+xml" /><item>
+    <title>American Fuzzy Lop tutorial-Challenge #libxml2</title>
+    <link>http://xidoo.top/2021/11/fuzzing2/</link>
+    <pubDate>Sun, 14 Nov 2021 11:38:18 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2021/11/fuzzing2/</guid>
+    <description><![CDATA[<p>This is a white-box fuzzing libxml2 v2.9.2 challenge[1] to reproduce CVE-2015-8317[2]</p>
+<p>Congrats to QuiHao by the way, a brand new qemu 0day Orzzzz!!!</p>]]></description>
+</item><item>
+    <title>American Fuzzy Lop tutorial-basic</title>
+    <link>http://xidoo.top/2021/11/fuzzing1/</link>
+    <pubDate>Sat, 13 Nov 2021 10:37:42 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2021/11/fuzzing1/</guid>
+    <description><![CDATA[<p>After all these frustrations due to the virus, I finally get back on the right track. American fuzzy lop (AFL) is a security-oriented fuzzer that employs a novel type of compile-time instrumentation and genetic algorithms to automatically discover clean, interesting test cases that trigger new internal states in the targeted binary.</p>]]></description>
+</item><item>
+    <title>软件构造（JAVA版）</title>
+    <link>http://xidoo.top/2020/06/software-engineering/</link>
+    <pubDate>Mon, 08 Jun 2020 10:25:04 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2020/06/software-engineering/</guid>
+    <description><![CDATA[<p>HIT cources review, derivate from CMU and MIT <em>6.005</em>.</p>
+<p>(1) concepts of design for complex systems</p>
+<p>(2) object oriented programming</p>
+<p>(3) techniques for robustness, including testing and static and dynamic analysis for programs</p>
+<p>(4) concurrent software</p>]]></description>
+</item></channel>
+</rss>

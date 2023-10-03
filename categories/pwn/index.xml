@@ -1,0 +1,98 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>PWN - Category - Stay Hungry</title>
+        <link>http://xidoo.top/categories/pwn/</link>
+        <description>PWN - Category - Stay Hungry</description>
+        <generator>Hugo -- gohugo.io</generator><language>en</language><lastBuildDate>Sun, 17 Jul 2022 12:03:19 &#43;0800</lastBuildDate><atom:link href="http://xidoo.top/categories/pwn/" rel="self" type="application/rss+xml" /><item>
+    <title>ACTF2022 kkk 赛后复现</title>
+    <link>http://xidoo.top/2022/07/actf2022-kkk/</link>
+    <pubDate>Sun, 17 Jul 2022 12:03:19 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2022/07/actf2022-kkk/</guid>
+    <description><![CDATA[<div class="details admonition info open">
+        <div class="details-summary admonition-title">
+            <i class="icon fas fa-info-circle fa-fw"></i>Info<i class="details-icon fas fa-angle-right fa-fw"></i>
+        </div>
+        <div class="details-content">
+            <div class="admonition-content">Yet another signin (kernel) pwn challenge. <strong>4 Solved</strong></div>
+        </div>
+    </div>
+<p>感谢 Nu1L 和 AAA 的几位师傅分享思路。</p>]]></description>
+</item><item>
+    <title>招新赛 2021 出题总结(个人向)</title>
+    <link>http://xidoo.top/2021/09/lilac_ctf/</link>
+    <pubDate>Wed, 22 Sep 2021 13:46:01 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2021/09/lilac_ctf/</guid>
+    <description><![CDATA[<p>前段时间还在惊讶福建为什么突然爆发疫情，转眼间哈尔滨也烂掉了。兰州聚会寄了，广州两周游也寄了，雅思寄了，GRE也寄了，只能在哈尔滨苦逼地记录一下<a href="https://writeup.tryout.hitctf.cn/" target="_blank" rel="noopener noreffer">招新赛2021</a>出题概况与环境部署细节，看来出国壬需要具备较强的心理容错能力。</p>]]></description>
+</item><item>
+    <title>Hxp2020</title>
+    <link>http://xidoo.top/2021/08/hxp2020/</link>
+    <pubDate>Mon, 23 Aug 2021 21:44:40 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2021/08/hxp2020/</guid>
+    <description><![CDATA[<p>Congratulations to Kaztebin, ranked 1 in DEFCON CTF29 again.</p>
+<p>It reminds me of my first ctf competition with Katzebin: hxp2020 [1]. There are some excellent challenges in this game which I missed out at that time, including some linux kernel exploitations. Recently I started to learn kernel pwn, and I think it&rsquo;s time to solve these left challenges.</p>]]></description>
+</item><item>
+    <title>BSides Noida CTF 2021</title>
+    <link>http://xidoo.top/2021/08/bsides-noida-ctf-2021/</link>
+    <pubDate>Wed, 18 Aug 2021 16:19:15 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2021/08/bsides-noida-ctf-2021/</guid>
+    <description><![CDATA[<p>周末和学弟学妹一起打的一场比赛，比较基础，但涉及的知识面较广，有必要整理查漏补缺
+url: <a href="https://ctftime.org/event/1397" target="_blank" rel="noopener noreffer">https://ctftime.org/event/1397</a>  rank 8 with lilac</p>]]></description>
+</item><item>
+    <title>强网杯总决赛 2021</title>
+    <link>http://xidoo.top/2021/07/qwb2021/</link>
+    <pubDate>Thu, 15 Jul 2021 17:08:17 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2021/07/qwb2021/</guid>
+    <description><![CDATA[<p>国内最受瞩目的比赛之一，拥有几乎最高的PWN/realworld赛题质量。</p>
+<p>比赛时看了几道cold down, EXSI找到了洞但是不好复现&hellip;</p>]]></description>
+</item><item>
+    <title>CVE-2009-1759 BT文件解析器栈溢出漏洞解析</title>
+    <link>http://xidoo.top/2021/07/cve-2009-1759/</link>
+    <pubDate>Mon, 12 Jul 2021 19:19:54 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2021/07/cve-2009-1759/</guid>
+    <description><![CDATA[<h2 id="overall">Overall</h2>
+<p>.torrent文件是BT种子文件格式，CTorrent是该文件格式的解析器。由于解析器解析过程中某个解析函数缺少长度检测，在解析由用户可控大小的Path时会将用户输入memcpy到栈上定长buffer，可造成栈溢出，ROP提权。</p>
+<p>复现契机来自于强网先锋[强网杯2021final]</p>]]></description>
+</item><item>
+    <title>ARM PWN 调试环境搭建</title>
+    <link>http://xidoo.top/2021/01/armpwn/</link>
+    <pubDate>Sat, 23 Jan 2021 21:22:33 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2021/01/armpwn/</guid>
+    <description><![CDATA[<p>qemu是GNU/linux上十分常用的模拟处理器，可以在ubuntu下跑arm\mips甚至riscv等几乎所有架构的可执行文件，一台机器上可以虚拟化为多种架构的机器。</p>]]></description>
+</item><item>
+    <title>*CTF 2021</title>
+    <link>http://xidoo.top/2021/01/starctf2021/</link>
+    <pubDate>Sat, 23 Jan 2021 21:11:44 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2021/01/starctf2021/</guid>
+    <description><![CDATA[<p>赛前科恩那边说二进制的题应该没什么难度，我知道我很弱了不要再说了&hellip;放假比较闲那就慢慢复现学习一下吧</p>
+<ul>
+<li>babyheap：tcache_struct, double free, 新libc</li>
+<li>babypac：ARMv8.3, pac, ROP</li>
+<li>fav arch1：RISC-V64 ROP</li>
+<li>fav arch2：qemu sandbox bypass, RISC-V ROP</li>
+<li>babygame： C++析构函数, double free</li>
+<li>babyxv6：RISC-V, kernel, 自定义漏洞syscall</li>
+</ul>]]></description>
+</item><item>
+    <title>RISC-V PWN 调试环境搭建</title>
+    <link>http://xidoo.top/2021/01/riscv-pwn/</link>
+    <pubDate>Fri, 22 Jan 2021 11:38:19 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2021/01/riscv-pwn/</guid>
+    <description><![CDATA[<p>2019年美国国家安全局(NSA)免费向公众开放其逆向工程框架，集成出工具ghidra并在当年3月登陆github。最近碰到一题risc-v架构（*ctf2021 favourite architecture），需要用ghidra反编译辅助分析，以其为例记录动态与静态调试环境搭建。</p>]]></description>
+</item><item>
+    <title>Ubuntu16.04 docker环境搭建</title>
+    <link>http://xidoo.top/2020/06/pwn-docker/</link>
+    <pubDate>Sun, 28 Jun 2020 10:51:32 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2020/06/pwn-docker/</guid>
+    <description><![CDATA[<p>为获取2.27libc下pwn环境，虚拟机过于麻烦，遂启用docker。</p>]]></description>
+</item></channel>
+</rss>

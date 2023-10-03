@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>AFL 源码分析（一）从 0 到 1 再到 n - Stay Hungry</title><meta name="Description" content="This is My New Hugo Site"><meta property="og:title" content="AFL 源码分析（一）从 0 到 1 再到 n" />
+<meta property="og:description" content="afl-fuzz.c 概览，后续重点将放在 forkserver 和启发式变异细节上。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://xidoo.top/2022/01/afl-rsc/" /><meta property="og:image" content="http://xidoo.top/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-01-09T21:05:21+08:00" />
+<meta property="article:modified_time" content="2022-01-09T21:05:21+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://xidoo.top/logo.png"/>
+
+<meta name="twitter:title" content="AFL 源码分析（一）从 0 到 1 再到 n"/>
+<meta name="twitter:description" content="afl-fuzz.c 概览，后续重点将放在 forkserver 和启发式变异细节上。"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://xidoo.top/2022/01/afl-rsc/" /><link rel="prev" href="http://xidoo.top/2022/01/afl-white-book/" /><link rel="next" href="http://xidoo.top/2022/01/afl-rsc2/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "AFL 源码分析（一）从 0 到 1 再到 n",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/xidoo.top\/2022\/01\/afl-rsc\/"
+        },"genre": "posts","wordcount":  863 ,
+        "url": "http:\/\/xidoo.top\/2022\/01\/afl-rsc\/","datePublished": "2022-01-09T21:05:21+08:00","dateModified": "2022-01-09T21:05:21+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "x1do0"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('light' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'light' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/friends/"> Friends </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/friends/" title="">Friends</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">AFL 源码分析（一）从 0 到 1 再到 n</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>x1do0</a></span>&nbsp;<span class="post-category">included in <a href="/categories/general/"><i class="far fa-folder fa-fw"></i>General</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-01-09">2022-01-09</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;863 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;5 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#main-函数鸟瞰">Main 函数鸟瞰</a>
+      <ul>
+        <li><a href="#get-option">Get Option</a></li>
+        <li><a href="#check-configuration">Check Configuration</a></li>
+        <li><a href="#dry-run">Dry Run</a></li>
+        <li><a href="#main-loop">Main Loop</a></li>
+        <li><a href="#exit">Exit</a></li>
+      </ul>
+    </li>
+    <li><a href="#第-1-次执行">第 1 次执行</a>
+      <ul>
+        <li><a href="#perform_dry_run">perform_dry_run()</a></li>
+        <li><a href="#calibrate_case">calibrate_case()</a></li>
+      </ul>
+    </li>
+    <li><a href="#第-n-次执行">第 n 次执行</a>
+      <ul>
+        <li><a href="#fuzz_one">fuzz_one()</a></li>
+        <li><a href="#common_fuzz_stuff">common_fuzz_stuff()</a></li>
+        <li><a href="#trim_case">trim_case()</a></li>
+        <li><a href="#calculate_score">calculate_score()</a></li>
+        <li><a href="#save_if_interesting">save_if_interesting()</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p><a href="https://github.com/google/AFL/blob/master/afl-fuzz.c" target="_blank" rel="noopener noreffer">afl-fuzz.c</a> 概览，后续重点将放在 forkserver 和启发式变异细节上。</p>
+<h2 id="main-函数鸟瞰">Main 函数鸟瞰</h2>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://s2.loli.net/2022/01/13/JZqVIGjstCUumYp.png"
+        data-srcset="https://s2.loli.net/2022/01/13/JZqVIGjstCUumYp.png, https://s2.loli.net/2022/01/13/JZqVIGjstCUumYp.png 1.5x, https://s2.loli.net/2022/01/13/JZqVIGjstCUumYp.png 2x"
+        data-sizes="auto"
+        alt="https://s2.loli.net/2022/01/13/JZqVIGjstCUumYp.png"
+        title="https://s2.loli.net/2022/01/13/JZqVIGjstCUumYp.png" /></p>
+<h3 id="get-option">Get Option</h3>
+<p><strong>在这一部分，AFL 会读取用户指定的参数</strong></p>
+<pre><code>   &quot;Required parameters:\n\n&quot;
+
+   &quot;  -i dir        - input directory with test cases\n&quot;
+   &quot;  -o dir        - output directory for fuzzer findings\n\n&quot;
+
+   &quot;Execution control settings:\n\n&quot;
+
+   &quot;  -f file       - location read by the fuzzed program (stdin)\n&quot;
+   &quot;  -t msec       - timeout for each run (auto-scaled, 50-%u ms)\n&quot;
+   &quot;  -m megs       - memory limit for child process (%u MB)\n&quot;
+   &quot;  -Q            - use binary-only instrumentation (QEMU mode)\n\n&quot;     
+ 
+   &quot;Fuzzing behavior settings:\n\n&quot;
+
+   &quot;  -d            - quick &amp; dirty mode (skips deterministic steps)\n&quot;
+   &quot;  -n            - fuzz without instrumentation (dumb mode)\n&quot;
+   &quot;  -x dir        - optional fuzzer dictionary (see README)\n\n&quot;
+
+   &quot;Other stuff:\n\n&quot;
+
+   &quot;  -T text       - text banner to show on the screen\n&quot;
+   &quot;  -M / -S id    - distributed mode (see parallel_fuzzing.txt)\n&quot;
+   &quot;  -C            - crash exploration mode (the peruvian rabbit thing)\n&quot;
+   &quot;  -V            - show version number and exit\n\n&quot;
+   &quot;  -b cpu_id     - bind the fuzzing process to the specified CPU core\n\n&quot;
+</code></pre>
+<p>文档中给出的输入参数如上，查阅源码会得到如下更详细的信息</p>
+<ol>
+<li>
+<p>-i, -o 指定输入、输出文件夹，改变 <code>in_dir</code>,  <code>out_dir</code></p>
+</li>
+<li>
+<p>-M, -S 并行设置，改变 <code>sync_id</code></p>
+</li>
+<li>
+<p>-f 指定临时输出文件（并行时不同 fuzzer 不能指定为同一个）改变 <code>out_file</code></p>
+</li>
+<li>
+<p>-x 用户指定额外的字典，读给 <code>extras_dir</code></p>
+</li>
+<li>
+<p>-t 指定超时时间， <code>%u%c</code> 读给 <code>exec_tmout</code> 与 <code>suffix</code>，改变 <code>timeout_given</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="n">u8</span> <span class="n">suffix</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">timeout_given</span><span class="p">)</span> <span class="n">FATAL</span><span class="p">(</span><span class="s">&#34;Multiple -t options not supported&#34;</span><span class="p">);</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">sscanf</span><span class="p">(</span><span class="n">optarg</span><span class="p">,</span> <span class="s">&#34;%u%c&#34;</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">exec_tmout</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">suffix</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="o">||</span>
+<span class="n">optarg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="sc">&#39;-&#39;</span><span class="p">)</span> <span class="n">FATAL</span><span class="p">(</span><span class="s">&#34;Bad syntax used for -t&#34;</span><span class="p">);</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">exec_tmout</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">)</span> <span class="n">FATAL</span><span class="p">(</span><span class="s">&#34;Dangerously low value of -t&#34;</span><span class="p">);</span>
+
+<span class="k">if</span> <span class="p">(</span><span class="n">suffix</span> <span class="o">==</span> <span class="sc">&#39;+&#39;</span><span class="p">)</span> <span class="n">timeout_given</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span> <span class="k">else</span> <span class="n">timeout_given</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>-m 指定内存限制，<code>%llu%c</code> 读给 <code>mem_limit</code> 与 <code>suffix</code>，改变 <code>mem_limit_given</code></p>
+<p>以 MB 为单位，不得低于 5 MB，不得大于 2000 MB（sizeof(rlim_t) == 4时）</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c">   <span class="k">switch</span> <span class="p">(</span><span class="n">suffix</span><span class="p">)</span> <span class="p">{</span>
+       <span class="k">case</span> <span class="sc">&#39;T&#39;</span><span class="o">:</span> <span class="n">mem_limit</span> <span class="o">*=</span> <span class="mi">1024</span> <span class="o">*</span> <span class="mi">1024</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+       <span class="k">case</span> <span class="sc">&#39;G&#39;</span><span class="o">:</span> <span class="n">mem_limit</span> <span class="o">*=</span> <span class="mi">1024</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+       <span class="k">case</span> <span class="sc">&#39;k&#39;</span><span class="o">:</span> <span class="n">mem_limit</span> <span class="o">/=</span> <span class="mi">1024</span><span class="p">;</span> <span class="k">break</span><span class="p">;</span>
+       <span class="k">case</span> <span class="sc">&#39;M&#39;</span><span class="o">:</span> <span class="k">break</span><span class="p">;</span>
+  <span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>-b 指定特定 CPU 核心，读给 <code>cpu_to_bind</code>，改变 <code>cpu_to_bind_given</code></p>
+</li>
+<li>
+<p>-B 指定 bitmap，读给 <code>in_bitmap</code></p>
+<blockquote>
+<p>“这是一个没有在文档中记录的选项，如果你在 fuzzing 过程中找到了一个有趣的测试用例，想将它变异又不想从头开始，可以用 -B 指示 fuzz_bitmap 为你这一轮得到的 bitmap，AFL 会在这个基础上去做 fuzz”</p>
+</blockquote>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="k">if</span> <span class="p">(</span><span class="n">in_bitmap</span><span class="p">)</span> <span class="n">FATAL</span><span class="p">(</span><span class="s">&#34;Multiple -B options not supported&#34;</span><span class="p">);</span>
+
+<span class="n">in_bitmap</span> <span class="o">=</span> <span class="n">optarg</span><span class="p">;</span>
+<span class="n">read_bitmap</span><span class="p">(</span><span class="n">in_bitmap</span><span class="p">);</span>
+</code></pre></td></tr></table>
+</div>
+</div></li>
+<li>
+<p>-C 开关选项，打开 crash mode（见白皮书 #9）</p>
+<pre><code> crash_mode = FAULT_CRASH;
+</code></pre>
+</li>
+<li>
+<p>-n 开关选项，打开 dumb mode（不插桩）</p>
+<pre><code>if (getenv(&quot;AFL_DUMB_FORKSRV&quot;)) dumb_mode = 2; else dumb_mode = 1;
+</code></pre>
+</li>
+<li>
+<p>-Q 开关选项，打开 qemu mode（黑盒插桩）</p>
+</li>
+<li>
+<p>-d 开关选项，可跳过确定性变异过程</p>
+<pre><code>skip_deterministic = 1;
+use_splicing = 1;
+</code></pre>
+</li>
+<li>
+<p>-T 指定横幅（貌似没什么用&hellip;），读给 <code>use_banner</code></p>
+</li>
+</ol>
+<h3 id="check-configuration">Check Configuration</h3>
+<p><strong>在这一部分，AFL 会如下依次检查当前配置是否存在冲突，并准备运行</strong></p>
+<ol>
+<li>
+<p>输入、输出文件夹必须指定</p>
+</li>
+<li>
+<p>setup_signal_handlers 设置信号处理函数</p>
+</li>
+<li>
+<p>check_asan_opts 检查 ASAN 设置是否正确</p>
+</li>
+<li>
+<p>如果开启并行，fix_up_sync 检查并行ID等</p>
+</li>
+<li>
+<p>输入、输出文件夹不能是相同</p>
+</li>
+<li>
+<p>dumb mode 与 crash mode 互斥</p>
+</li>
+<li>
+<p>dumb mode 与 qemu mode 互斥</p>
+</li>
+<li>
+<p>getenv 获取如下配置</p>
+<ul>
+<li>
+<p>AFL_NO_FORKSRV：与 AFL_DUMB_FORKSRV 冲突</p>
+</li>
+<li>
+<p>AFL_NO_CPU_RED</p>
+</li>
+<li>
+<p>AFL_NO_ARITH</p>
+</li>
+<li>
+<p>AFL_SHUFFLE_QUEUE</p>
+</li>
+<li>
+<p>AFL_FAST_CAL</p>
+</li>
+<li>
+<p>AFL_HANG_TMOUT</p>
+</li>
+<li>
+<p>用 AFL_PRELOAD 设置系统变量 LD_PRELOAD</p>
+</li>
+<li>
+<p>AFL_LD_PRELOAD 参数已被 AFL_PRELOAD 取代</p>
+</li>
+</ul>
+</li>
+<li>
+<p>save_cmdline 将命令行保存在<code>orig_cmdline</code></p>
+</li>
+<li>
+<p>fix_up_banner 修复<code>use_banner</code></p>
+</li>
+<li>
+<p>check_if_tty 查看是否在 tty 终端上运行的 AFL，改变<code>not_no_tty</code></p>
+</li>
+<li>
+<p>get_core_count, bind_to_free_cpu 查看、绑定空闲 CPU 核心</p>
+</li>
+<li>
+<p>check_crash_handling 查看崩溃处理的句柄，转存崩溃</p>
+</li>
+<li>
+<p>check_cpu_governor</p>
+</li>
+<li>
+<p>setup_post 加载 postprocessor（if available）</p>
+</li>
+<li>
+<p>setup_shm 设置共享内存，初始化<code>virgin_bits</code>, <code>virgin_tmout</code>, <code>virgin_crash</code>, <code>trace_bits</code></p>
+</li>
+<li>
+<p>init_count_class16</p>
+</li>
+<li>
+<p>setup_dirs_fds 初始化输出文件夹与描述符</p>
+</li>
+<li>
+<p>read_testcases 从输入文件夹读取种子，入队（后续包含较多 Linux 系统编程）</p>
+<ul>
+<li>用 scandir 与 <a href="https://baike.baidu.com/item/alphasort/3873759?fr=aladdin" target="_blank" rel="noopener noreffer">alphasort</a> 扫描文件夹</li>
+<li><code>shuffle_queue</code> 决定是否调用 shuffle_ptrs 去随机打乱输入顺序</li>
+<li>将未经过确定性变异的测试用例入队
+<ul>
+<li><a href="https://blog.csdn.net/fengbingchun/article/details/100342049" target="_blank" rel="noopener noreffer">access</a> 判断该队列元素（测试用例）名字是否于 <font color='grey'>&ldquo;in_dir/.state/deterministic_done/&rdquo; </font>文件夹中存在</li>
+<li>存在则认为该测试用例已经完成了确定性变异，不再送入队列重新处理</li>
+<li>不存在则调用 add_to_queue 送入队列</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>
+<p>load_auto 自动加载字典 token，从 <font color='grey'>&ldquo;in_dir/auto_extras/auto_%06u&rdquo; % cnt </font>位置处依次读取，调用 maybe_add_auto 按规则加入字典</p>
+</li>
+<li>
+<p>pivot_inputs 在输出文件夹中为测试用例创建硬链接，有如下命名规则</p>
+<ul>
+<li><code>SIMPLE_FILES</code> 有定义时， <font color='grey'>&ldquo;in_dir/queue/id:%06u&rdquo; % id</font></li>
+<li><code>SIMPLE_FILES</code> 无定义时， <font color='grey'>&ldquo;in_dir/queue/id:%06u,orig:%s&rdquo; % id, use_name</font></li>
+<li>调用 mark_as_det_done 在 <font color='grey'> &ldquo;out_dir/queue/.state/deterministic_done/&rdquo; </font>文件夹中产生已经完成确定性变异的测试用例文件</li>
+<li>调用 nuke_resume_dir 删除掉   <font color='grey'>&ldquo;out_dir/_resume/.state/&rdquo; </font>文件夹中所有临时文件</li>
+</ul>
+</li>
+<li>
+<p>load_extras 调用 load_extras_file 加载 token</p>
+</li>
+<li>
+<p>如果没有设置 <code>timeout_given</code>，调用 find_timeout</p>
+</li>
+<li>
+<p>detect_file_args 处理 @@ 的输入命令（用于 AFL 的文件输入，harness 见<a href="https://xidoo.top/2021/11/fuzzing1/#harness" target="_blank" rel="noopener noreffer">前文</a>）</p>
+</li>
+<li>
+<p>如果没有 -f 设置临时输出，调用 setup_stdio_file 按 <font color='grey'>&ldquo;out_dir/.cur_input&rdquo;</font> 设置并创建</p>
+</li>
+<li>
+<p>check_binary 检查待测试文件的信息</p>
+</li>
+<li>
+<p>get_cur_time 获取当前时间作为启动时间</p>
+</li>
+<li>
+<p>如果开启 qemu mode 则 get_qemu_argv</p>
+</li>
+</ol>
+<h3 id="dry-run">Dry Run</h3>
+<p><strong>在这一部分，AFL 会执行首轮 fuzz，预热。</strong></p>
+<ol>
+<li>
+<p>perform_dry_run<font color='red'>*</font></p>
+<ol>
+<li>依次读取 queue 中内容</li>
+<li>调用 calibrate_case 校准测试用例，得到返回值 <code>res</code></li>
+<li>根据 <code>res</code> 判断错误类型</li>
+</ol>
+</li>
+<li>
+<p>cull_queue<font color='red'>*</font> 精简队列</p>
+</li>
+<li>
+<p>show_init_stats 显示这一轮 dry run 的统计信息</p>
+</li>
+<li>
+<p>find_start_position 从 fuzzer_stats 中找到当前测试用例，以便从这个位置继续</p>
+</li>
+<li>
+<p>write_stats_file 在 fuzzer_stats 中创建新的统计数据</p>
+</li>
+<li>
+<p>save_auto 将这一轮过程中产生的 token 保存在 <font color='grey'>&ldquo;out_dir/queue/.state/auto_extras/auto_%06u&rdquo; % cnt </font> 目录下</p>
+</li>
+</ol>
+<h3 id="main-loop">Main Loop</h3>
+<p><strong>模糊测试终于开始了，在这一部分 AFL 会反复如下执行，直至停止条件满足。</strong></p>
+<ol>
+<li>
+<p>cull_queue</p>
+</li>
+<li>
+<p>如果当前 <code>queue_cur</code> 为空，代表已经遍历完一遍队列，初始化到队首重新遍历</p>
+<ul>
+<li>
+<p>show_stats 显示信息</p>
+</li>
+<li>
+<p>如果这一轮队列与上一轮完全相同，说明此轮 fuzz 没有效果，则重组变异策略</p>
+</li>
+</ul>
+</li>
+<li>
+<p>fuzz_one<font color='red'>*</font> 对 <code>queue_cur</code> 指示的测试用例进行测试</p>
+</li>
+<li>
+<p>移动 <code>queue_cur</code></p>
+</li>
+</ol>
+<p>关闭方式有两种，programmatically （设置 <code>stop_soon</code>）以及 by user（ctrl-c）</p>
+<h3 id="exit">Exit</h3>
+<p><strong>在这一部分 AFL 会保存测试结果，并圆润地关闭自己</strong></p>
+<ol>
+<li>
+<p>向还没关掉的子进程以及 forkserver 进程发送 kill 信号，并等待它们圆润地关闭</p>
+</li>
+<li>
+<p>write_bitmap 保存 bitmap 到硬盘，通常是为了 -B 选项进一步 fuzz</p>
+</li>
+<li>
+<p>write_stats_file</p>
+</li>
+<li>
+<p>save_auto</p>
+</li>
+<li>
+<p>destroy_queue, destroy_extras 销毁内存</p>
+</li>
+<li>
+<p>exit(0)</p>
+</li>
+</ol>
+<h2 id="第-1-次执行">第 1 次执行</h2>
+<p><strong>紧接上文，AFL 调用 perform_dry_run 开启对队列的第一轮遍历，如果有错误或者不合适的测试用例及时报错。结束后使用 cull_queue 修剪测试队列。</strong></p>
+<h3 id="perform_dry_run">perform_dry_run()</h3>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://s2.loli.net/2022/01/18/daJQr3UFs8k5SN9.png"
+        data-srcset="https://s2.loli.net/2022/01/18/daJQr3UFs8k5SN9.png, https://s2.loli.net/2022/01/18/daJQr3UFs8k5SN9.png 1.5x, https://s2.loli.net/2022/01/18/daJQr3UFs8k5SN9.png 2x"
+        data-sizes="auto"
+        alt="https://s2.loli.net/2022/01/18/daJQr3UFs8k5SN9.png"
+        title="https://s2.loli.net/2022/01/18/daJQr3UFs8k5SN9.png" /></p>
+<p>遍历队列，对其中每个元素进行如下操作</p>
+<ol>
+<li>
+<p>打开文件，读出内容</p>
+</li>
+<li>
+<p>将其传入 calibrate_case，得到返回值 <code>res</code></p>
+</li>
+<li>
+<p>根据返回值判断错误</p>
+</li>
+</ol>
+<ul>
+<li>FAULT_NONE 队列没有元素错误。check_map_coverage 后结束。</li>
+<li>FAULT_TMOUT 当前元素超时错误。判断 <code>timeout_given</code> 设置，为 2 则跳过该元素。</li>
+<li>FAULT_CRASH 初始元素就引发了崩溃。需要排除 Out Of Memory（<code>mem_limit</code> 太小） 与 MacOS （非标准平台下的 fork 系统调用）问题。如果确实需要从崩溃元素开始变异，应该开启 crash mode.</li>
+<li>FAULT_ERROR 目标程序无法执行</li>
+<li>FAULT_NOINST 没检测到插桩代码</li>
+<li>FAULT_NOBITS 无用测试用例。如果 <code>in_bitmap</code> 没有初始化，且不让打乱顺序（ <code>shuffle_queue</code> 指示），则报警。</li>
+</ul>
+<h3 id="calibrate_case">calibrate_case()</h3>
+<blockquote>
+<p>该函数在 perform_dry_run, save_if_interesting, fuzz_one 中均会调用。每个测试轮都会对测试用例遍历，而对每个测试用例都会进行多轮校验。</p>
+</blockquote>
+<p>init_forkserver 确保开启 forkserver ，获取当前时间。</p>
+<p>将初始 <code>trace_bits</code> 保存到 <code>first_trace</code> ，has_new_bits<font color='red'>*</font> 检查  <code>trace_bits</code>  是否改变（相比于 <code>virgin_bits</code> ），<code>new_bits</code> 存放返回值。设定校准轮数 <code>stage_max</code> . 每一轮校准如下：</p>
+<ol>
+<li>
+<p>write_to_testcase 将新的内容写入测试用例</p>
+</li>
+<li>
+<p>run_target 做一次 fuzz，这次执行中的路径记录会保存在 <code>trace_bits</code> 。</p>
+</li>
+<li>
+<p>如果 <code>count_bytes(trace_bits)</code> 返回 0，则返回 FAULT_NONE 错误</p>
+</li>
+<li>
+<p>用 <code>trace_bits</code> 计算 <code>cksum</code> ，如果改变则调用 has_new_bits 更新 <code>new_bits</code> . 并且在非 dry run 时，如果 <code>trace_bits</code> 发生了改变则调大校准轮数。</p>
+</li>
+</ol>
+<p>这个测试用例的校准结束，收集信息。调用 update_bitmap_score<font color='red'>*</font> 更新此队列优胜者。</p>
+<p>如果这是第一轮，该测试用例经过校验以后 <code>new_bits</code> 还是 0，则返回 FAULT_NOBITS 错误。</p>
+<p>如果 <code>new_bits</code> 为 2，代表有新的路径产生.</p>
+<h2 id="第-n-次执行">第 n 次执行</h2>
+<p><strong>AFL 区分第 1 轮与第 n 轮是为了 Fall-Fast, 但不管是哪一轮，其总体逻辑均相同。Dry run 结束后，每一轮对每一个测试用例均调用 fuzz_one 进行测试，然后 cull_queue 修剪队列。</strong></p>
+<h3 id="fuzz_one">fuzz_one()</h3>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://s2.loli.net/2022/01/18/t6m1zHYdLOKQwIp.png"
+        data-srcset="https://s2.loli.net/2022/01/18/t6m1zHYdLOKQwIp.png, https://s2.loli.net/2022/01/18/t6m1zHYdLOKQwIp.png 1.5x, https://s2.loli.net/2022/01/18/t6m1zHYdLOKQwIp.png 2x"
+        data-sizes="auto"
+        alt="https://s2.loli.net/2022/01/18/t6m1zHYdLOKQwIp.png"
+        title="https://s2.loli.net/2022/01/18/t6m1zHYdLOKQwIp.png" /></p>
+<p>以队列中的元素为参数，获取该测试用例内容，喂给目标程序。</p>
+<ol>
+<li>
+<p>根据队列优胜者机制，按特定概率跳过此元素。跳过则直接返回。</p>
+</li>
+<li>
+<p>如果上一轮 calibrate_case 产生校对错误，获取得到的 <code>cal_failed</code> 计数，小于 <code>CAL_CHANCES</code> 时重新调用 calibrate_case，防止产生非法 <code>trace_bits</code>.</p>
+</li>
+<li>
+<p>调用 trim_case 对当前元素进行剪枝，即使失败也只剪一次。</p>
+</li>
+<li>
+<p>调用 calculate_score 对当前元素打分，用于 havoc_stage</p>
+</li>
+<li>
+<p>开始变异（每经过一个阶段都会调用 common_fuzz_stuff ）</p>
+<ol>
+<li>simple bitflip（+ dictionary construction）</li>
+<li>arithmetic inc/dec</li>
+<li>interesting values</li>
+<li>dictionary stuff</li>
+<li>random havoc</li>
+<li>splicing</li>
+</ol>
+</li>
+</ol>
+<h3 id="common_fuzz_stuff">common_fuzz_stuff()</h3>
+<p>将变异得到的测试用例写进硬盘，执行目标程序并将其喂给它，收集结果并处理错误。</p>
+<ol>
+<li>write_to_testcase</li>
+<li>run_target 执行</li>
+<li>save_if_interesting</li>
+</ol>
+<h3 id="trim_case">trim_case()</h3>
+<p>减少测试用例大小，细节略。</p>
+<h3 id="calculate_score">calculate_score()</h3>
+<blockquote>
+<p>Calculate case desirability score to adjust the length of havoc fuzzing. A helper function for fuzz_one(). Maybe some of these constants should go into config.h.</p>
+</blockquote>
+<p>该函数打分是为了变异的 havoc 过程。给执行时间短，代码覆盖高，新发现的，路径深度深的测试用例拥有更多 havoc 变异的机会。细节略。</p>
+<h3 id="save_if_interesting">save_if_interesting()</h3>
+<blockquote>
+<p>Check if the result of an execve() during routine fuzzing is interesting, save or queue the input test case for further analysis if so. Returns 1 if entry is saved, 0 otherwise.</p>
+</blockquote>
+<p><code>has_new_bits(virgin_bits)</code> 返回值为 0 时直接返回，否则将测试用例放入测试队列文件夹并如下命名（describe_op 会分析该测试用例是如何变异得到的）：</p>
+<p><code>fn = alloc_printf(&quot;%s/queue/id:%06u,%s&quot;, out_dir, queued_paths,describe_op(hnb))</code></p>
+<p>然后 add_to_queue 为此测试用例开辟空间并放入队列中。重新计算队列 checksum 后将测试用例内容写入并调用 calibrate_case 校验错误码。在校验的过程中记录 crashes 与 hangs 文件夹。</p></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2022-01-09</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/2022/01/afl-rsc/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://xidoo.top/2022/01/afl-rsc/" data-title="AFL 源码分析（一）从 0 到 1 再到 n"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://xidoo.top/2022/01/afl-rsc/"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on WhatsApp" data-sharer="whatsapp" data-url="http://xidoo.top/2022/01/afl-rsc/" data-title="AFL 源码分析（一）从 0 到 1 再到 n" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://xidoo.top/2022/01/afl-rsc/" data-title="AFL 源码分析（一）从 0 到 1 再到 n"><i data-svg-src="/lib/simple-icons/icons/line.min.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://xidoo.top/2022/01/afl-rsc/" data-title="AFL 源码分析（一）从 0 到 1 再到 n"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="Share on Myspace" data-sharer="myspace" data-url="http://xidoo.top/2022/01/afl-rsc/" data-title="AFL 源码分析（一）从 0 到 1 再到 n" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="Share on Blogger" data-sharer="blogger" data-url="http://xidoo.top/2022/01/afl-rsc/" data-title="AFL 源码分析（一）从 0 到 1 再到 n" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="Share on Evernote" data-sharer="evernote" data-url="http://xidoo.top/2022/01/afl-rsc/" data-title="AFL 源码分析（一）从 0 到 1 再到 n"><i class="fab fa-evernote fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/2022/01/afl-white-book/" class="prev" rel="prev" title="AFL 白皮书翻译与读书笔记"><i class="fas fa-angle-left fa-fw"></i>AFL 白皮书翻译与读书笔记</a>
+            <a href="/2022/01/afl-rsc2/" class="next" rel="next" title="AFL 源码分析（二）路径覆盖信息 &amp; 队列优胜者">AFL 源码分析（二）路径覆盖信息 &amp; 队列优胜者<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">🏴‍☠️ Love it, Make magic</div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2019 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">x1do0</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript" src="/lib/smooth-scroll/smooth-scroll.min.js"></script><script type="text/javascript" src="/lib/autocomplete/autocomplete.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.min.js"></script><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/sharer/sharer.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js"></script><script type="text/javascript" src="/lib/katex/auto-render.min.js"></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js"></script><script type="text/javascript" src="/lib/katex/mhchem.min.js"></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":15},"comment":{},"cookieconsent":{"content":{"dismiss":"Got it!","link":"Learn more","message":"This website uses Cookies to improve your experience."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

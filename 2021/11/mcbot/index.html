@@ -1,0 +1,922 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>如何为 Minecraft 服务器添加一个播报员（一） - Stay Hungry</title><meta name="Description" content="This is My New Hugo Site"><meta property="og:title" content="如何为 Minecraft 服务器添加一个播报员（一）" />
+<meta property="og:description" content="Mirai 是一个在全平台下运行，提供 QQ 协议支持的高效率机器人库。这个项目的名字来源于京都动画作品《境界的彼方》的栗山未来(Kuriyama Mirai)，本文将基于 Mirai 构建 Minecraft 与 QQ 协同的聊天机器人，需求有三" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://xidoo.top/2021/11/mcbot/" /><meta property="og:image" content="http://xidoo.top/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-11-08T22:08:53+08:00" />
+<meta property="article:modified_time" content="2021-11-08T22:08:53+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://xidoo.top/logo.png"/>
+
+<meta name="twitter:title" content="如何为 Minecraft 服务器添加一个播报员（一）"/>
+<meta name="twitter:description" content="Mirai 是一个在全平台下运行，提供 QQ 协议支持的高效率机器人库。这个项目的名字来源于京都动画作品《境界的彼方》的栗山未来(Kuriyama Mirai)，本文将基于 Mirai 构建 Minecraft 与 QQ 协同的聊天机器人，需求有三"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://xidoo.top/2021/11/mcbot/" /><link rel="prev" href="http://xidoo.top/2021/09/lilac_ctf/" /><link rel="next" href="http://xidoo.top/2021/11/fuzzing1/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "如何为 Minecraft 服务器添加一个播报员（一）",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/xidoo.top\/2021\/11\/mcbot\/"
+        },"genre": "posts","wordcount":  1018 ,
+        "url": "http:\/\/xidoo.top\/2021\/11\/mcbot\/","datePublished": "2021-11-08T22:08:53+08:00","dateModified": "2021-11-08T22:08:53+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "x1do0"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('light' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'light' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/friends/"> Friends </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/friends/" title="">Friends</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">如何为 Minecraft 服务器添加一个播报员（一）</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>x1do0</a></span>&nbsp;<span class="post-category">included in <a href="/categories/general/"><i class="far fa-folder fa-fw"></i>General</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2021-11-08">2021-11-08</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;1018 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;5 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li>
+      <ul>
+        <li><a href="#环境搭建">环境搭建</a>
+          <ul>
+            <li><a href="#环境异常以及如何绕过qq滑块验证检测">环境异常，以及如何绕过QQ滑块验证检测</a></li>
+            <li><a href="#版本不匹配造成的更多错误">版本不匹配造成的更多错误</a></li>
+            <li><a href="#如何用python开发">如何用python开发</a></li>
+            <li><a href="#如何上云">如何上云</a></li>
+          </ul>
+        </li>
+        <li><a href="#今日开发进度">今日开发进度</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p><a href="https://github.com/mamoe/mirai" target="_blank" rel="noopener noreffer">Mirai</a> 是一个在全平台下运行，提供 QQ 协议支持的高效率机器人库。这个项目的名字来源于京都动画作品《境界的彼方》的栗山未来(Kuriyama Mirai)，本文将基于 Mirai 构建 Minecraft 与 QQ 协同的聊天机器人，需求有三</p>
+<ul>
+<li>让服务器qq群与mc聊天互通</li>
+<li>让机器人自动通报事件（比如成就、死亡等）</li>
+<li>与机器人交互了解服务器情况（比如list显示当前服务器人数等）</li>
+</ul>
+<h3 id="环境搭建">环境搭建</h3>
+<p><a href="https://blog.csdn.net/TL18382950497/article/details/112321956" target="_blank" rel="noopener noreffer">此博客</a>提供了以python为开发语言的完整的搭建流程，由于其中某些环节的项目已经停止维护，建议配合这个<a href="https://www.cnblogs.com/lxy764139720/p/15246972.html" target="_blank" rel="noopener noreffer">清单</a>来食用！以下是我遇到的其他问题</p>
+<h4 id="环境异常以及如何绕过qq滑块验证检测">环境异常，以及如何绕过QQ滑块验证检测</h4>
+<p>强烈建议先在本地成功得到通过检测的<code>/bots/qq号码/device.json</code>后再将其拷贝到服务器上!</p>
+<p>如果你和我一样不幸全家都是iphone用户，你可能得准备以下工具</p>
+<ul>
+<li>
+<p>iTunes</p>
+</li>
+<li>
+<p>inspect (<a href="https://inspect.dev/why" target="_blank" rel="noopener noreffer">https://inspect.dev/why</a>)</p>
+</li>
+</ul>
+<p>我们的目的是拿到登录qq时验证滑块成功通过的流量，其中有个ticket就是我们想要的。iTunes帮助Windows电脑能成功连接iPhone，而Inspect可以拿到手机上的流量</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/11/09/B3ZfXyb1iKCojSD.png"
+        data-srcset="https://i.loli.net/2021/11/09/B3ZfXyb1iKCojSD.png, https://i.loli.net/2021/11/09/B3ZfXyb1iKCojSD.png 1.5x, https://i.loli.net/2021/11/09/B3ZfXyb1iKCojSD.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/11/09/B3ZfXyb1iKCojSD.png"
+        title="https://i.loli.net/2021/11/09/B3ZfXyb1iKCojSD.png" /></p>
+<p>剩下的就好办了，跟着做就行，把Mirai弹出来的url在手机上打开，滑动滑块的同时在Inspect上拿到result，并填入ticket后回车。这时候会再要求扫码或者弹出一个安全检测，在手机上照着做就成功了。如此，我们让一个不常用设备登录上了qq，这也是在服务器上挂qq机器人必须完成的一步。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/11/09/2CBfKWe7DRvuAIx.png"
+        data-srcset="https://i.loli.net/2021/11/09/2CBfKWe7DRvuAIx.png, https://i.loli.net/2021/11/09/2CBfKWe7DRvuAIx.png 1.5x, https://i.loli.net/2021/11/09/2CBfKWe7DRvuAIx.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/11/09/2CBfKWe7DRvuAIx.png"
+        title="https://i.loli.net/2021/11/09/2CBfKWe7DRvuAIx.png" /></p>
+<p>登录一次以后每次都不用验证了，并且找到<code>/bots/qq号码/device.json</code>文件将其拷贝到任何设备都可以绕过验证！</p>
+<h4 id="版本不匹配造成的更多错误">版本不匹配造成的更多错误</h4>
+<p>添加<code>mirai-api-http</code>并下载后发现这个错误</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/11/09/1HNu8AEJFlfyKMO.png"
+        data-srcset="https://i.loli.net/2021/11/09/1HNu8AEJFlfyKMO.png, https://i.loli.net/2021/11/09/1HNu8AEJFlfyKMO.png 1.5x, https://i.loli.net/2021/11/09/1HNu8AEJFlfyKMO.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/11/09/1HNu8AEJFlfyKMO.png"
+        title="https://i.loli.net/2021/11/09/1HNu8AEJFlfyKMO.png" /></p>
+<p>这是我此时的版本清单</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">12:02:02 [INFO] Verifying &#34;org.bouncycastle:bcprov-jdk15on&#34; v1.64
+12:02:02 [INFO] Verifying &#34;net.mamoe:mirai-console&#34; v2.8.0-RC
+12:02:02 [INFO] Verifying &#34;net.mamoe:mirai-console-terminal&#34; v2.8.0-RC
+12:02:02 [INFO] Verifying &#34;net.mamoe:mirai-core-all&#34; v2.8.0-RC
+12:02:03 [INFO] Verifying &#34;org.itxtech:mcl-addon&#34; v1.2.2
+</code></pre></td></tr></table>
+</div>
+</div><p>你最好立马从头开始，并使用这个<a href="https://www.cnblogs.com/lxy764139720/p/15246972.html" target="_blank" rel="noopener noreffer">清单</a>！通过关掉updator并指定配置文件<code>/config.json</code>中的版本来自动下载所需版本</p>
+<p>这是我最终的<code>/config.json</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="p">{</span>
+  <span class="nt">&#34;js_optimization_level&#34;</span><span class="p">:</span> <span class="mi">-1</span><span class="p">,</span>
+  <span class="nt">&#34;mirai_repo&#34;</span><span class="p">:</span> <span class="s2">&#34;https://gitee.com/peratx/mirai-repo/raw/master&#34;</span><span class="p">,</span>
+  <span class="nt">&#34;maven_repo&#34;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="s2">&#34;https://maven.aliyun.com/repository/public&#34;</span>
+  <span class="p">],</span>
+  <span class="nt">&#34;packages&#34;</span><span class="p">:</span> <span class="p">[</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;org.bouncycastle:bcprov-jdk15on&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;channel&#34;</span><span class="p">:</span> <span class="s2">&#34;stable&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="s2">&#34;1.64&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;libs&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;versionLocked&#34;</span><span class="p">:</span> <span class="kc">false</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;net.mamoe:mirai-console&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;channel&#34;</span><span class="p">:</span> <span class="s2">&#34;beta&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="s2">&#34;2.7.0&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;libs&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;versionLocked&#34;</span><span class="p">:</span> <span class="kc">false</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;net.mamoe:mirai-console-terminal&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;channel&#34;</span><span class="p">:</span> <span class="s2">&#34;beta&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="s2">&#34;2.7.0&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;libs&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;versionLocked&#34;</span><span class="p">:</span> <span class="kc">false</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;net.mamoe:mirai-core-all&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;channel&#34;</span><span class="p">:</span> <span class="s2">&#34;beta&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="s2">&#34;2.7.0&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;libs&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;versionLocked&#34;</span><span class="p">:</span> <span class="kc">false</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;org.itxtech:mcl-addon&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;channel&#34;</span><span class="p">:</span> <span class="s2">&#34;c122&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="s2">&#34;1.2.2&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;plugins&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;versionLocked&#34;</span><span class="p">:</span> <span class="kc">false</span>
+    <span class="p">},</span>
+    <span class="p">{</span>
+      <span class="nt">&#34;id&#34;</span><span class="p">:</span> <span class="s2">&#34;net.mamoe:mirai-api-http&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;channel&#34;</span><span class="p">:</span> <span class="s2">&#34;stable&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;version&#34;</span><span class="p">:</span> <span class="s2">&#34;1.12.0&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;type&#34;</span><span class="p">:</span> <span class="s2">&#34;plugins&#34;</span><span class="p">,</span>
+      <span class="nt">&#34;versionLocked&#34;</span><span class="p">:</span> <span class="kc">false</span>
+    <span class="p">}</span>
+  <span class="p">],</span>
+  <span class="nt">&#34;disabled_scripts&#34;</span><span class="p">:</span> <span class="p">[],</span>
+  <span class="nt">&#34;proxy&#34;</span><span class="p">:</span> <span class="s2">&#34;&#34;</span><span class="p">,</span>
+  <span class="nt">&#34;log_level&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+  <span class="nt">&#34;script_props&#34;</span><span class="p">:</span> <span class="p">{}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>以及<code>/config/net.mamoe.mirai-api-http/setting.yml</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="err">#</span> <span class="err">可选，默认值为</span><span class="mf">0.0</span><span class="err">.</span><span class="mf">0.0</span>
+<span class="err">host:</span> <span class="err">&#39;</span><span class="mf">0.0</span><span class="err">.</span><span class="mf">0.0</span><span class="err">&#39;</span>
+<span class="err">#</span>
+<span class="err">#</span> <span class="err">#</span> <span class="err">可选，默认值为</span><span class="mi">8080</span>
+<span class="err">port:</span> <span class="mi">8080</span>
+<span class="err">#</span>
+<span class="err">#</span> <span class="err">#</span> <span class="err">可选，默认由插件第一次启动时随机生成，建议手动指定</span>
+<span class="err">authKey:</span> <span class="err">xdchaseforever</span>
+<span class="err">#</span>
+<span class="err">#</span> <span class="err">#</span> <span class="err">可选，缓存大小，默认</span><span class="mi">4096</span><span class="err">.缓存过小会导致引用回复与撤回消息失败</span>
+<span class="err">cacheSize:</span> <span class="mi">4096</span>
+<span class="err">#</span>
+<span class="err">#</span> <span class="err">#</span> <span class="err">可选，是否开启websocket，默认关闭，建议通过Session范围的配置设置</span>
+<span class="err">enableWebsocket:</span> <span class="kc">true</span>
+
+<span class="err">cors:</span>
+  <span class="err">-</span> <span class="err">&#39;*&#39;</span>
+
+<span class="err">##</span> <span class="err">消息上报</span>
+<span class="err">report:</span>
+<span class="err">##</span> <span class="err">功能总开关</span>
+  <span class="err">enable:</span> <span class="kc">false</span>
+
+  <span class="err">#</span> <span class="err">群消息上报</span>
+  <span class="err">groupMessage:</span>
+    <span class="err">report:</span> <span class="kc">false</span>
+  <span class="err">#</span> <span class="err">好友消息上报</span>
+  <span class="err">friendMessage:</span>
+    <span class="err">report:</span> <span class="kc">false</span>
+  <span class="err">#</span> <span class="err">临时消息上报</span>
+  <span class="err">tempMessage:</span>
+    <span class="err">report:</span> <span class="kc">false</span>
+  <span class="err">#</span> <span class="err">事件上报</span>
+  <span class="err">eventMessage:</span>
+    <span class="err">report:</span> <span class="kc">false</span>
+  <span class="err">#</span> <span class="err">上报URL</span>
+  <span class="err">destinations:</span> <span class="p">[]</span>
+  <span class="err">#</span> <span class="err">上报时的额外Header</span>
+  <span class="err">extraHeaders:</span> <span class="p">{}</span>
+
+
+<span class="err">##</span> <span class="err">心跳</span>
+<span class="err">heartbeat:</span>
+   <span class="err">#</span> <span class="err">功能总开关</span>
+    <span class="err">enable:</span> <span class="kc">false</span>
+    <span class="err">#</span> <span class="err">启动延迟</span>
+    <span class="err">delay:</span> <span class="mi">1000</span>
+    <span class="err">#</span> <span class="err">心跳间隔</span>
+    <span class="err">period:</span> <span class="mi">15000</span>
+    <span class="err">#</span> <span class="err">心跳上报URL</span>
+    <span class="err">destinations:</span> <span class="p">[]</span>
+    <span class="err">#</span> <span class="err">上报时的额外信息</span>
+    <span class="err">extraBody:</span> <span class="p">{}</span>
+    <span class="err">#</span> <span class="err">上报时的额外头</span>
+    <span class="err">extraHeaders:</span> <span class="p">{}</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><p>以下报错单纯是因为Mirai没有打开滑块验证，重新登录即可</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/11/09/ui7kHGXNFh9BRpg.png"
+        data-srcset="https://i.loli.net/2021/11/09/ui7kHGXNFh9BRpg.png, https://i.loli.net/2021/11/09/ui7kHGXNFh9BRpg.png 1.5x, https://i.loli.net/2021/11/09/ui7kHGXNFh9BRpg.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/11/09/ui7kHGXNFh9BRpg.png"
+        title="https://i.loli.net/2021/11/09/ui7kHGXNFh9BRpg.png" /></p>
+<h4 id="如何用python开发">如何用python开发</h4>
+<p>至此，其实你已经可以用java来写了，但我想用python，<a href="https://graia-document.vercel.app/docs/intro" target="_blank" rel="noopener noreffer">graia</a>可以解决这个问题，虽然已停止维护但我在使用过程中并没有遇到问题（python3.9.7）同时graia作者指出未来的趋势为此<a href="https://github.com/GraiaProject/Avilla" target="_blank" rel="noopener noreffer">项目</a>，也许值得一试但我并没有尝试。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">pip install graia-application-mirai
+</code></pre></td></tr></table>
+</div>
+</div><p>创建<code>bot.py</code> 并修改authenKey与QQ号</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">from graia.broadcast import Broadcast
+from graia.application import GraiaMiraiApplication, Session
+from graia.application.message.chain import MessageChain
+import asyncio
+
+from graia.application.message.elements.internal import Plain
+from graia.application.friend import Friend
+
+loop = asyncio.get_event_loop()
+
+bcc = Broadcast(loop=loop)
+app = GraiaMiraiApplication(
+    broadcast=bcc,
+    connect_info=Session(
+        host=&#34;http://localhost:8080&#34;, # 填入 httpapi 服务运行的地址
+        authKey=&#34;xdchaseforever&#34;, # 填入 authKey
+        account=dontwannatellyou, # 你的机器人的 qq 号
+        websocket=True # Graia 已经可以根据所配置的消息接收的方式来保证消息接收部分的正常运作.
+    )
+)
+
+@bcc.receiver(&#34;FriendMessage&#34;)
+async def friend_message_listener(app: GraiaMiraiApplication, friend: Friend):
+    await app.sendFriendMessage(friend, MessageChain.create([
+        Plain(&#34;Hello, World!&#34;)
+    ]))
+
+app.launch_blocking()
+</code></pre></td></tr></table>
+</div>
+</div><p>以上代码就能实现私聊自动回复。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/11/09/sq6abBDAux8YVmK.png"
+        data-srcset="https://i.loli.net/2021/11/09/sq6abBDAux8YVmK.png, https://i.loli.net/2021/11/09/sq6abBDAux8YVmK.png 1.5x, https://i.loli.net/2021/11/09/sq6abBDAux8YVmK.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/11/09/sq6abBDAux8YVmK.png"
+        title="https://i.loli.net/2021/11/09/sq6abBDAux8YVmK.png" /></p>
+<h4 id="如何上云">如何上云</h4>
+<p>其实你大可以将本地搭建好的<code>mcl</code>文件夹整个送上服务器，只要保证python与java环境不变，然后用 screen 将 Mirai 与 bot.py 全部挂在后台即可。</p>
+<p>我的服务器是阿里云Debian9.9镜像，最后是这样</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">(base) root@iZ2zefiis08efdfsj0cydeZ:~# screen -ls
+There are screens on:
+        29765.bot       (11/09/2021 05:51:43 PM)        (Detached)
+        28393.mirai     (11/09/2021 03:48:23 PM)        (Detached)
+        2358.minecraft  (11/01/2021 07:24:13 PM)        (Detached)
+3 Sockets in /run/screen/S-root.
+(base) root@iZ2zefiis08efdfsj0cydeZ:~# uname -a
+Linux iZ2zefiis08efdfsj0cydeZ 4.9.0-9-amd64 #1 SMP Debian 4.9.168-1+deb9u3 (2019-06-16) x86_64 GNU/Linux
+</code></pre></td></tr></table>
+</div>
+</div><p>同时 Mirai 支持 <code>autologin</code> 自动登录，建议加密方式不要选择<code>MD5</code>，我遇到了暂时没有解决的问题。</p>
+<h3 id="今日开发进度">今日开发进度</h3>
+<p>快速学习了一些API，参见官方文档 [https://graia-document.vercel.app/docs/guides/installation]</p>
+<p>私聊回复</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="nd">@bcc</span><span class="o">.</span><span class="n">receiver</span><span class="p">(</span><span class="s2">&#34;FriendMessage&#34;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">friend_message_listener</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">GraiaMiraiApplication</span><span class="p">,</span> <span class="n">friend</span><span class="p">:</span> <span class="n">Friend</span><span class="p">):</span>
+    <span class="k">await</span> <span class="n">app</span><span class="o">.</span><span class="n">sendFriendMessage</span><span class="p">(</span><span class="n">friend</span><span class="p">,</span> <span class="n">MessageChain</span><span class="o">.</span><span class="n">create</span><span class="p">([</span>
+        <span class="n">Plain</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+    <span class="p">]))</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>群聊回复</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="nd">@bcc</span><span class="o">.</span><span class="n">receiver</span><span class="p">(</span><span class="s2">&#34;GroupMessage&#34;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">test</span><span class="p">(</span>
+    <span class="n">message</span><span class="p">:</span> <span class="n">MessageChain</span><span class="p">,</span>
+    <span class="n">app</span><span class="p">:</span> <span class="n">GraiaMiraiApplication</span><span class="p">,</span>
+    <span class="n">group</span><span class="p">:</span> <span class="n">Group</span><span class="p">,</span> <span class="n">member</span><span class="p">:</span> <span class="n">Member</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">asDisplay</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&#34;!ping&#34;</span><span class="p">):</span>
+        <span class="k">await</span> <span class="n">app</span><span class="o">.</span><span class="n">sendGroupMessage</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">MessageChain</span><span class="o">.</span><span class="n">create</span><span class="p">([</span>
+            <span class="n">At</span><span class="p">(</span><span class="n">member</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="n">Plain</span><span class="p">(</span><span class="s2">&#34;pong&#34;</span><span class="p">)</span>
+        <span class="p">]))</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>由于Minecraft会自动记录日志，所以可以读取日志来响应用户</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="n">buf</span> <span class="o">=</span> <span class="s2">&#34;&#34;</span>
+
+<span class="k">def</span> <span class="nf">read_latest_mclog</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">buf</span>
+    <span class="n">buf</span> <span class="o">=</span> <span class="s2">&#34;&#34;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">PATH</span><span class="p">,</span> <span class="s2">&#34;r&#34;</span><span class="p">)</span> <span class="k">as</span> <span class="n">logfile</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">logfile</span><span class="p">:</span>
+            <span class="n">buf</span> <span class="o">+=</span> <span class="n">i</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&#34;[Server thread/INFO]&#34;</span><span class="p">,</span> <span class="s2">&#34;&#34;</span><span class="p">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>然后分别解析即可。但需要改进的地方也很多，而要实现需求最重要的是如何进行实时交互。从搭建环境到这里已经花了一天时间，得赶紧爬回去准备考试和毕设了，只得草草收场。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">graia.broadcast</span> <span class="kn">import</span> <span class="n">Broadcast</span>
+<span class="kn">from</span> <span class="nn">graia.application</span> <span class="kn">import</span> <span class="n">GraiaMiraiApplication</span><span class="p">,</span> <span class="n">Session</span>
+<span class="kn">from</span> <span class="nn">graia.application.message.chain</span> <span class="kn">import</span> <span class="n">MessageChain</span>
+<span class="kn">from</span> <span class="nn">graia.application.group</span> <span class="kn">import</span> <span class="n">Group</span><span class="p">,</span> <span class="n">Member</span>
+<span class="kn">import</span> <span class="nn">asyncio</span>
+
+<span class="kn">from</span> <span class="nn">graia.application.message.elements.internal</span> <span class="kn">import</span> <span class="n">Plain</span><span class="p">,</span> <span class="n">At</span>
+
+<span class="kn">from</span> <span class="nn">graia.application.friend</span> <span class="kn">import</span> <span class="n">Friend</span>
+
+<span class="kn">import</span> <span class="nn">time</span><span class="o">,</span> <span class="nn">os</span>
+
+<span class="n">PATH</span> <span class="o">=</span> <span class="s2">&#34;/root/logs/latest.log&#34;</span>
+
+<span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+
+<span class="n">bcc</span> <span class="o">=</span> <span class="n">Broadcast</span><span class="p">(</span><span class="n">loop</span><span class="o">=</span><span class="n">loop</span><span class="p">)</span>
+<span class="n">app</span> <span class="o">=</span> <span class="n">GraiaMiraiApplication</span><span class="p">(</span>
+    <span class="n">broadcast</span><span class="o">=</span><span class="n">bcc</span><span class="p">,</span>
+    <span class="n">connect_info</span><span class="o">=</span><span class="n">Session</span><span class="p">(</span>
+        <span class="n">host</span><span class="o">=</span><span class="s2">&#34;http://localhost:8080&#34;</span><span class="p">,</span> <span class="c1"># 填入 httpapi 服务运行的地址</span>
+        <span class="n">authKey</span><span class="o">=</span><span class="s2">&#34;xdchaseforever&#34;</span><span class="p">,</span> <span class="c1"># 填入 authKey</span>
+        <span class="n">account</span><span class="o">=</span><span class="n">dontwannatellyou</span><span class="p">,</span> <span class="c1"># 你的机器人的 qq 号</span>
+        <span class="n">websocket</span><span class="o">=</span><span class="kc">True</span> <span class="c1"># Graia 已经可以根据所配置的消息接收的方式来保证消息接收部分的正常运作.</span>
+    <span class="p">)</span>
+<span class="p">)</span>
+
+
+<span class="n">buf</span> <span class="o">=</span> <span class="s2">&#34;&#34;</span>
+
+<span class="k">def</span> <span class="nf">read_latest_mclog</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">buf</span>
+    <span class="n">buf</span> <span class="o">=</span> <span class="s2">&#34;&#34;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">PATH</span><span class="p">,</span> <span class="s2">&#34;r&#34;</span><span class="p">)</span> <span class="k">as</span> <span class="n">logfile</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">logfile</span><span class="p">:</span>
+            <span class="n">buf</span> <span class="o">+=</span> <span class="n">i</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&#34;[Server thread/INFO]&#34;</span><span class="p">,</span> <span class="s2">&#34;&#34;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">get_list</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">buf</span>
+    <span class="n">read_latest_mclog</span><span class="p">()</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+    <span class="n">buf</span> <span class="o">=</span> <span class="s2">&#34;&#34;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">b</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&#34;joined the game&#34;</span> <span class="ow">in</span> <span class="n">i</span> <span class="ow">or</span> <span class="s2">&#34;left the game&#34;</span> <span class="ow">in</span> <span class="n">i</span><span class="p">:</span>
+            <span class="n">buf</span> <span class="o">+=</span> <span class="n">i</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+<span class="k">def</span> <span class="nf">get_event</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">buf</span>
+    <span class="n">read_latest_mclog</span><span class="p">()</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+    <span class="n">buf</span> <span class="o">=</span> <span class="s2">&#34;&#34;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">b</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&#34;advancement&#34;</span> <span class="ow">in</span> <span class="n">i</span><span class="p">:</span>
+            <span class="n">buf</span> <span class="o">+=</span> <span class="s2">&#34; 【喜报】 &#34;</span> <span class="o">+</span> <span class="n">i</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">elif</span> <span class="s2">&#34;swim in lava&#34;</span> <span class="ow">in</span> <span class="n">i</span><span class="p">:</span>
+            <span class="n">buf</span> <span class="o">+=</span> <span class="s2">&#34; 【悲报】 &#34;</span> <span class="o">+</span> <span class="n">i</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+<span class="k">def</span> <span class="nf">get_chat</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">buf</span>
+    <span class="n">read_latest_mclog</span><span class="p">()</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">buf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">b</span><span class="p">)</span>
+    <span class="n">buf</span> <span class="o">=</span> <span class="s2">&#34;&#34;</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">b</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">&#34;&lt;&#34;</span> <span class="ow">in</span> <span class="n">i</span> <span class="ow">and</span> <span class="s2">&#34;&gt;&#34;</span> <span class="ow">in</span> <span class="n">i</span><span class="p">:</span>
+            <span class="n">buf</span> <span class="o">+=</span> <span class="n">i</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+
+<span class="nd">@bcc</span><span class="o">.</span><span class="n">receiver</span><span class="p">(</span><span class="s2">&#34;FriendMessage&#34;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">friend_message_listener</span><span class="p">(</span><span class="n">app</span><span class="p">:</span> <span class="n">GraiaMiraiApplication</span><span class="p">,</span> <span class="n">friend</span><span class="p">:</span> <span class="n">Friend</span><span class="p">):</span>
+    <span class="n">read_latest_mclog</span><span class="p">()</span>
+    <span class="k">await</span> <span class="n">app</span><span class="o">.</span><span class="n">sendFriendMessage</span><span class="p">(</span><span class="n">friend</span><span class="p">,</span> <span class="n">MessageChain</span><span class="o">.</span><span class="n">create</span><span class="p">([</span>
+        <span class="n">Plain</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+    <span class="p">]))</span>
+
+<span class="nd">@bcc</span><span class="o">.</span><span class="n">receiver</span><span class="p">(</span><span class="s2">&#34;GroupMessage&#34;</span><span class="p">)</span>
+<span class="k">async</span> <span class="k">def</span> <span class="nf">test</span><span class="p">(</span>
+    <span class="n">message</span><span class="p">:</span> <span class="n">MessageChain</span><span class="p">,</span>
+    <span class="n">app</span><span class="p">:</span> <span class="n">GraiaMiraiApplication</span><span class="p">,</span>
+    <span class="n">group</span><span class="p">:</span> <span class="n">Group</span><span class="p">,</span> <span class="n">member</span><span class="p">:</span> <span class="n">Member</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="k">if</span> <span class="n">message</span><span class="o">.</span><span class="n">asDisplay</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&#34;!ping&#34;</span><span class="p">):</span>
+        <span class="k">await</span> <span class="n">app</span><span class="o">.</span><span class="n">sendGroupMessage</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">MessageChain</span><span class="o">.</span><span class="n">create</span><span class="p">([</span>
+            <span class="n">At</span><span class="p">(</span><span class="n">member</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="n">Plain</span><span class="p">(</span><span class="s2">&#34;pong&#34;</span><span class="p">)</span>
+        <span class="p">]))</span>
+    <span class="k">elif</span> <span class="n">message</span><span class="o">.</span><span class="n">asDisplay</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&#34;!help&#34;</span><span class="p">):</span>
+        <span class="k">await</span> <span class="n">app</span><span class="o">.</span><span class="n">sendGroupMessage</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">MessageChain</span><span class="o">.</span><span class="n">create</span><span class="p">([</span>
+            <span class="n">Plain</span><span class="p">(</span><span class="s2">&#34;施工中...</span><span class="se">\n</span><span class="s2"> help 查看帮助</span><span class="se">\n</span><span class="s2"> log 查看日志详情 </span><span class="se">\n</span><span class="s2"> list 查看近期登录情况 </span><span class="se">\n</span><span class="s2"> event 查看近期事件 </span><span class="se">\n</span><span class="s2"> chat  查看近期聊天内容&#34;</span><span class="p">)</span>
+        <span class="p">]))</span>
+    <span class="k">elif</span> <span class="n">message</span><span class="o">.</span><span class="n">asDisplay</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&#34;!log&#34;</span><span class="p">):</span>
+        <span class="n">read_latest_mclog</span><span class="p">()</span>
+        <span class="k">await</span> <span class="n">app</span><span class="o">.</span><span class="n">sendGroupMessage</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">MessageChain</span><span class="o">.</span><span class="n">create</span><span class="p">([</span>
+            <span class="n">At</span><span class="p">(</span><span class="n">member</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="n">Plain</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">buf</span><span class="p">)</span>
+        <span class="p">]))</span>
+    <span class="k">elif</span> <span class="n">message</span><span class="o">.</span><span class="n">asDisplay</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&#34;!list&#34;</span><span class="p">):</span>
+        <span class="n">get_list</span><span class="p">()</span>
+        <span class="k">await</span> <span class="n">app</span><span class="o">.</span><span class="n">sendGroupMessage</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">MessageChain</span><span class="o">.</span><span class="n">create</span><span class="p">([</span>
+            <span class="n">At</span><span class="p">(</span><span class="n">member</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="n">Plain</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">buf</span><span class="p">)</span>
+        <span class="p">]))</span>
+    <span class="k">elif</span> <span class="n">message</span><span class="o">.</span><span class="n">asDisplay</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&#34;!event&#34;</span><span class="p">):</span>
+        <span class="n">get_event</span><span class="p">()</span>
+        <span class="k">await</span> <span class="n">app</span><span class="o">.</span><span class="n">sendGroupMessage</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">MessageChain</span><span class="o">.</span><span class="n">create</span><span class="p">([</span>
+            <span class="n">At</span><span class="p">(</span><span class="n">member</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="n">Plain</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">+</span><span class="n">buf</span><span class="p">)</span>
+        <span class="p">]))</span>
+    <span class="k">elif</span> <span class="n">message</span><span class="o">.</span><span class="n">asDisplay</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&#34;!chat&#34;</span><span class="p">):</span>
+        <span class="n">get_chat</span><span class="p">()</span>
+        <span class="k">await</span> <span class="n">app</span><span class="o">.</span><span class="n">sendGroupMessage</span><span class="p">(</span><span class="n">group</span><span class="p">,</span> <span class="n">MessageChain</span><span class="o">.</span><span class="n">create</span><span class="p">([</span>
+            <span class="n">At</span><span class="p">(</span><span class="n">member</span><span class="o">.</span><span class="n">id</span><span class="p">),</span> <span class="n">Plain</span><span class="p">(</span><span class="s2">&#34;</span><span class="se">\n</span><span class="s2">&#34;</span><span class="o">+</span><span class="n">buf</span><span class="p">)</span>
+        <span class="p">]))</span>
+
+<span class="n">app</span><span class="o">.</span><span class="n">launch_blocking</span><span class="p">()</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>最终是达到了这样的效果</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/11/09/OdjrLhby7TgiBNu.png"
+        data-srcset="https://i.loli.net/2021/11/09/OdjrLhby7TgiBNu.png, https://i.loli.net/2021/11/09/OdjrLhby7TgiBNu.png 1.5x, https://i.loli.net/2021/11/09/OdjrLhby7TgiBNu.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/11/09/OdjrLhby7TgiBNu.png"
+        title="https://i.loli.net/2021/11/09/OdjrLhby7TgiBNu.png" /></p>
+<p>有空继续完善，后续细分来看需要解决如下问题</p>
+<ol>
+<li>每当QQ群有消息，机器人从Mirai手中拿到消息，发给Minecraft后台，后者进一步在Minecraft中广播
+<ul>
+<li>若是聊天信息，直接广播即可</li>
+<li>若是查询信息，需要从Minecraft后台拿到查询结果并返回给Mirai</li>
+</ul>
+</li>
+<li>每当Minecraft中有消息，机器人需要问询Minecraft后台并拿到这个消息，发送给Mirai</li>
+</ol>
+<p>所以至少需要知道</p>
+<ol>
+<li>
+<p>Mirai如何向QQ发送消息</p>
+</li>
+<li>
+<p>Minecraft后台如何向游戏内发送消息</p>
+</li>
+<li>
+<p>Mirai与Minecraft后台如何交互（可能考虑重定向IO）</p>
+</li>
+</ol></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2021-11-08</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/2021/11/mcbot/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://xidoo.top/2021/11/mcbot/" data-title="如何为 Minecraft 服务器添加一个播报员（一）"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://xidoo.top/2021/11/mcbot/"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on WhatsApp" data-sharer="whatsapp" data-url="http://xidoo.top/2021/11/mcbot/" data-title="如何为 Minecraft 服务器添加一个播报员（一）" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://xidoo.top/2021/11/mcbot/" data-title="如何为 Minecraft 服务器添加一个播报员（一）"><i data-svg-src="/lib/simple-icons/icons/line.min.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://xidoo.top/2021/11/mcbot/" data-title="如何为 Minecraft 服务器添加一个播报员（一）"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="Share on Myspace" data-sharer="myspace" data-url="http://xidoo.top/2021/11/mcbot/" data-title="如何为 Minecraft 服务器添加一个播报员（一）" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="Share on Blogger" data-sharer="blogger" data-url="http://xidoo.top/2021/11/mcbot/" data-title="如何为 Minecraft 服务器添加一个播报员（一）" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="Share on Evernote" data-sharer="evernote" data-url="http://xidoo.top/2021/11/mcbot/" data-title="如何为 Minecraft 服务器添加一个播报员（一）"><i class="fab fa-evernote fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/2021/09/lilac_ctf/" class="prev" rel="prev" title="招新赛 2021 出题总结(个人向)"><i class="fas fa-angle-left fa-fw"></i>招新赛 2021 出题总结(个人向)</a>
+            <a href="/2021/11/fuzzing1/" class="next" rel="next" title="American Fuzzy Lop tutorial-basic">American Fuzzy Lop tutorial-basic<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">🏴‍☠️ Love it, Make magic</div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2019 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">x1do0</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript" src="/lib/smooth-scroll/smooth-scroll.min.js"></script><script type="text/javascript" src="/lib/autocomplete/autocomplete.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.min.js"></script><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/sharer/sharer.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js"></script><script type="text/javascript" src="/lib/katex/auto-render.min.js"></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js"></script><script type="text/javascript" src="/lib/katex/mhchem.min.js"></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":15},"comment":{},"cookieconsent":{"content":{"dismiss":"Got it!","link":"Learn more","message":"This website uses Cookies to improve your experience."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

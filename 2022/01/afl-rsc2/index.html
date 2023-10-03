@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>AFL 源码分析（二）路径覆盖信息 &amp; 队列优胜者 - Stay Hungry</title><meta name="Description" content="This is My New Hugo Site"><meta property="og:title" content="AFL 源码分析（二）路径覆盖信息 &amp; 队列优胜者" />
+<meta property="og:description" content="紧接上一部分，本文将更进一步探讨 AFL 如何在运行时保存和分析路径覆盖信息，以及队列优胜者的选取思路。前者为启发式变异提供导向，后者为 culling the corpus 的基础。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://xidoo.top/2022/01/afl-rsc2/" /><meta property="og:image" content="http://xidoo.top/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-01-23T11:01:02+08:00" />
+<meta property="article:modified_time" content="2022-01-23T11:01:02+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://xidoo.top/logo.png"/>
+
+<meta name="twitter:title" content="AFL 源码分析（二）路径覆盖信息 &amp; 队列优胜者"/>
+<meta name="twitter:description" content="紧接上一部分，本文将更进一步探讨 AFL 如何在运行时保存和分析路径覆盖信息，以及队列优胜者的选取思路。前者为启发式变异提供导向，后者为 culling the corpus 的基础。"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://xidoo.top/2022/01/afl-rsc2/" /><link rel="prev" href="http://xidoo.top/2022/01/afl-rsc/" /><link rel="next" href="http://xidoo.top/2022/01/afl-rsc3/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "AFL 源码分析（二）路径覆盖信息 \u0026 队列优胜者",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/xidoo.top\/2022\/01\/afl-rsc2\/"
+        },"genre": "posts","wordcount":  1309 ,
+        "url": "http:\/\/xidoo.top\/2022\/01\/afl-rsc2\/","datePublished": "2022-01-23T11:01:02+08:00","dateModified": "2022-01-23T11:01:02+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "x1do0"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('light' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'light' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/friends/"> Friends </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/friends/" title="">Friends</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">AFL 源码分析（二）路径覆盖信息 &amp; 队列优胜者</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>x1do0</a></span>&nbsp;<span class="post-category">included in <a href="/categories/general/"><i class="far fa-folder fa-fw"></i>General</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-01-23">2022-01-23</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;1309 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;7 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#路径覆盖信息的保存与分析">路径覆盖信息的保存与分析</a>
+      <ul>
+        <li><a href="#初始化">初始化</a></li>
+        <li><a href="#运行时获取">运行时获取</a></li>
+        <li><a href="#以路径覆盖为指导">以路径覆盖为指导</a></li>
+      </ul>
+    </li>
+    <li><a href="#优胜者策略">优胜者策略</a>
+      <ul>
+        <li><a href="#指导因子标记">指导因子标记</a></li>
+        <li><a href="#剪枝因子标记">剪枝因子标记</a></li>
+        <li><a href="#指导测试过程">指导测试过程</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>紧接上一部分，本文将更进一步探讨 AFL 如何在运行时保存和分析路径覆盖信息，以及队列优胜者的选取思路。前者为启发式变异提供导向，后者为 <a href="https://xidoo.top/2022/01/afl-white-book/#4-%E8%AF%AD%E6%96%99%E5%BA%93%E7%B2%BE%E7%AE%80-culling-the-corpus" target="_blank" rel="noopener noreffer">culling the corpus</a> 的基础。</p>
+<h2 id="路径覆盖信息的保存与分析">路径覆盖信息的保存与分析</h2>
+<p>这部分主要涉及到 has_new_bits</p>
+<h3 id="初始化">初始化</h3>
+<p><a href="https://xidoo.top/2022/01/afl-rsc/#check-configuration" target="_blank" rel="noopener noreffer">前文</a> 提到 AFL 会调用 <code>setup_shm</code>  初始化内存。在这个函数中，<code>virgin_bits</code> 被初始化为一段二进制一的内存并全程维护作为总表，对于其中的每个字节，全一则代表对应元组未被访问。<code>shmget</code> 初始化一段同样大小的共享内存，通过 IPC 进行进程间的通信与同步。如果不是 dumb 模式就会将此共享内存的标识符设置在环境变量中，方便子进程（见 forkserver 部分）锁定。AFL 本身通过 <code>trace_bits</code> 变量指向这段共享内存，用来记录每次运行得到的路径执行情况。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="n">EXP_ST</span> <span class="kt">void</span> <span class="nf">setup_shm</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="n">u8</span><span class="o">*</span> <span class="n">shm_str</span><span class="p">;</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">in_bitmap</span><span class="p">)</span> <span class="n">memset</span><span class="p">(</span><span class="n">virgin_bits</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="n">MAP_SIZE</span><span class="p">);</span>
+
+  <span class="n">memset</span><span class="p">(</span><span class="n">virgin_tmout</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="n">MAP_SIZE</span><span class="p">);</span>
+  <span class="n">memset</span><span class="p">(</span><span class="n">virgin_crash</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="n">MAP_SIZE</span><span class="p">);</span>
+
+  <span class="n">shm_id</span> <span class="o">=</span> <span class="n">shmget</span><span class="p">(</span><span class="n">IPC_PRIVATE</span><span class="p">,</span> <span class="n">MAP_SIZE</span><span class="p">,</span> <span class="n">IPC_CREAT</span> <span class="o">|</span> <span class="n">IPC_EXCL</span> <span class="o">|</span> <span class="mo">0600</span><span class="p">);</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="n">shm_id</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="n">PFATAL</span><span class="p">(</span><span class="s">&#34;shmget() failed&#34;</span><span class="p">);</span>
+
+  <span class="n">atexit</span><span class="p">(</span><span class="n">remove_shm</span><span class="p">);</span>
+
+  <span class="n">shm_str</span> <span class="o">=</span> <span class="n">alloc_printf</span><span class="p">(</span><span class="s">&#34;%d&#34;</span><span class="p">,</span> <span class="n">shm_id</span><span class="p">);</span>
+
+  <span class="cm">/* If somebody is asking us to fuzz instrumented binaries in dumb mode,
+</span><span class="cm">     we don&#39;t want them to detect instrumentation, since we won&#39;t be sending
+</span><span class="cm">     fork server commands. This should be replaced with better auto-detection
+</span><span class="cm">     later on, perhaps? */</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">dumb_mode</span><span class="p">)</span> <span class="n">setenv</span><span class="p">(</span><span class="n">SHM_ENV_VAR</span><span class="p">,</span> <span class="n">shm_str</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+
+  <span class="n">ck_free</span><span class="p">(</span><span class="n">shm_str</span><span class="p">);</span>
+
+  <span class="n">trace_bits</span> <span class="o">=</span> <span class="n">shmat</span><span class="p">(</span><span class="n">shm_id</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+  
+  <span class="k">if</span> <span class="p">(</span><span class="n">trace_bits</span> <span class="o">==</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="n">PFATAL</span><span class="p">(</span><span class="s">&#34;shmat() failed&#34;</span><span class="p">);</span>
+
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="运行时获取">运行时获取</h3>
+<p>每次 <code>run_target()</code> 的最开始会清零 <code>trace_bits</code> ，在执行时用如下插桩代码改变 <code>trace_bits</code> （ 见 afl-as.h/__afl_maybe_log ）回忆 <a href="https://xidoo.top/2022/01/afl-white-book/#1-%E8%A6%86%E7%9B%96%E5%BA%A6%E6%B5%8B%E9%87%8F-coverage-measurements" target="_blank" rel="noopener noreffer">白皮书 </a>中对于插桩代码的伪代码描述。</p>
+<p>在 afl-as.h/trampoline_fmt_64 中，插桩代码用 rcx 存储一个 <code>(random() % (MAP_SIZE))</code> 范围的随机值，因此在处理到某个分支并且需要插入插桩代码时，afl-as 会产生一个此范围的随机数作为此边的 ID. 对应于伪代码第一行 <code>cur_location = &lt;COMPILE_TIME_RANDOM&gt;;</code></p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="k">static</span> <span class="k">const</span> <span class="n">u8</span><span class="o">*</span> <span class="n">trampoline_fmt_64</span> <span class="o">=</span>
+ 
+  <span class="s">&#34;/* --- AFL TRAMPOLINE (64-BIT) --- */</span><span class="se">\n</span><span class="s">&#34;</span>
+  <span class="c1">//...
+</span><span class="c1"></span>  <span class="s">&#34;movq %%rcx,  8(%%rsp)</span><span class="se">\n</span><span class="s">&#34;</span>
+  <span class="s">&#34;movq $0x%08x, %%rcx</span><span class="se">\n</span><span class="s">&#34;</span>
+  <span class="s">&#34;call __afl_maybe_log</span><span class="se">\n</span><span class="s">&#34;</span>
+  <span class="c1">//...
+</span><span class="c1"></span>  <span class="s">&#34;</span><span class="se">\n</span><span class="s">&#34;</span>
+  <span class="s">&#34;/* --- END --- */</span><span class="se">\n</span><span class="s">&#34;</span>
+  <span class="s">&#34;</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>进入到 __afl_maybe_log，首先会检查共享内存是否设置好</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c">  <span class="s">&#34;  /* Check if SHM region is already mapped. */</span><span class="se">\n</span><span class="s">&#34;</span>
+  <span class="s">&#34;</span><span class="se">\n</span><span class="s">&#34;</span>
+  <span class="s">&#34;  movl  __afl_area_ptr, %edx</span><span class="se">\n</span><span class="s">&#34;</span>
+  <span class="s">&#34;  testl %edx, %edx</span><span class="se">\n</span><span class="s">&#34;</span>
+  <span class="s">&#34;  je    __afl_setup</span><span class="se">\n</span><span class="s">&#34;</span>
+  <span class="s">&#34;</span><span class="se">\n</span><span class="s">&#34;</span>
+  <span class="s">&#34;__afl_store:</span><span class="se">\n</span><span class="s">&#34;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>然后开始如下计算，可见 <code>__afl_pre_loc</code>  便是伪代码中 <code>prev_location</code> ，保存上一个元组位置。在对 <code>cur_location</code> 进行异或后将 <code>cur_location</code> 右移一位作为新的 <code>prev_location</code> .</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="cp">#ifndef COVERAGE_ONLY
+</span><span class="cp"></span>  <span class="s">&#34;  movl __afl_prev_loc, %edi</span><span class="se">\n</span><span class="s">&#34;</span>
+  <span class="s">&#34;  xorl %ecx, %edi</span><span class="se">\n</span><span class="s">&#34;</span>
+  <span class="s">&#34;  shrl $1, %ecx</span><span class="se">\n</span><span class="s">&#34;</span>
+  <span class="s">&#34;  movl %ecx, __afl_prev_loc</span><span class="se">\n</span><span class="s">&#34;</span>
+<span class="cp">#else
+</span><span class="cp"></span>  <span class="s">&#34;  movl %ecx, %edi</span><span class="se">\n</span><span class="s">&#34;</span>
+<span class="cp">#endif </span><span class="cm">/* ^!COVERAGE_ONLY */</span><span class="cp">
+</span><span class="cp"></span>  <span class="s">&#34;</span><span class="se">\n</span><span class="s">&#34;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>然后用 rcx 与 rdx 来改变 <code>trace_bits</code> 内存区域。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="cp">#ifdef SKIP_COUNTS
+</span><span class="cp"></span>  <span class="s">&#34;  orb  $1, (%rdx, %rcx, 1)</span><span class="se">\n</span><span class="s">&#34;</span>
+<span class="cp">#else
+</span><span class="cp"></span>  <span class="s">&#34;  incb (%rdx, %rcx, 1)</span><span class="se">\n</span><span class="s">&#34;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这便是在一次执行中插桩代码对路径覆盖表做的改变。</p>
+<h3 id="以路径覆盖为指导">以路径覆盖为指导</h3>
+<p>在上一步得到改变 <code>trace_bits</code> 后调用 <code>classify_counts(trace_bits)</code>  对其做预处理，此函数将传入的内存按每两个字节做 <code>count_class_lookup16</code> 变换。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="k">static</span> <span class="kr">inline</span> <span class="kt">void</span> <span class="nf">classify_counts</span><span class="p">(</span><span class="n">u64</span><span class="o">*</span> <span class="n">mem</span><span class="p">)</span> <span class="p">{</span>
+      <span class="c1">//...
+</span><span class="c1"></span>      <span class="n">mem16</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">count_class_lookup16</span><span class="p">[</span><span class="n">mem16</span><span class="p">[</span><span class="mi">0</span><span class="p">]];</span>
+      <span class="n">mem16</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">count_class_lookup16</span><span class="p">[</span><span class="n">mem16</span><span class="p">[</span><span class="mi">1</span><span class="p">]];</span>
+      <span class="n">mem16</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">count_class_lookup16</span><span class="p">[</span><span class="n">mem16</span><span class="p">[</span><span class="mi">2</span><span class="p">]];</span>
+      <span class="n">mem16</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">count_class_lookup16</span><span class="p">[</span><span class="n">mem16</span><span class="p">[</span><span class="mi">3</span><span class="p">]];</span>
+	  <span class="c1">//...
+</span><span class="c1"></span><span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>其中 <code>count_class_lookup8</code> 便是白皮书提到的桶操作，将一字节宽的变量按如下映射。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="k">static</span> <span class="k">const</span> <span class="n">u8</span> <span class="n">count_class_lookup8</span><span class="p">[</span><span class="mi">256</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    
+      <span class="p">[</span><span class="mi">0</span><span class="p">]</span>           <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="c1">// 00000000
+</span><span class="c1"></span>      <span class="p">[</span><span class="mi">1</span><span class="p">]</span>           <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="c1">// 00000001
+</span><span class="c1"></span>      <span class="p">[</span><span class="mi">2</span><span class="p">]</span>           <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="c1">// 00000010
+</span><span class="c1"></span>      <span class="p">[</span><span class="mi">3</span><span class="p">]</span>           <span class="o">=</span> <span class="mi">4</span><span class="p">,</span> <span class="c1">// 00000100
+</span><span class="c1"></span>      <span class="p">[</span><span class="mi">4</span> <span class="p">...</span> <span class="mi">7</span><span class="p">]</span>     <span class="o">=</span> <span class="mi">8</span><span class="p">,</span> <span class="c1">// 00001000
+</span><span class="c1"></span>      <span class="p">[</span><span class="mi">8</span> <span class="p">...</span> <span class="mi">15</span><span class="p">]</span>    <span class="o">=</span> <span class="mi">16</span><span class="p">,</span><span class="c1">// 00010000
+</span><span class="c1"></span>      <span class="p">[</span><span class="mi">16</span> <span class="p">...</span> <span class="mi">31</span><span class="p">]</span>   <span class="o">=</span> <span class="mi">32</span><span class="p">,</span><span class="c1">// 00100000
+</span><span class="c1"></span>      <span class="p">[</span><span class="mi">32</span> <span class="p">...</span> <span class="mi">127</span><span class="p">]</span>  <span class="o">=</span> <span class="mi">64</span><span class="p">,</span><span class="c1">// 01000000
+</span><span class="c1"></span>      <span class="p">[</span><span class="mi">128</span> <span class="p">...</span> <span class="mi">255</span><span class="p">]</span> <span class="o">=</span> <span class="mi">128</span><span class="c1">// 10000000
+</span><span class="c1"></span>      
+<span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>二字节宽的 <code>count_class_lookup16</code> 就是将前后两个字节分开计算 <code>count_class_lookup8</code>，可能是为了提高效率。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="k">static</span> <span class="n">u16</span> <span class="n">count_class_lookup16</span><span class="p">[</span><span class="mi">65536</span><span class="p">];</span>
+
+<span class="n">EXP_ST</span> <span class="kt">void</span> <span class="nf">init_count_class16</span><span class="p">(</span><span class="kt">void</span><span class="p">)</span> <span class="p">{</span>
+
+  <span class="n">u32</span> <span class="n">b1</span><span class="p">,</span> <span class="n">b2</span><span class="p">;</span>
+
+  <span class="k">for</span> <span class="p">(</span><span class="n">b1</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">b1</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">;</span> <span class="n">b1</span><span class="o">++</span><span class="p">)</span> 
+    <span class="k">for</span> <span class="p">(</span><span class="n">b2</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">b2</span> <span class="o">&lt;</span> <span class="mi">256</span><span class="p">;</span> <span class="n">b2</span><span class="o">++</span><span class="p">)</span>
+      <span class="n">count_class_lookup16</span><span class="p">[(</span><span class="n">b1</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">+</span> <span class="n">b2</span><span class="p">]</span> <span class="o">=</span> 
+        <span class="p">(</span><span class="n">count_class_lookup8</span><span class="p">[</span><span class="n">b1</span><span class="p">]</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">|</span>
+        <span class="n">count_class_lookup8</span><span class="p">[</span><span class="n">b2</span><span class="p">];</span>
+
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><code>run_target()</code> 结束后会调用 <code>has_new_bits(virgin_bits) </code> 去判断是否产生了新的元组，该函数将 <code>trace_bits</code> 与 <code>virgin_bits</code> 做一系列对比，得到返回值：1 代表元组命中数改变，2 代表新元组产生。这个函数会将上述两个待比较的内存以 8 个 字节为一组（64位下），对每组进行如下对比判断，最后清零 <code>virgin_bits</code> 相应位，代表此位置对应元组已被命中。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c">    <span class="k">if</span> <span class="p">(</span><span class="n">unlikely</span><span class="p">(</span><span class="o">*</span><span class="n">current</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="n">unlikely</span><span class="p">(</span><span class="o">*</span><span class="n">current</span> <span class="o">&amp;</span> <span class="o">*</span><span class="n">virgin</span><span class="p">))</span> <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">likely</span><span class="p">(</span><span class="n">ret</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">))</span> <span class="p">{</span>
+
+        <span class="n">u8</span><span class="o">*</span> <span class="n">cur</span> <span class="o">=</span> <span class="p">(</span><span class="n">u8</span><span class="o">*</span><span class="p">)</span><span class="n">current</span><span class="p">;</span>
+        <span class="n">u8</span><span class="o">*</span> <span class="n">vir</span> <span class="o">=</span> <span class="p">(</span><span class="n">u8</span><span class="o">*</span><span class="p">)</span><span class="n">virgin</span><span class="p">;</span>
+
+        <span class="k">if</span> <span class="p">((</span><span class="n">cur</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="n">vir</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="mh">0xff</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">cur</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="n">vir</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mh">0xff</span><span class="p">)</span> <span class="o">||</span>
+            <span class="p">(</span><span class="n">cur</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="n">vir</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="mh">0xff</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">cur</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="n">vir</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">==</span> <span class="mh">0xff</span><span class="p">)</span> <span class="o">||</span>
+            <span class="p">(</span><span class="n">cur</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="n">vir</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="mh">0xff</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">cur</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="n">vir</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="o">==</span> <span class="mh">0xff</span><span class="p">)</span> <span class="o">||</span>
+            <span class="p">(</span><span class="n">cur</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="n">vir</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span> <span class="o">==</span> <span class="mh">0xff</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">cur</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="n">vir</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span> <span class="o">==</span> <span class="mh">0xff</span><span class="p">))</span> <span class="n">ret</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+        <span class="k">else</span> <span class="n">ret</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+      <span class="p">}</span>
+      <span class="o">*</span><span class="n">virgin</span> <span class="o">&amp;=</span> <span class="o">~*</span><span class="n">current</span><span class="p">;</span>
+    <span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>应该不会有人像我一样因为不注意 &amp;&amp; 与 == 运算符的优先级而看不懂逻辑吧？</p>
+</blockquote>
+<p>同样，save_if_interesting 中也会调用 has_new_bits 获取返回值，如果为 0 则代表本次执行没有新的路径产生，该测试用例不会被放入测试队列，也不会写入磁盘。只有返回 1 或 2 时才会保留测试用例。</p>
+<p>总的来说，AFL 的启发式变异就体现在此，只有当 has_new_bits 返回非 0 时（即测试用例带来了元组命中次数的改变或新命中元组的产生）该测试用例才会被放入测试队列被进一步变异。如白皮书说所，这样的启发式思想给 AFL 带来了超过 Blind fuzzing, 以 Block coverage, Edge coverage 为导向的 fuzzing 性能。</p>
+<h2 id="优胜者策略">优胜者策略</h2>
+<p>此部分主要涉及到 update_bitmap_score, cull_queue .</p>
+<h3 id="指导因子标记">指导因子标记</h3>
+<p>队列用链表实现，每个元素代表一个测试用例，结构体为 <code>queue_entry</code>，着重注意它的成员变量 <code>trace_mini</code>  与 <code>tc_ref</code> ，在这一部分起到重要效果。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">queue_entry</span> <span class="p">{</span>
+
+  <span class="n">u8</span><span class="o">*</span> <span class="n">fname</span><span class="p">;</span>                          <span class="cm">/* File name for the test case      */</span>
+  <span class="n">u32</span> <span class="n">len</span><span class="p">;</span>                            <span class="cm">/* Input length                     */</span>
+
+  <span class="n">u8</span>  <span class="n">cal_failed</span><span class="p">,</span>                     <span class="cm">/* Calibration failed?              */</span>
+      <span class="n">trim_done</span><span class="p">,</span>                      <span class="cm">/* Trimmed?                         */</span>
+      <span class="n">was_fuzzed</span><span class="p">,</span>                     <span class="cm">/* Had any fuzzing done yet?        */</span>
+      <span class="n">passed_det</span><span class="p">,</span>                     <span class="cm">/* Deterministic stages passed?     */</span>
+      <span class="n">has_new_cov</span><span class="p">,</span>                    <span class="cm">/* Triggers new coverage?           */</span>
+      <span class="n">var_behavior</span><span class="p">,</span>                   <span class="cm">/* Variable behavior?               */</span>
+      <span class="n">favored</span><span class="p">,</span>                        <span class="cm">/* Currently favored?               */</span>
+      <span class="n">fs_redundant</span><span class="p">;</span>                   <span class="cm">/* Marked as redundant in the fs?   */</span>
+
+  <span class="n">u32</span> <span class="n">bitmap_size</span><span class="p">,</span>                    <span class="cm">/* Number of bits set in bitmap     */</span>
+      <span class="n">exec_cksum</span><span class="p">;</span>                     <span class="cm">/* Checksum of the execution trace  */</span>
+
+  <span class="n">u64</span> <span class="n">exec_us</span><span class="p">,</span>                        <span class="cm">/* Execution time (us)              */</span>
+      <span class="n">handicap</span><span class="p">,</span>                       <span class="cm">/* Number of queue cycles behind    */</span>
+      <span class="n">depth</span><span class="p">;</span>                          <span class="cm">/* Path depth                       */</span>
+
+  <span class="n">u8</span><span class="o">*</span> <span class="n">trace_mini</span><span class="p">;</span>                     <span class="cm">/* Trace bytes, if kept             */</span>
+  <span class="n">u32</span> <span class="n">tc_ref</span><span class="p">;</span>                         <span class="cm">/* Trace bytes ref count            */</span>
+
+  <span class="k">struct</span> <span class="n">queue_entry</span> <span class="o">*</span><span class="n">next</span><span class="p">,</span>           <span class="cm">/* Next element, if any             */</span>
+                     <span class="o">*</span><span class="n">next_100</span><span class="p">;</span>       <span class="cm">/* 100 elements ahead               */</span>
+
+<span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>AFL 维护一个数组 <code>top_rated</code> ，它的每个条目对应 bitmap 中一个字节（即一个元组的命中情况）。 <code>static struct queue_entry* top_rated[MAP_SIZE];  </code> 对表中每一个字节，即每一个元组，都用 <code>top_rated</code> 一一对应到一个队列元素，代表这个元组的“最佳测试用例”。</p>
+<p>对每个队列元素定义参考值 <code>u64 fav_factor = q-&gt;exec_us * q-&gt;len;</code> AFL 用测试用例执行时间与长度的乘积作为“最佳测试用例”的度量标准，如白皮书所说，简单却有效。</p>
+<p>在 <code>run_target()</code> 中得到 bitmap 后会调用 update_bitmap_score 函数。它遍历 <code>trace_bits</code> 的每个字节，如果当前字节为 1（即此元组在此次执行时命中）则初始化 <code>top_rated</code> 条目为此队列元素。当以后执行又命中此元组时（即当 <code>top_rated</code> 对应条目不为空时），该元组会选取更小参考值的队列元素作为其 <code>top_rated</code> 条目，并将 <code>score_changed</code> 置 1 。在这个过程中，队列元素的成员变量 <code>tc_ref</code> 记录了此队列元素被元组认为是优胜者的次数，如果减为 0，则会将 <code>trace_mini</code> 空间释放；如果从 0 到 1，则为 成员变量 <code>trace_mini </code> 分配内存，并调用 minimize_bits 来缩减 <code>trace_bits</code> 得到 <code>trace_mini</code> 。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c">    <span class="k">if</span> <span class="p">(</span><span class="n">top_rated</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">fav_factor</span> <span class="o">&gt;</span> <span class="n">top_rated</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">exec_us</span> <span class="o">*</span> <span class="n">top_rated</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">len</span><span class="p">)</span> <span class="k">continue</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="o">!--</span><span class="n">top_rated</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">tc_ref</span><span class="p">)</span> <span class="p">{</span>  <span class="c1">// 减到 0 则释放内存
+</span><span class="c1"></span>            <span class="n">ck_free</span><span class="p">(</span><span class="n">top_rated</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">trace_mini</span><span class="p">);</span>
+            <span class="n">top_rated</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">trace_mini</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="n">top_rated</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">q</span><span class="p">;</span>
+    <span class="n">q</span><span class="o">-&gt;</span><span class="n">tc_ref</span><span class="o">++</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">trace_mini</span><span class="p">)</span> <span class="p">{</span>	
+        <span class="n">q</span><span class="o">-&gt;</span><span class="n">trace_mini</span> <span class="o">=</span> <span class="n">ck_alloc</span><span class="p">(</span><span class="n">MAP_SIZE</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="p">);</span> <span class="c1">// 分配内存
+</span><span class="c1"></span>        <span class="n">minimize_bits</span><span class="p">(</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">trace_mini</span><span class="p">,</span> <span class="n">trace_bits</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="n">score_changed</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>update_bitmap_score 的优化方向为：<code>trace_bits</code> 不变但队列元素的 <code>fav_factor</code> 趋于最小。</p>
+<p>而 minimize_bits 函数就是简单地将 <code>trace_bits </code>  缩减到原来的 1/8 存储到 <code>trace_mini</code> ,  <code>trace_mini</code> 的一个 bit 对应了 <code>trace_bits</code> 的一个字节。也就是说，这样的压缩方式去掉了 <code>trace_bits</code> 中元组命中次数的信息，而只保留了该元组是否命中的信息。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="cm">/* Compact trace bytes into a smaller bitmap. We effectively just drop the
+</span><span class="cm">   count information here. This is called only sporadically, for some
+</span><span class="cm">   new paths. */</span>
+ 
+<span class="k">static</span> <span class="kt">void</span> <span class="nf">minimize_bits</span><span class="p">(</span><span class="n">u8</span> <span class="o">*</span><span class="n">dst</span><span class="p">,</span> <span class="n">u8</span> <span class="o">*</span><span class="n">src</span><span class="p">)</span> <span class="p">{</span>
+ 
+    <span class="n">u32</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+ 
+    <span class="k">while</span> <span class="p">(</span><span class="n">i</span> <span class="o">&lt;</span> <span class="n">MAP_SIZE</span><span class="p">)</span> <span class="p">{</span>
+ 
+        <span class="k">if</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="n">src</span><span class="o">++</span><span class="p">))</span> <span class="n">dst</span><span class="p">[</span><span class="n">i</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="p">]</span> <span class="o">|=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">i</span> <span class="o">&amp;</span> <span class="mi">7</span><span class="p">);</span>
+        <span class="n">i</span><span class="o">++</span><span class="p">;</span>
+ 
+    <span class="p">}</span> 
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>上述过程得到的 <code>trace_mini</code>, <code>top_rated</code>, <code>score_changed</code> 将作为指导因子，指导后续过程。</p>
+<h3 id="剪枝因子标记">剪枝因子标记</h3>
+<p><code>run_target()</code> 后会调用 cull_queue 对队列进行剪枝。该函数如下：</p>
+<p>初始化 <code>temp_v</code>  为全二进制一的内存，大小与 <code>trace_mini</code> 相同，它的一个 bit 同样对应了 <code>trace_bits</code> 的一个字节，用于在这一函数中标识没有被访问的元组。</p>
+<p>这里本质上还是使用了贪心算法。前面提到，队列元素的 <code>trace_mini</code> 保存了该测试用例命中的元组信息。而 <code>top_rated</code> 指示的队列元素的 <code>trace_mini</code> 便是在优胜者圈子内的测试用例命中的元组信息。但不是所有优胜者的 <code>favored</code> 都被置 1，AFL 贪心地认为对于每个被命中的元组，遍历时第一次遇到的优胜者就是“更受喜爱的”，并置成员变量 <code>favored</code> 为 1.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c">	  <span class="k">if</span> <span class="p">(</span><span class="n">top_rated</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">temp_v</span><span class="p">[</span><span class="n">i</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="p">]</span> <span class="o">&amp;</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="p">(</span><span class="n">i</span> <span class="o">&amp;</span> <span class="mi">7</span><span class="p">))))</span> <span class="p">{</span>
+
+      <span class="n">u32</span> <span class="n">j</span> <span class="o">=</span> <span class="n">MAP_SIZE</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="p">;</span>
+
+      <span class="cm">/* Remove all bits belonging to the current entry from temp_v. */</span>
+
+      <span class="k">while</span> <span class="p">(</span><span class="n">j</span><span class="o">--</span><span class="p">)</span> 
+        <span class="k">if</span> <span class="p">(</span><span class="n">top_rated</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">trace_mini</span><span class="p">[</span><span class="n">j</span><span class="p">])</span>
+          <span class="n">temp_v</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="n">top_rated</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">trace_mini</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+
+      <span class="n">top_rated</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">favored</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+      <span class="n">queued_favored</span><span class="o">++</span><span class="p">;</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">top_rated</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">-&gt;</span><span class="n">was_fuzzed</span><span class="p">)</span> <span class="n">pending_favored</span><span class="o">++</span><span class="p">;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>标记好“更受喜爱”的测试用例之后，遍历每个测试用例调用 mark_as_redundant 做处理。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c">  <span class="n">q</span> <span class="o">=</span> <span class="n">queue</span><span class="p">;</span>
+
+  <span class="k">while</span> <span class="p">(</span><span class="n">q</span><span class="p">)</span> <span class="p">{</span>
+    <span class="n">mark_as_redundant</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="o">!</span><span class="n">q</span><span class="o">-&gt;</span><span class="n">favored</span><span class="p">);</span>
+    <span class="n">q</span> <span class="o">=</span> <span class="n">q</span><span class="o">-&gt;</span><span class="n">next</span><span class="p">;</span>
+  <span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>在 mark_as_redundant 中，未被 <code>favored </code> 标记的测试用例，其成员变量 <code>fs_redundant</code> 会被置 1，并放入 out_dir/queue/.state/redundant_edges/ 文件夹中。如果它在后续又被 <code>favored</code> 标记，则从文件夹中删去；反之同理。</p>
+<p>所以总的来说 cull_queue 干了两件事情，选择优胜者并标记为 <code>favored</code> ，并将剩余测试用例标记为 <code>fs_redundant</code> 并在磁盘中留下名字。正如白皮书所说，AFL 并未将非优胜者直接剔除。</p>
+<h3 id="指导测试过程">指导测试过程</h3>
+<p>在 fuzz_one 函数中</p>
+<ul>
+<li>
+<p>pending_favored 时，was_fuzzed 或是 非优胜者 会以 <code>SKIP_TO_NEW_PROB</code> 概率跳过测试。</p>
+</li>
+<li>
+<p>没有 pending_favored 时</p>
+<ul>
+<li>非优胜者
+<ul>
+<li>没被 fuzz 过会以 <code>SKIP_NFAV_NEW_PROB</code> 概率跳过。</li>
+<li>被 fuzz 过以 <code>SKIP_NFAV_OLD_PROB</code> 概率跳过。</li>
+</ul>
+</li>
+<li>优胜者不跳过</li>
+</ul>
+</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c">  <span class="k">if</span> <span class="p">(</span><span class="n">pending_favored</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="cm">/* If we have any favored, non-fuzzed new arrivals in the queue,
+</span><span class="cm">       possibly skip to them at the expense of already-fuzzed or non-favored
+</span><span class="cm">       cases. */</span>
+
+    <span class="k">if</span> <span class="p">((</span><span class="n">queue_cur</span><span class="o">-&gt;</span><span class="n">was_fuzzed</span> <span class="o">||</span> <span class="o">!</span><span class="n">queue_cur</span><span class="o">-&gt;</span><span class="n">favored</span><span class="p">)</span> <span class="o">&amp;&amp;</span>
+        <span class="n">UR</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">SKIP_TO_NEW_PROB</span><span class="p">)</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+
+  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">dumb_mode</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">queue_cur</span><span class="o">-&gt;</span><span class="n">favored</span> <span class="o">&amp;&amp;</span> <span class="n">queued_paths</span> <span class="o">&gt;</span> <span class="mi">10</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="cm">/* Otherwise, still possibly skip non-favored cases, albeit less often.
+</span><span class="cm">       The odds of skipping stuff are higher for already-fuzzed inputs and
+</span><span class="cm">       lower for never-fuzzed entries. */</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">queue_cycle</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">queue_cur</span><span class="o">-&gt;</span><span class="n">was_fuzzed</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="n">UR</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">SKIP_NFAV_NEW_PROB</span><span class="p">)</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+
+    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="n">UR</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">SKIP_NFAV_OLD_PROB</span><span class="p">)</span> <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+
+    <span class="p">}</span>
+
+  <span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这便是剪枝因子指导测试队列减小的全过程。</p></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2022-01-23</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/2022/01/afl-rsc2/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://xidoo.top/2022/01/afl-rsc2/" data-title="AFL 源码分析（二）路径覆盖信息 &amp; 队列优胜者"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://xidoo.top/2022/01/afl-rsc2/"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on WhatsApp" data-sharer="whatsapp" data-url="http://xidoo.top/2022/01/afl-rsc2/" data-title="AFL 源码分析（二）路径覆盖信息 &amp; 队列优胜者" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://xidoo.top/2022/01/afl-rsc2/" data-title="AFL 源码分析（二）路径覆盖信息 &amp; 队列优胜者"><i data-svg-src="/lib/simple-icons/icons/line.min.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://xidoo.top/2022/01/afl-rsc2/" data-title="AFL 源码分析（二）路径覆盖信息 &amp; 队列优胜者"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="Share on Myspace" data-sharer="myspace" data-url="http://xidoo.top/2022/01/afl-rsc2/" data-title="AFL 源码分析（二）路径覆盖信息 &amp; 队列优胜者" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="Share on Blogger" data-sharer="blogger" data-url="http://xidoo.top/2022/01/afl-rsc2/" data-title="AFL 源码分析（二）路径覆盖信息 &amp; 队列优胜者" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="Share on Evernote" data-sharer="evernote" data-url="http://xidoo.top/2022/01/afl-rsc2/" data-title="AFL 源码分析（二）路径覆盖信息 &amp; 队列优胜者"><i class="fab fa-evernote fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/2022/01/afl-rsc/" class="prev" rel="prev" title="AFL 源码分析（一）从 0 到 1 再到 n"><i class="fas fa-angle-left fa-fw"></i>AFL 源码分析（一）从 0 到 1 再到 n</a>
+            <a href="/2022/01/afl-rsc3/" class="next" rel="next" title="AFL 源码分析（三）forkserver 详解">AFL 源码分析（三）forkserver 详解<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">🏴‍☠️ Love it, Make magic</div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2019 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">x1do0</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript" src="/lib/smooth-scroll/smooth-scroll.min.js"></script><script type="text/javascript" src="/lib/autocomplete/autocomplete.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.min.js"></script><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/sharer/sharer.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js"></script><script type="text/javascript" src="/lib/katex/auto-render.min.js"></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js"></script><script type="text/javascript" src="/lib/katex/mhchem.min.js"></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":15},"comment":{},"cookieconsent":{"content":{"dismiss":"Got it!","link":"Learn more","message":"This website uses Cookies to improve your experience."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

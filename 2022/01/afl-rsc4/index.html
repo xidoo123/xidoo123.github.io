@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>AFL 源码分析（完）变异详解 - Stay Hungry</title><meta name="Description" content="This is My New Hugo Site"><meta property="og:title" content="AFL 源码分析（完）变异详解" />
+<meta property="og:description" content="本文将细致阐述 AFL 变异方式，包括各阶段的变异算子与次数等细节。变异模式是固定的，所以变异细节看上去繁琐又无趣。但正如白皮书中提到，“它被认为是一个被实践证实有效的 hack 行为集合，把这些行为以最简单、最健壮的形式实现便得到了 AFL”，经验主义的产物是不可小觑的。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://xidoo.top/2022/01/afl-rsc4/" /><meta property="og:image" content="http://xidoo.top/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2022-01-28T19:14:31+08:00" />
+<meta property="article:modified_time" content="2022-01-28T19:14:31+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://xidoo.top/logo.png"/>
+
+<meta name="twitter:title" content="AFL 源码分析（完）变异详解"/>
+<meta name="twitter:description" content="本文将细致阐述 AFL 变异方式，包括各阶段的变异算子与次数等细节。变异模式是固定的，所以变异细节看上去繁琐又无趣。但正如白皮书中提到，“它被认为是一个被实践证实有效的 hack 行为集合，把这些行为以最简单、最健壮的形式实现便得到了 AFL”，经验主义的产物是不可小觑的。"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://xidoo.top/2022/01/afl-rsc4/" /><link rel="prev" href="http://xidoo.top/2022/01/afl-rsc3/" /><link rel="next" href="http://xidoo.top/2022/07/actf2022-kkk/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "AFL 源码分析（完）变异详解",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/xidoo.top\/2022\/01\/afl-rsc4\/"
+        },"genre": "posts","wordcount":  1502 ,
+        "url": "http:\/\/xidoo.top\/2022\/01\/afl-rsc4\/","datePublished": "2022-01-28T19:14:31+08:00","dateModified": "2022-01-28T19:14:31+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "x1do0"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('light' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'light' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/friends/"> Friends </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/friends/" title="">Friends</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">AFL 源码分析（完）变异详解</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>x1do0</a></span>&nbsp;<span class="post-category">included in <a href="/categories/general/"><i class="far fa-folder fa-fw"></i>General</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2022-01-28">2022-01-28</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;1502 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;8 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#simple-bitflip">simple bitflip</a>
+      <ul>
+        <li><a href="#bitflip-11">bitflip 1/1</a></li>
+        <li><a href="#bitflip-21">bitflip 2/1</a></li>
+        <li><a href="#bitflip-41">bitflip 4/1</a></li>
+        <li><a href="#bitflip-88">bitflip 8/8</a></li>
+        <li><a href="#bitflip-168">bitflip 16/8</a></li>
+        <li><a href="#bitflip-328">bitflip 32/8</a></li>
+      </ul>
+    </li>
+    <li><a href="#arithmetic-incdec">arithmetic inc/dec</a>
+      <ul>
+        <li><a href="#arith-88">arith 8/8</a></li>
+        <li><a href="#arith-168">arith 16/8</a></li>
+        <li><a href="#arith-328">arith 32/8</a></li>
+      </ul>
+    </li>
+    <li><a href="#interesting-values">interesting values</a>
+      <ul>
+        <li><a href="#interest-88">interest 8/8</a></li>
+        <li><a href="#interest-168">interest 16/8</a></li>
+        <li><a href="#interest-328">interest 32/8</a></li>
+      </ul>
+    </li>
+    <li><a href="#dictionary-stuff">dictionary stuff</a>
+      <ul>
+        <li><a href="#user-extras-over">user extras (over)</a></li>
+        <li><a href="#user-extras-insert">user extras (insert)</a></li>
+        <li><a href="#auto-extras-over">auto extras (over)</a></li>
+      </ul>
+    </li>
+    <li><a href="#random-havoc">random havoc</a></li>
+    <li><a href="#splicing">splicing</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>本文将细致阐述 AFL 变异方式，包括各阶段的变异算子与次数等细节。变异模式是固定的，所以变异细节看上去繁琐又无趣。但正如白皮书中提到，“它被认为是一个被实践证实有效的 hack 行为集合，把这些行为以最简单、最健壮的形式实现便得到了 AFL”，经验主义的产物是不可小觑的。</p>
+<p><a href="https://xidoo.top/2022/01/afl-rsc/#%E7%AC%AC-n-%E6%AC%A1%E6%89%A7%E8%A1%8C" target="_blank" rel="noopener noreffer">前文</a>提到在 fuzz_one 中会对测试用例进行如下阶段的变异：</p>
+<ol>
+<li>simple bitflip（+ dictionary construction）</li>
+<li>arithmetic inc/dec</li>
+<li>interesting values</li>
+<li>dictionary stuff</li>
+<li>random havoc</li>
+<li>splicing</li>
+</ol>
+<p>接下来我们来详细描述一下各个过程。</p>
+<h2 id="simple-bitflip">simple bitflip</h2>
+<p>每个翻转的原子操作都是 <code>FLIP_BIT(out_buf, stage_cur);</code> ，其中 <code>out_buf</code> 为输出缓冲区，存放结果；<code>stage_cur</code> 是循环变量，从 0 自增到特定长度。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="cp">#define FLIP_BIT(_ar, _b) do { \
+</span><span class="cp">    u8* _arf = (u8*)(_ar); \
+</span><span class="cp">    u32 _bf = (_b); \
+</span><span class="cp">    _arf[(_bf) &gt;&gt; 3] ^= (128 &gt;&gt; ((_bf) &amp; 7)); \
+</span><span class="cp">  } while (0)
+</span></code></pre></td></tr></table>
+</div>
+</div><p>此部分有以下几个阶段</p>
+<h3 id="bitflip-11">bitflip 1/1</h3>
+<p>从头到尾，步长为 1 bit，每次翻转 1 bit</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c">  <span class="k">for</span> <span class="p">(</span><span class="n">stage_cur</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">stage_cur</span> <span class="o">&lt;</span> <span class="n">stage_max</span><span class="p">;</span> <span class="n">stage_cur</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="n">stage_cur_byte</span> <span class="o">=</span> <span class="n">stage_cur</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="p">;</span>
+
+    <span class="n">FLIP_BIT</span><span class="p">(</span><span class="n">out_buf</span><span class="p">,</span> <span class="n">stage_cur</span><span class="p">);</span> <span class="c1">// 翻一位
+</span><span class="c1"></span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">common_fuzz_stuff</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">out_buf</span><span class="p">,</span> <span class="n">len</span><span class="p">))</span> <span class="k">goto</span> <span class="n">abandon_entry</span><span class="p">;</span> <span class="c1">// 执行看看效果
+</span><span class="c1"></span>
+    <span class="n">FLIP_BIT</span><span class="p">(</span><span class="n">out_buf</span><span class="p">,</span> <span class="n">stage_cur</span><span class="p">);</span> <span class="c1">// 复原
+</span><span class="c1"></span>      <span class="c1">// ...
+</span><span class="c1"></span>      <span class="c1">// token 处理
+</span><span class="c1"></span>  <span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这个阶段比较特殊的是 token 处理。每第八次翻转并执行之后（即翻转每个 byte 的最低有效位之后），都会检查 <code>trace_bits</code> 的改变情况。如果 checksum 和最初没翻转之前的不一样，但是连续几个 byte 翻转以后得到的 checksum 却相同，则将这个字节加入字典。</p>
+<blockquote>
+<p>如白皮书所说，以此来改善 magic number 等固定结构的 fuzz 表现。如果遇到 magic number，对它的每个字节改变都会使程序走向崩溃路径，表现相同且与原路径不同。</p>
+</blockquote>
+<blockquote>
+<p>“对于一些文件来说，我们已知其格式中出现的 token 长度不会超过 4，那么我们就可以修改<code>MAX_AUTO_EXTRA</code> 为 4 并重新编译 AFL，以排除一些明显不会是 token 的情况。遗憾的是，这些设置是通过宏定义来实现，所以不能做到运行时指定，每次修改后必须重新编译 AFL。”</p>
+<p><a href="http://rk700.github.io/2018/01/04/afl-mutations/" target="_blank" rel="noopener noreffer">http://rk700.github.io/2018/01/04/afl-mutations/</a></p>
+</blockquote>
+<h3 id="bitflip-21">bitflip 2/1</h3>
+<p>从头到尾，步长为 1 bit，每次翻转相邻的 2 bit</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c">  <span class="k">for</span> <span class="p">(</span><span class="n">stage_cur</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">stage_cur</span> <span class="o">&lt;</span> <span class="n">stage_max</span><span class="p">;</span> <span class="n">stage_cur</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="n">stage_cur_byte</span> <span class="o">=</span> <span class="n">stage_cur</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="p">;</span>
+
+    <span class="n">FLIP_BIT</span><span class="p">(</span><span class="n">out_buf</span><span class="p">,</span> <span class="n">stage_cur</span><span class="p">);</span>
+    <span class="n">FLIP_BIT</span><span class="p">(</span><span class="n">out_buf</span><span class="p">,</span> <span class="n">stage_cur</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">common_fuzz_stuff</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">out_buf</span><span class="p">,</span> <span class="n">len</span><span class="p">))</span> <span class="k">goto</span> <span class="n">abandon_entry</span><span class="p">;</span>
+
+    <span class="n">FLIP_BIT</span><span class="p">(</span><span class="n">out_buf</span><span class="p">,</span> <span class="n">stage_cur</span><span class="p">);</span>  <span class="c1">// 复原
+</span><span class="c1"></span>    <span class="n">FLIP_BIT</span><span class="p">(</span><span class="n">out_buf</span><span class="p">,</span> <span class="n">stage_cur</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+
+  <span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="bitflip-41">bitflip 4/1</h3>
+<p>从头到尾，步长为 1 bit，每次翻转相邻的 4 bit</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c">  <span class="k">for</span> <span class="p">(</span><span class="n">stage_cur</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">stage_cur</span> <span class="o">&lt;</span> <span class="n">stage_max</span><span class="p">;</span> <span class="n">stage_cur</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="n">stage_cur_byte</span> <span class="o">=</span> <span class="n">stage_cur</span> <span class="o">&gt;&gt;</span> <span class="mi">3</span><span class="p">;</span>
+
+    <span class="n">FLIP_BIT</span><span class="p">(</span><span class="n">out_buf</span><span class="p">,</span> <span class="n">stage_cur</span><span class="p">);</span>
+    <span class="n">FLIP_BIT</span><span class="p">(</span><span class="n">out_buf</span><span class="p">,</span> <span class="n">stage_cur</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="n">FLIP_BIT</span><span class="p">(</span><span class="n">out_buf</span><span class="p">,</span> <span class="n">stage_cur</span> <span class="o">+</span> <span class="mi">2</span><span class="p">);</span>
+    <span class="n">FLIP_BIT</span><span class="p">(</span><span class="n">out_buf</span><span class="p">,</span> <span class="n">stage_cur</span> <span class="o">+</span> <span class="mi">3</span><span class="p">);</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">common_fuzz_stuff</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">out_buf</span><span class="p">,</span> <span class="n">len</span><span class="p">))</span> <span class="k">goto</span> <span class="n">abandon_entry</span><span class="p">;</span>
+
+    <span class="n">FLIP_BIT</span><span class="p">(</span><span class="n">out_buf</span><span class="p">,</span> <span class="n">stage_cur</span><span class="p">);</span>
+    <span class="n">FLIP_BIT</span><span class="p">(</span><span class="n">out_buf</span><span class="p">,</span> <span class="n">stage_cur</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="n">FLIP_BIT</span><span class="p">(</span><span class="n">out_buf</span><span class="p">,</span> <span class="n">stage_cur</span> <span class="o">+</span> <span class="mi">2</span><span class="p">);</span>
+    <span class="n">FLIP_BIT</span><span class="p">(</span><span class="n">out_buf</span><span class="p">,</span> <span class="n">stage_cur</span> <span class="o">+</span> <span class="mi">3</span><span class="p">);</span>
+
+  <span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="bitflip-88">bitflip 8/8</h3>
+<p>这一阶段首先会创建 <code>eff_map</code> 空间，长度为测试用例字节数，并将头尾置 1，其余为 0.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="cp">#define EFF_APOS(_p)          ((_p) &gt;&gt; EFF_MAP_SCALE2)
+</span><span class="cp">#define EFF_REM(_x)           ((_x) &amp; ((1 &lt;&lt; EFF_MAP_SCALE2) - 1))
+</span><span class="cp">#define EFF_ALEN(_l)          (EFF_APOS(_l) + !!EFF_REM(_l))
+</span><span class="cp">#define EFF_SPAN_ALEN(_p, _l) (EFF_APOS((_p) + (_l) - 1) - EFF_APOS(_p) + 1)
+</span><span class="cp"></span>
+  <span class="cm">/* Initialize effector map for the next step (see comments below). Always
+</span><span class="cm">     flag first and last byte as doing something. */</span>
+
+  <span class="n">eff_map</span>    <span class="o">=</span> <span class="n">ck_alloc</span><span class="p">(</span><span class="n">EFF_ALEN</span><span class="p">(</span><span class="n">len</span><span class="p">));</span>
+  <span class="n">eff_map</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+
+  <span class="k">if</span> <span class="p">(</span><span class="n">EFF_APOS</span><span class="p">(</span><span class="n">len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span> 	
+    <span class="n">eff_map</span><span class="p">[</span><span class="n">EFF_APOS</span><span class="p">(</span><span class="n">len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">eff_cnt</span><span class="o">++</span><span class="p">;</span>
+  <span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>从头到尾，步长为 1 byte，每次翻转 1 byte</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c">	<span class="k">for</span> <span class="p">(</span><span class="n">stage_cur</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">stage_cur</span> <span class="o">&lt;</span> <span class="n">stage_max</span><span class="p">;</span> <span class="n">stage_cur</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="n">stage_cur_byte</span> <span class="o">=</span> <span class="n">stage_cur</span><span class="p">;</span>
+
+    <span class="n">out_buf</span><span class="p">[</span><span class="n">stage_cur</span><span class="p">]</span> <span class="o">^=</span> <span class="mh">0xFF</span><span class="p">;</span> <span class="c1">// 翻转整个 byte
+</span><span class="c1"></span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">common_fuzz_stuff</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">out_buf</span><span class="p">,</span> <span class="n">len</span><span class="p">))</span> <span class="k">goto</span> <span class="n">abandon_entry</span><span class="p">;</span>
+    <span class="c1">// ...
+</span><span class="c1"></span>    <span class="c1">// effector map 处理
+</span><span class="c1"></span>        
+    <span class="n">out_buf</span><span class="p">[</span><span class="n">stage_cur</span><span class="p">]</span> <span class="o">^=</span> <span class="mh">0xFF</span><span class="p">;</span> <span class="c1">// 复原
+</span><span class="c1"></span>	<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>翻转后检查 <code>eff_map</code> ，如果此字节对应项为 0 ，则检查翻转以后是否带来了路径变化，是则置 1.</p>
+<blockquote>
+<p>当整个 byte 的改变都没有带来任何路径变化时， AFL 认为这个 byte 是没有价值的，后续会根据 <code>eff_map</code> 来选择性跳过。白皮书指出，这样的字节可能只是单纯的非元数据。</p>
+</blockquote>
+<p>当然，AFL 做了一点例外处理。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="cm">/* Minimum input file length at which the effector logic kicks in: */</span>
+
+<span class="cp">#define EFF_MIN_LEN 128 
+</span><span class="cp"></span><span class="cm">/* Maximum effector density past which everything is just fuzzed unconditionally (%): */</span>
+
+<span class="cp">#define EFF_MAX_PERC 90
+</span></code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>“ 默认情况下，如果文件小于 128 bytes，那么所有字符都是“有效”的；同样地，如果 AFL 发现一个文件有超过 90% 的 bytes 都是“有效”的，那么也不差那 10% 了，大笔一挥，干脆把所有字符都划归为“有效”。”</p>
+</blockquote>
+<p>至此以后的翻转操作，均会参考 <code>eff_map</code> ，没有意义的 byte 会直接跳过操作。</p>
+<h3 id="bitflip-168">bitflip 16/8</h3>
+<p>从头到尾，步长为 1 byte，每次翻转相邻的 2 byte</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c">  <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="cm">/* Let&#39;s consult the effector map... */</span>
+	<span class="c1">// 两个字节都没意义，不用翻了
+</span><span class="c1"></span>    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">eff_map</span><span class="p">[</span><span class="n">EFF_APOS</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">eff_map</span><span class="p">[</span><span class="n">EFF_APOS</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)])</span> <span class="p">{</span>
+      <span class="n">stage_max</span><span class="o">--</span><span class="p">;</span>
+      <span class="k">continue</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">stage_cur_byte</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+
+    <span class="o">*</span><span class="p">(</span><span class="n">u16</span><span class="o">*</span><span class="p">)(</span><span class="n">out_buf</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span> <span class="o">^=</span> <span class="mh">0xFFFF</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">common_fuzz_stuff</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">out_buf</span><span class="p">,</span> <span class="n">len</span><span class="p">))</span> <span class="k">goto</span> <span class="n">abandon_entry</span><span class="p">;</span>
+    <span class="n">stage_cur</span><span class="o">++</span><span class="p">;</span>
+
+    <span class="o">*</span><span class="p">(</span><span class="n">u16</span><span class="o">*</span><span class="p">)(</span><span class="n">out_buf</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span> <span class="o">^=</span> <span class="mh">0xFFFF</span><span class="p">;</span>
+
+
+  <span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="bitflip-328">bitflip 32/8</h3>
+<p>从头到尾，步长为 1 byte，每次翻转相邻的 4 byte</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c">	<span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span> <span class="o">-</span> <span class="mi">3</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="cm">/* Let&#39;s consult the effector map... */</span>
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">eff_map</span><span class="p">[</span><span class="n">EFF_APOS</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">eff_map</span><span class="p">[</span><span class="n">EFF_APOS</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span> <span class="o">&amp;&amp;</span>
+        <span class="o">!</span><span class="n">eff_map</span><span class="p">[</span><span class="n">EFF_APOS</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">)]</span> <span class="o">&amp;&amp;</span> <span class="o">!</span><span class="n">eff_map</span><span class="p">[</span><span class="n">EFF_APOS</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)])</span> <span class="p">{</span>
+      <span class="n">stage_max</span><span class="o">--</span><span class="p">;</span>
+      <span class="k">continue</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">stage_cur_byte</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+
+    <span class="o">*</span><span class="p">(</span><span class="n">u32</span><span class="o">*</span><span class="p">)(</span><span class="n">out_buf</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span> <span class="o">^=</span> <span class="mh">0xFFFFFFFF</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">common_fuzz_stuff</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">out_buf</span><span class="p">,</span> <span class="n">len</span><span class="p">))</span> <span class="k">goto</span> <span class="n">abandon_entry</span><span class="p">;</span>
+    <span class="n">stage_cur</span><span class="o">++</span><span class="p">;</span>
+
+    <span class="o">*</span><span class="p">(</span><span class="n">u32</span><span class="o">*</span><span class="p">)(</span><span class="n">out_buf</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span> <span class="o">^=</span> <span class="mh">0xFFFFFFFF</span><span class="p">;</span>
+
+  <span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="arithmetic-incdec">arithmetic inc/dec</h2>
+<p>这一阶段对测试用例做加减法变异。config.h 中将宏 <code>ARITH_MAX</code> 定义为 35，代表了算术运算范围为 -35 到 +35. 其中用 could_be_bitflip 来检查是否此步骤会产生和 bitflip 一样的结果（这是可以用位比较做到的），以减少重复执行。同时， <code>eff_map</code> 也指导了此步骤。</p>
+<h3 id="arith-88">arith 8/8</h3>
+<p>从头到尾，步长为 1 byte，对每个字节都从 -35 一直试到 +35.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="n">u8</span> <span class="n">orig</span> <span class="o">=</span> <span class="n">out_buf</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+
+    <span class="cm">/* Let&#39;s consult the effector map... */</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">eff_map</span><span class="p">[</span><span class="n">EFF_APOS</span><span class="p">(</span><span class="n">i</span><span class="p">)])</span> <span class="p">{</span>
+      <span class="n">stage_max</span> <span class="o">-=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ARITH_MAX</span><span class="p">;</span>
+      <span class="k">continue</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">stage_cur_byte</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;=</span> <span class="n">ARITH_MAX</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="n">u8</span> <span class="n">r</span> <span class="o">=</span> <span class="n">orig</span> <span class="o">^</span> <span class="p">(</span><span class="n">orig</span> <span class="o">+</span> <span class="n">j</span><span class="p">);</span>
+
+      <span class="cm">/* Do arithmetic operations only if the result couldn&#39;t be a product
+</span><span class="cm">         of a bitflip. */</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">could_be_bitflip</span><span class="p">(</span><span class="n">r</span><span class="p">))</span> <span class="p">{</span>
+
+        <span class="n">stage_cur_val</span> <span class="o">=</span> <span class="n">j</span><span class="p">;</span>
+        <span class="n">out_buf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">orig</span> <span class="o">+</span> <span class="n">j</span><span class="p">;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">common_fuzz_stuff</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">out_buf</span><span class="p">,</span> <span class="n">len</span><span class="p">))</span> <span class="k">goto</span> <span class="n">abandon_entry</span><span class="p">;</span>
+        <span class="n">stage_cur</span><span class="o">++</span><span class="p">;</span>
+
+      <span class="p">}</span> <span class="k">else</span> <span class="n">stage_max</span><span class="o">--</span><span class="p">;</span>
+
+      <span class="n">r</span> <span class="o">=</span>  <span class="n">orig</span> <span class="o">^</span> <span class="p">(</span><span class="n">orig</span> <span class="o">-</span> <span class="n">j</span><span class="p">);</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">could_be_bitflip</span><span class="p">(</span><span class="n">r</span><span class="p">))</span> <span class="p">{</span>
+
+        <span class="n">stage_cur_val</span> <span class="o">=</span> <span class="o">-</span><span class="n">j</span><span class="p">;</span>
+        <span class="n">out_buf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">orig</span> <span class="o">-</span> <span class="n">j</span><span class="p">;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">common_fuzz_stuff</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">out_buf</span><span class="p">,</span> <span class="n">len</span><span class="p">))</span> <span class="k">goto</span> <span class="n">abandon_entry</span><span class="p">;</span>
+        <span class="n">stage_cur</span><span class="o">++</span><span class="p">;</span>
+
+      <span class="p">}</span> <span class="k">else</span> <span class="n">stage_max</span><span class="o">--</span><span class="p">;</span>
+
+      <span class="n">out_buf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">orig</span><span class="p">;</span>
+
+    <span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="arith-168">arith 16/8</h3>
+<p>从头到尾，步长为 1 byte，对每个 word 都从 -35 一直试到 +35.</p>
+<p>这里 AFL 考虑了大小端两种情况。</p>
+<h3 id="arith-328">arith 32/8</h3>
+<p>从头到尾，步长为 1 byte，对每个 dword 都从 -35 一直试到 +35.</p>
+<p>同样考虑了大小端。</p>
+<h2 id="interesting-values">interesting values</h2>
+<p>这一阶段用一些特殊的常数对测试用例做替换操作。config.h 中定义了这些 interesting values.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="k">static</span> <span class="n">s8</span>  <span class="n">interesting_8</span><span class="p">[]</span>  <span class="o">=</span> <span class="p">{</span> <span class="n">INTERESTING_8</span> <span class="p">};</span>
+<span class="k">static</span> <span class="n">s16</span> <span class="n">interesting_16</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span> <span class="n">INTERESTING_8</span><span class="p">,</span> <span class="n">INTERESTING_16</span> <span class="p">};</span>
+<span class="k">static</span> <span class="n">s32</span> <span class="n">interesting_32</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span> <span class="n">INTERESTING_8</span><span class="p">,</span> <span class="n">INTERESTING_16</span><span class="p">,</span> <span class="n">INTERESTING_32</span> <span class="p">};</span>
+
+<span class="cm">/* List of interesting values to use in fuzzing. */</span>
+
+<span class="cp">#define INTERESTING_8 \ -128, </span><span class="cm">/* Overflow signed 8-bit when decremented */</span><span class="cp"> \ -1, </span><span class="cm">/* */</span><span class="cp"> \ 0, </span><span class="cm">/* */</span><span class="cp"> \ 1, </span><span class="cm">/* */</span><span class="cp"> \ 16, </span><span class="cm">/* One-off with common buffer size */</span><span class="cp"> \ 32, </span><span class="cm">/* One-off with common buffer size */</span><span class="cp"> \ 64, </span><span class="cm">/* One-off with common buffer size */</span><span class="cp"> \ 100, </span><span class="cm">/* One-off with common buffer size */</span><span class="cp"> \ 127 </span><span class="cm">/* Overflow signed 8-bit when incremented */</span><span class="cp"> 
+</span><span class="cp">#define INTERESTING_16 \ -32768, </span><span class="cm">/* Overflow signed 16-bit when decremented */</span><span class="cp"> \ -129, </span><span class="cm">/* Overflow signed 8-bit */</span><span class="cp"> \ 128, </span><span class="cm">/* Overflow signed 8-bit */</span><span class="cp"> \ 255, </span><span class="cm">/* Overflow unsig 8-bit when incremented */</span><span class="cp"> \ 256, </span><span class="cm">/* Overflow unsig 8-bit */</span><span class="cp"> \ 512, </span><span class="cm">/* One-off with common buffer size */</span><span class="cp"> \ 1000, </span><span class="cm">/* One-off with common buffer size */</span><span class="cp"> \ 1024, </span><span class="cm">/* One-off with common buffer size */</span><span class="cp"> \ 4096, </span><span class="cm">/* One-off with common buffer size */</span><span class="cp"> \ 32767 </span><span class="cm">/* Overflow signed 16-bit when incremented */</span><span class="cp"> 
+</span><span class="cp">#define INTERESTING_32 \ -2147483648LL, </span><span class="cm">/* Overflow signed 32-bit when decremented */</span><span class="cp"> \ -100663046, </span><span class="cm">/* Large negative number (endian-agnostic) */</span><span class="cp"> \ -32769, </span><span class="cm">/* Overflow signed 16-bit */</span><span class="cp"> \ 32768, </span><span class="cm">/* Overflow signed 16-bit */</span><span class="cp"> \ 65535, </span><span class="cm">/* Overflow unsig 16-bit when incremented */</span><span class="cp"> \ 65536, </span><span class="cm">/* Overflow unsig 16 bit */</span><span class="cp"> \ 100663045, </span><span class="cm">/* Large positive number (endian-agnostic) */</span><span class="cp"> \ 2147483647 </span><span class="cm">/* Overflow signed 32-bit when incremented */</span><span class="cp">
+</span></code></pre></td></tr></table>
+</div>
+</div><p>could_be_arith 与上一阶段去重。并且，这一阶段同样受 <code>eff_map</code> 影响。</p>
+<h3 id="interest-88">interest 8/8</h3>
+<p>从头到尾，步长为 1 byte，用 <code>INTERESTING_8</code> 中的每个数替换测试用例 1 byte</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c">  <span class="k">for</span> <span class="p">(</span><span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">len</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+
+    <span class="n">u8</span> <span class="n">orig</span> <span class="o">=</span> <span class="n">out_buf</span><span class="p">[</span><span class="n">i</span><span class="p">];</span>
+
+    <span class="cm">/* Let&#39;s consult the effector map... */</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="n">eff_map</span><span class="p">[</span><span class="n">EFF_APOS</span><span class="p">(</span><span class="n">i</span><span class="p">)])</span> <span class="p">{</span>
+      <span class="n">stage_max</span> <span class="o">-=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">interesting_8</span><span class="p">);</span>
+      <span class="k">continue</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="n">stage_cur_byte</span> <span class="o">=</span> <span class="n">i</span><span class="p">;</span>
+
+    <span class="k">for</span> <span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">interesting_8</span><span class="p">);</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="cm">/* Skip if the value could be a product of bitflips or arithmetics. */</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="n">could_be_bitflip</span><span class="p">(</span><span class="n">orig</span> <span class="o">^</span> <span class="p">(</span><span class="n">u8</span><span class="p">)</span><span class="n">interesting_8</span><span class="p">[</span><span class="n">j</span><span class="p">])</span> <span class="o">||</span>
+          <span class="n">could_be_arith</span><span class="p">(</span><span class="n">orig</span><span class="p">,</span> <span class="p">(</span><span class="n">u8</span><span class="p">)</span><span class="n">interesting_8</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span> <span class="p">{</span>
+        <span class="n">stage_max</span><span class="o">--</span><span class="p">;</span>
+        <span class="k">continue</span><span class="p">;</span>
+      <span class="p">}</span>
+
+      <span class="n">stage_cur_val</span> <span class="o">=</span> <span class="n">interesting_8</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+      <span class="n">out_buf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">interesting_8</span><span class="p">[</span><span class="n">j</span><span class="p">];</span>
+
+      <span class="k">if</span> <span class="p">(</span><span class="n">common_fuzz_stuff</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">out_buf</span><span class="p">,</span> <span class="n">len</span><span class="p">))</span> <span class="k">goto</span> <span class="n">abandon_entry</span><span class="p">;</span>
+
+      <span class="n">out_buf</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">orig</span><span class="p">;</span>
+      <span class="n">stage_cur</span><span class="o">++</span><span class="p">;</span>
+
+    <span class="p">}</span>
+
+  <span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="interest-168">interest 16/8</h3>
+<p>从头到尾，步长为 1 byte，用 <code>INTERESTING_16</code> 中的每个数替换测试用例 1 word</p>
+<h3 id="interest-328">interest 32/8</h3>
+<p>从头到尾，步长为 1 byte，用 <code>INTERESTING_32</code> 中的每个数替换测试用例 1 dword</p>
+<h2 id="dictionary-stuff">dictionary stuff</h2>
+<p>这一阶段用字典内容对测试用例进行替换。</p>
+<h3 id="user-extras-over">user extras (over)</h3>
+<p>先将 extras 按长度从小到大排，以便复原。</p>
+<p>从头到尾，步长为 1 byte，用 extras 中的每个字符串替换测试用例相同长度。受 <code>eff_map</code> 影响。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c">    <span class="k">for</span> <span class="p">(</span><span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="n">extras_cnt</span><span class="p">;</span> <span class="n">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+
+      <span class="cm">/* Skip extras probabilistically if extras_cnt &gt; MAX_DET_EXTRAS. Also skip them if there&#39;s no room to insert the payload, if the token is redundant, or if its entire span has no bytes set in the effector map. */</span>
+
+      <span class="k">if</span> <span class="p">((</span><span class="n">extras_cnt</span> <span class="o">&gt;</span> <span class="n">MAX_DET_EXTRAS</span> <span class="o">&amp;&amp;</span> <span class="n">UR</span><span class="p">(</span><span class="n">extras_cnt</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">MAX_DET_EXTRAS</span><span class="p">)</span> <span class="o">||</span>
+          <span class="n">extras</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">len</span> <span class="o">&gt;</span> <span class="n">len</span> <span class="o">-</span> <span class="n">i</span> <span class="o">||</span>
+          <span class="o">!</span><span class="n">memcmp</span><span class="p">(</span><span class="n">extras</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">data</span><span class="p">,</span> <span class="n">out_buf</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="n">extras</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">len</span><span class="p">)</span> <span class="o">||</span>
+          <span class="o">!</span><span class="n">memchr</span><span class="p">(</span><span class="n">eff_map</span> <span class="o">+</span> <span class="n">EFF_APOS</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="n">EFF_SPAN_ALEN</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">extras</span><span class="p">[</span><span class="n">j</span><span class="p">].</span><span class="n">len</span><span class="p">)))</span> <span class="p">{</span>
+
+        <span class="n">stage_max</span><span class="o">--</span><span class="p">;</span>
+        <span class="k">continue</span><span class="p">;</span>
+
+      <span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><blockquote>
+<p>“AFL 会检查 tokens 的数量，如果数量大于预设的 <code>MAX_DET_EXTRAS</code>（默认值为 200），那么对每个 token 会根据概率来决定是否进行替换：这里的 <code>UR(extras_cnt)</code> 是运行时生成的一个 <code>0</code> 到 <code>extras_cnt </code> 之间的随机数。所以，如果用户词典中一共有 400 个 tokens，那么每个 token 就有 <code>200/400=50%</code> 的概率执行替换变异。我们可以修改 <code>MAX_DET_EXTRAS</code> 的大小来调整这一概率。”</p>
+</blockquote>
+<h3 id="user-extras-insert">user extras (insert)</h3>
+<p>从头到尾，步长为 1 byte，将 extras 中的每个字符串尝试插入测试用例。不受 <code>eff_map</code> 影响。</p>
+<p>这一阶段复原相比于上述阶段更耗时，涉及到空间分配、拷贝、复原等操作。</p>
+<blockquote>
+<p>“所以，如果用户提供了大量 tokens，或者原文件很大，那么这一阶段的运算量就会非常的多。直观表现上，就是AFL的执行状态栏中，”user extras (insert)” 的总执行量很大，执行时间很长。如果出现了这种情况，那么就可以考虑适当删减一些 tokens。”</p>
+</blockquote>
+<h3 id="auto-extras-over">auto extras (over)</h3>
+<p>上文提到 bitflip 时会产生字典。在这一步将使用这个字典。</p>
+<p>从头到尾，步长为 1 byte，用其中的每个字符串替换测试用例相同长度。受 <code>eff_map</code> 影响。</p>
+<h2 id="random-havoc">random havoc</h2>
+<p>dumb mode 会直接从这一阶段开始，跳过上述确定性过程。后续所有的变异都是随机的。</p>
+<p>在这一阶段，AFL 会计算得到一个操作轮数，每一轮再产生一个随机数作为每轮的操作次数，每次在以下操作中选择一个：</p>
+<ul>
+<li>
+<p>随机选取某个 bit 进行翻转</p>
+</li>
+<li>
+<p>随机选取某个 byte，将其设置为随机的 interesting value</p>
+</li>
+<li>
+<p>随机选取某个 word，并随机选取大、小端序，将其设置为随机的 interesting value</p>
+</li>
+<li>
+<p>随机选取某个 dword，并随机选取大、小端序，将其设置为随机的 interesting value</p>
+</li>
+<li>
+<p>随机选取某个 byte，对其减去一个随机数</p>
+</li>
+<li>
+<p>随机选取某个 byte，对其加上一个随机数</p>
+</li>
+<li>
+<p>随机选取某个 word，并随机选取大、小端序，对其减去一个随机数</p>
+</li>
+<li>
+<p>随机选取某个 word，并随机选取大、小端序，对其加上一个随机数</p>
+</li>
+<li>
+<p>随机选取某个 dword，并随机选取大、小端序，对其减去一个随机数</p>
+</li>
+<li>
+<p>随机选取某个 dword，并随机选取大、小端序，对其加上一个随机数</p>
+</li>
+<li>
+<p>随机选取某个 byte，将其设置为随机数</p>
+</li>
+<li>
+<p>随机删除一段 bytes</p>
+</li>
+<li>
+<p>随机选取一个位置，插入一段随机长度的内容，其中 75% 的概率是插入原文中随机位置的内容，25% 的概率是插入一段随机选取的数</p>
+</li>
+<li>
+<p>随机选取一个位置，替换为一段随机长度的内容，其中 75% 的概率是替换成原文中随机位置的内容，25% 的概率是替换成一段随机选取的数</p>
+</li>
+<li>
+<p>随机选取一个位置，用随机选取的 token（用户提供的或自动生成的）替换</p>
+</li>
+<li>
+<p>随机选取一个位置，用随机选取的 token（用户提供的或自动生成的）插入</p>
+<p>（摘自 <a href="https://bbs.pediy.com/thread-254705.htm" target="_blank" rel="noopener noreffer">https://bbs.pediy.com/thread-254705.htm</a>）</p>
+</li>
+</ul>
+<p>在充满随机的 havoc 大杂烩中，AFL 对测试用例做了一系列天马行空的变异尝试。</p>
+<h2 id="splicing">splicing</h2>
+<p>在这一阶段，AFL 尝试对各个测试用例之间做切分、拼接操作。</p>
+<p>在队列中随机选取另一个测试用例，用 locate_diffs 在这两个测试用例的 first differing byte 与 last differing byte 中选取一个切分位置（如果两个测试用例太接近则重新选），将它们各自分割为 2 部分。最后，将随机选取的测试用例的尾与该测试用例的头拼接起来，作为变异结果。</p>
+<p>至此，一个测试用例的所有变异尝试便结束了。</p></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2022-01-28</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/2022/01/afl-rsc4/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://xidoo.top/2022/01/afl-rsc4/" data-title="AFL 源码分析（完）变异详解"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://xidoo.top/2022/01/afl-rsc4/"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on WhatsApp" data-sharer="whatsapp" data-url="http://xidoo.top/2022/01/afl-rsc4/" data-title="AFL 源码分析（完）变异详解" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://xidoo.top/2022/01/afl-rsc4/" data-title="AFL 源码分析（完）变异详解"><i data-svg-src="/lib/simple-icons/icons/line.min.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://xidoo.top/2022/01/afl-rsc4/" data-title="AFL 源码分析（完）变异详解"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="Share on Myspace" data-sharer="myspace" data-url="http://xidoo.top/2022/01/afl-rsc4/" data-title="AFL 源码分析（完）变异详解" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="Share on Blogger" data-sharer="blogger" data-url="http://xidoo.top/2022/01/afl-rsc4/" data-title="AFL 源码分析（完）变异详解" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="Share on Evernote" data-sharer="evernote" data-url="http://xidoo.top/2022/01/afl-rsc4/" data-title="AFL 源码分析（完）变异详解"><i class="fab fa-evernote fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/2022/01/afl-rsc3/" class="prev" rel="prev" title="AFL 源码分析（三）forkserver 详解"><i class="fas fa-angle-left fa-fw"></i>AFL 源码分析（三）forkserver 详解</a>
+            <a href="/2022/07/actf2022-kkk/" class="next" rel="next" title="ACTF2022 kkk 赛后复现">ACTF2022 kkk 赛后复现<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">🏴‍☠️ Love it, Make magic</div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2019 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">x1do0</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript" src="/lib/smooth-scroll/smooth-scroll.min.js"></script><script type="text/javascript" src="/lib/autocomplete/autocomplete.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.min.js"></script><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/sharer/sharer.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js"></script><script type="text/javascript" src="/lib/katex/auto-render.min.js"></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js"></script><script type="text/javascript" src="/lib/katex/mhchem.min.js"></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":15},"comment":{},"cookieconsent":{"content":{"dismiss":"Got it!","link":"Learn more","message":"This website uses Cookies to improve your experience."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

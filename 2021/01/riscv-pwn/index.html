@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>RISC-V PWN 调试环境搭建 - Stay Hungry</title><meta name="Description" content="This is My New Hugo Site"><meta property="og:title" content="RISC-V PWN 调试环境搭建" />
+<meta property="og:description" content="2019年美国国家安全局(NSA)免费向公众开放其逆向工程框架，集成出工具ghidra并在当年3月登陆github。最近碰到一题risc-v架构（*ctf2021 favourite architecture），需要用ghidra反编译辅助分析，以其为例记录动态与静态调试环境搭建。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://xidoo.top/2021/01/riscv-pwn/" /><meta property="og:image" content="http://xidoo.top/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-01-22T11:38:19+08:00" />
+<meta property="article:modified_time" content="2021-01-22T11:38:19+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://xidoo.top/logo.png"/>
+
+<meta name="twitter:title" content="RISC-V PWN 调试环境搭建"/>
+<meta name="twitter:description" content="2019年美国国家安全局(NSA)免费向公众开放其逆向工程框架，集成出工具ghidra并在当年3月登陆github。最近碰到一题risc-v架构（*ctf2021 favourite architecture），需要用ghidra反编译辅助分析，以其为例记录动态与静态调试环境搭建。"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://xidoo.top/2021/01/riscv-pwn/" /><link rel="prev" href="http://xidoo.top/2020/06/pwn-docker/" /><link rel="next" href="http://xidoo.top/2021/01/starctf2021/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "RISC-V PWN 调试环境搭建",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/xidoo.top\/2021\/01\/riscv-pwn\/"
+        },"genre": "posts","wordcount":  867 ,
+        "url": "http:\/\/xidoo.top\/2021\/01\/riscv-pwn\/","datePublished": "2021-01-22T11:38:19+08:00","dateModified": "2021-01-22T11:38:19+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "x1do0"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('light' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'light' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/friends/"> Friends </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/friends/" title="">Friends</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">RISC-V PWN 调试环境搭建</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>x1do0</a></span>&nbsp;<span class="post-category">included in <a href="/categories/pwn/"><i class="far fa-folder fa-fw"></i>PWN</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2021-01-22">2021-01-22</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;867 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;5 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#静态调试">静态调试</a>
+      <ul>
+        <li><a href="#下载与使用ghidra">下载与使用ghidra</a></li>
+        <li><a href="#踩坑记录">踩坑记录</a></li>
+      </ul>
+    </li>
+    <li><a href="#动态调试">动态调试</a>
+      <ul>
+        <li><a href="#qemugdb调试">qemu+gdb调试</a></li>
+        <li><a href="#参考资料">参考资料</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>2019年美国国家安全局(NSA)免费向公众开放其逆向工程框架，集成出工具ghidra并在当年3月登陆github。最近碰到一题risc-v架构（*ctf2021 favourite architecture），需要用ghidra反编译辅助分析，以其为例记录动态与静态调试环境搭建。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">$ checksec ./main
+<span class="o">[</span>*<span class="o">]</span> <span class="s1">&#39;/mnt/hgfs/linux_share/starctf/favourite_architecture/share/main&#39;</span>
+    Arch:     em_riscv-64-little
+    RELRO:    Partial RELRO
+    Stack:    No canary found
+    NX:       NX disabled
+    PIE:      No PIE <span class="o">(</span>0x10000<span class="o">)</span>
+    RWX:      Has RWX segments
+
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="静态调试">静态调试</h2>
+<h3 id="下载与使用ghidra">下载与使用ghidra</h3>
+<p>下载略</p>
+<p>快捷键见[3]</p>
+<ul>
+<li>L 重命名函数</li>
+<li>G 跳转到</li>
+<li>ctrl+shift+E 查找</li>
+<li>&hellip;&hellip;</li>
+</ul>
+<h3 id="踩坑记录">踩坑记录</h3>
+<p>反编译(decompiling)窗口显示unknown error，无法反编译除entry以外的函数</p>
+<p>见参考资料[1]，需要设置手动gp（全局寄存器）</p>
+<p>在entrypoint最后(0x00101ec)能计算出或者直接在entry的反编译窗口看到gp的正确值为0x6f178</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">                             *************************************************************
+                             *                           FUNCTION                          
+                             *************************************************************
+                             undefined  entry ()
+                               assume gp = 0x6f178
+             undefined         a0:1           &lt;RETURN&gt;
+                             entry                                           XREF[3]:     Entry Point (*) , 00010018 (*) , 
+                                                                                          00067e94 (*)   
+        000101c0 ef  00  c0  02    jal        ra,FUN_000101ec                                  undefined FUN_000101ec()
+        000101c4 aa  87           c.mv       a5,a0
+        000101c6 17  05  00  00    auipc      a0,0x0
+        000101ca 13  05  a5  23    addi       a0=&gt;LAB_00010400 ,a0,0x23a
+        000101ce 82  65           c.ldsp     a1,0x0 =&gt;Stack [0x0 ](sp)
+        000101d0 30  00           c.addi4s   a2,sp,0x8
+        000101d2 13  71  01  ff    andi       sp,sp,-0x10
+        000101d6 97  16  00  00    auipc      a3,0x1
+        000101da 93  86  a6  54    addi       a3=&gt;LAB_00011720 ,a3,0x54a
+        000101de 17  17  00  00    auipc      a4,0x1
+        000101e2 13  07  27  5d    addi       a4=&gt;LAB_000117b0 ,a4,0x5d2
+        000101e6 0a  88           c.mv       a6,sp
+        000101e8 6f  10  40  0a    j          FUN_0001128c                                     undefined FUN_0001128c()
+                             -- Flow Override: CALL_RETURN (CALL_TERMINATOR)
+                             *************************************************************
+                             *                           FUNCTION                          
+                             *************************************************************
+                             undefined  FUN_000101ec ()
+                               assume gp = 0x6f178
+             undefined         a0:1           &lt;RETURN&gt;
+                             FUN_000101ec                                    XREF[3]:     entry:000101c0 (c) , 00011762 (c) , 
+                                                                                          0006cb80 (*)   
+        000101ec 97  f1  05  00    auipc      gp,0x5f
+        000101f0 93  81  c1  f8    addi       gp,gp,-0x74
+        000101f4 82  80           ret
+
+</code></pre></td></tr></table>
+</div>
+</div><p>全选以后<code>ctrl-R</code>，将gp改对即可。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/01/26/9SsF4bUXJuLOBf1.png"
+        data-srcset="https://i.loli.net/2021/01/26/9SsF4bUXJuLOBf1.png, https://i.loli.net/2021/01/26/9SsF4bUXJuLOBf1.png 1.5x, https://i.loli.net/2021/01/26/9SsF4bUXJuLOBf1.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/01/26/9SsF4bUXJuLOBf1.png"
+        title="https://i.loli.net/2021/01/26/9SsF4bUXJuLOBf1.png" /></p>
+<h2 id="动态调试">动态调试</h2>
+<h3 id="qemugdb调试">qemu+gdb调试</h3>
+<p>先去掉~/.gdbinit的pwndbg等启动命令，使用原生gdb（如果pwn环境安装在py3中，可以使用gef）</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="nb">source</span> ~/pwndbg/gdbinit.py
+<span class="nb">source</span> ~/GdbPlugins/gef/gef.py
+</code></pre></td></tr></table>
+</div>
+</div><p>调试脚本，gdb连本地23333端口来连</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="cp">#!/bin/sh
+</span><span class="cp"></span>
+gdb-multiarch -q <span class="se">\
+</span><span class="se"></span>  -ex <span class="s1">&#39;set architecture riscv:rv64&#39;</span> <span class="se">\
+</span><span class="se"></span>  -ex <span class="s1">&#39;file main&#39;</span> <span class="se">\
+</span><span class="se"></span>  -ex <span class="s1">&#39;target remote localhost:23333&#39;</span> <span class="se">\
+</span><span class="se"></span>  -ex <span class="s1">&#39;break *0x0010582&#39;</span><span class="se">\
+</span><span class="se"></span>  -ex <span class="k">continue</span> <span class="se">\
+</span><span class="se"></span><span class="p">;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>攻击脚本，用qemu在23333端口开一个程序并进行攻击（这里题目给了qemu，也可以用自己的）</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="n">io</span> <span class="o">=</span> <span class="n">process</span><span class="p">([</span><span class="s2">&#34;./qemu-riscv64&#34;</span> <span class="p">,</span> <span class="s2">&#34;-g&#34;</span><span class="p">,</span> <span class="s2">&#34;23333&#34;</span> <span class="p">,</span><span class="s2">&#34;./main&#34;</span><span class="p">],</span> <span class="n">aslr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>原生gdb比较简陋，并且功能不够强大，暂时只能凑合着用了</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/01/26/F9y2i1suMzC37DO.png"
+        data-srcset="https://i.loli.net/2021/01/26/F9y2i1suMzC37DO.png, https://i.loli.net/2021/01/26/F9y2i1suMzC37DO.png 1.5x, https://i.loli.net/2021/01/26/F9y2i1suMzC37DO.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/01/26/F9y2i1suMzC37DO.png"
+        title="https://i.loli.net/2021/01/26/F9y2i1suMzC37DO.png" /></p>
+<p>重新学一下gdb指令&hellip;</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">Breakpoint 1, 0x0000000000010452 in ?? <span class="o">()</span>
+<span class="o">(</span>gdb<span class="o">)</span> x/10xi <span class="nv">0x10452</span>
+<span class="o">=</span>&gt; 0x10452:     jal     ra,0x204e4
+   0x10456:     mv      a3,a0
+   0x10458:     lw      a4,-1952<span class="o">(</span>gp<span class="o">)</span>
+   0x1045c:     lw      a5,-1948<span class="o">(</span>gp<span class="o">)</span>
+   0x10460:     addw    a5,a5,a4
+   0x10462:     sext.w  a5,a5
+   0x10464:     slli    a5,a5,0x20
+   0x10466:     srli    a5,a5,0x20
+   0x10468:     bne     a3,a5,0x10570
+   0x1046c:     lw      a5,-1952<span class="o">(</span>gp<span class="o">)</span>
+<span class="o">(</span>gdb<span class="o">)</span> info registers
+ra             0x1044c  0x1044c
+sp             0x40007ffff0     0x40007ffff0
+gp             0x6f178  0x6f178
+tp             0x71700  0x71700
+t0             0x0      <span class="m">0</span>
+t1             0x1a3f2  <span class="m">107506</span>
+t2             0x71f93  <span class="m">466835</span>
+fp             0x40008001f0     0x40008001f0
+s1             0x117b0  <span class="m">71600</span>
+a0             0x40008000c8     <span class="m">274886295752</span>
+a1             0x6d523  <span class="m">447779</span>
+a2             0x1      <span class="m">1</span>
+a3             0x0      <span class="m">0</span>
+a4             0x1      <span class="m">1</span>
+a5             0x40008000c8     <span class="m">274886295752</span>
+a6             0xfffffffffbad208b       -72540021
+a7             0x3f     <span class="m">63</span>
+s2             0x0      <span class="m">0</span>
+s3             0x0      <span class="m">0</span>
+s4             0x0      <span class="m">0</span>
+s5             0x0      <span class="m">0</span>
+s6             0x0      <span class="m">0</span>
+s7             0x0      <span class="m">0</span>
+s8             0x0      <span class="m">0</span>
+s9             0x0      <span class="m">0</span>
+s10            0x0      <span class="m">0</span>
+s11            0x0      <span class="m">0</span>
+t3             0x8101010101010100       -9151031864016699136
+t4             0x2f     <span class="m">47</span>
+t5             0x1      <span class="m">1</span>
+t6             0x0      <span class="m">0</span>
+pc             0x10452  0x10452
+<span class="o">(</span>gdb<span class="o">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>gef可以通过gdb-multiarch -p pid号来使用，但是寄存器等却无法正确识别，原因不明</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/02/01/l4wgecMJVAYBS8o.png"
+        data-srcset="https://i.loli.net/2021/02/01/l4wgecMJVAYBS8o.png, https://i.loli.net/2021/02/01/l4wgecMJVAYBS8o.png 1.5x, https://i.loli.net/2021/02/01/l4wgecMJVAYBS8o.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/02/01/l4wgecMJVAYBS8o.png"
+        title="https://i.loli.net/2021/02/01/l4wgecMJVAYBS8o.png" /></p>
+<p>可以看到能正确解析risc-v的指令与寄存器。如果不行也许得先安装一下gcc-riscv64-linux-gnu</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">sudo apt-get install git build-essential gdb-multiarch qemu-system-misc gcc-riscv64-linux-gnu binutils-riscv64-linux-gnu
+</code></pre></td></tr></table>
+</div>
+</div><p>具体见参考资料[2]</p>
+<p>经过测试，以下常用工具都不支持risc-v&hellip;</p>
+<ul>
+<li>ROP_gadget</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="o">(</span>pwn<span class="o">)</span> pwn@ubuntu:~/share/starctf/favourite_architecture/share$ ROPgadget --binary ./main --only <span class="s2">&#34;ldsp&#34;</span>
+<span class="o">[</span>Error<span class="o">]</span> ELF.getArch<span class="o">()</span> - Architecture not supported
+<span class="o">[</span>Error<span class="o">]</span> ELF.getArch<span class="o">()</span> - Architecture not supported
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li><del>gef/pwndbg/peda/gdbinit均出现以下类似的exception</del> （个人问题，貌似是py3的锅）</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="o">(</span>pwn<span class="o">)</span> pwn@ubuntu:~/share/starctf/favourite_architecture/share$ gdb-multiarch -q ./main
+GEF <span class="k">for</span> linux ready, <span class="nb">type</span> <span class="sb">`</span>gef<span class="s1">&#39; to start, `gef config&#39;</span> to configure
+<span class="m">50</span> commands loaded <span class="k">for</span> GDB 9.2 using Python engine 3.8
+<span class="o">[</span>*<span class="o">]</span> <span class="m">4</span> commands could not be loaded, run <span class="sb">`</span>gef missing<span class="sb">`</span> to know why.
+Reading symbols from ./main...
+<span class="o">(</span>No debugging symbols found in ./main<span class="o">)</span>
+Python Exception &lt;class <span class="s1">&#39;__main__.GefUnsupportedOS&#39;</span>&gt; <span class="s1">&#39;CPU type is currently not supported: riscv:rv64&#39;</span>: 
+gef➤  <span class="nb">set</span> architecture riscv:rv64
+The target architecture is assumed to be riscv:rv64
+gef➤  r
+Starting program: /mnt/hgfs/linux_share/starctf/favourite_architecture/share/main 
+/build/gdb-OxeNvS/gdb-9.2/gdb/i387-tdep.c:592: internal-error: void i387_supply_fxsave<span class="o">(</span>regcache*, int, const void*<span class="o">)</span>: Assertion <span class="sb">`</span>tdep-&gt;st0_regnum &gt;<span class="o">=</span> I386_ST0_REGNUM<span class="err">&#39;</span> failed.
+A problem internal to GDB has been detected,
+further debugging may prove unreliable.
+
+This is a bug, please report it.  For instructions, see:
+&lt;http://www.gnu.org/software/gdb/bugs/&gt;.
+
+Aborted <span class="o">(</span>core dumped<span class="o">)</span>
+<span class="o">(</span>pwn<span class="o">)</span> pwn@ubuntu:~/share/starctf/favourite_architecture/share$ Input the flag: You are wrong ._.
+
+<span class="o">(</span>pwn<span class="o">)</span> pwn@ubuntu:~/share/starctf/favourite_architecture/share$ 
+</code></pre></td></tr></table>
+</div>
+</div><ul>
+<li>seccomp-tools乱码且报错</li>
+</ul>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">$ seccomp-tools dump ./main 
+./main: 12: ./main: �����&gt;�<span class="s2">&#34;tEa��&#34;</span>���#0��#<span class="p">&amp;</span>��������7�#������ׇ��7��w�#���������7��w�#������ׇ��7��w�#��bda��9q�<span class="s2">&#34;��#&lt;��#8��#4���7������5�&gt;��1I�7�����1F�5��&gt;���G�����#4��5����?몇��7��#��7���&gt;����骇��7��#��7���&gt;����窇��7��#��7���&gt;���_檇��7��#�5����䪇��7��#��7��&gt;���_㪇��7��#��7��&gt;����᪇��7��#��7��&gt;���ઇ��7��#��7��&gt;���ު���7��#��
+</span><span class="s2">�7��&gt;����ܪ���7��#��
+</span><span class="s2">�7��&gt;���?۪���7��#��
+</span><span class="s2">�7��&gt;����٪���7��#��
+</span><span class="s2">�7��#�
+</span><span class="s2">5�����ת���7��#��
+</span><span class="s2">�7���&gt;���֪���7��#��
+</span><span class="s2">�7���&gt;���Ԫ���7��#��
+</span><span class="s2">�7�����1F�5��&gt;���-�pBt!a���&#34;</span>�#4��#0���7���7��#��
+�7�����&gt;����Ϊ���7��������7��#��: File name too long
+./main: 1: ./main: Syntax error: Unterminated quoted string
+./main: 3: ./main: ���7������������ُ#: not found./main: 3: ./main: ���7�������������ُ#: not found
+
+./main: 3: ./main: ���7�������������ُ#: not found
+./main: 3: ./main: �����7�����k�������<span class="sb">`</span>f�G<span class="o">)</span>�!��������<span class="sb">``</span>d�G&gt;��p^t ��<span class="s2">&#34;���.�#&amp;����#</span>$<span class="s2">��������������@���W�Տ�&gt;�bda��yq&#34;</span>�#&lt;��#<span class="p">&amp;</span>��7��������ُ#: not found
+./main: 3: ./main: cannot create ��7�: Directory nonexistent
+./main: 3: ./main: ��������7�: not found
+./main: 3: ./main: cannot create ����p��#0����������������:���N������������6���: Directory nonexistent
+./main: 3: ./main: �������G���������D����6����������W������6��������#$�����#: not found
+./main: 3: ./main: ���7���C#$��#���7�����#.���7��C#,���7��C#*���7��G#<span class="o">(</span>���7��G#<span class="p">&amp;</span>��# �<span class="o">}</span>�<span class="s1">&#39;D��&#39;</span>����#�������G����������D����6����������W�D����6��������#: not found
+./main: 1: ./main: �: not found
+./main: 1: ./main: ���5XXXDD: not found
+./main: 1: ./main: �: not found
+./main: 1: ./main:R�td: not found
+./main: 1: ./main: �: not found
+./main: 1: ./main: dA������Gz��7�A�������cP�: not found
+./main: 1: ./main: cannot open ��#8���7���C#: No such file
+./main: 1: ./main: ELF��@��@8@t�t����: not found
+
+$  
+</code></pre></td></tr></table>
+</div>
+</div><p>以下常用工具可用</p>
+<ul>
+<li>原生gdb</li>
+<li>checksec</li>
+</ul>
+<h3 id="参考资料">参考资料</h3>
+<p>[1] <a href="https://github.com/NationalSecurityAgency/ghidra/issues/2466" target="_blank" rel="noopener noreffer">https://github.com/NationalSecurityAgency/ghidra/issues/2466</a></p>
+<p>[2] <a href="https://pdos.csail.mit.edu/6.828/2019/tools.html" target="_blank" rel="noopener noreffer">https://pdos.csail.mit.edu/6.828/2019/tools.html</a></p>
+<p>[3] <a href="https://www.cnblogs.com/iBinary/p/13852204.html" target="_blank" rel="noopener noreffer">https://www.cnblogs.com/iBinary/p/13852204.html</a></p></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2021-01-22</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/2021/01/riscv-pwn/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://xidoo.top/2021/01/riscv-pwn/" data-title="RISC-V PWN 调试环境搭建"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://xidoo.top/2021/01/riscv-pwn/"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on WhatsApp" data-sharer="whatsapp" data-url="http://xidoo.top/2021/01/riscv-pwn/" data-title="RISC-V PWN 调试环境搭建" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://xidoo.top/2021/01/riscv-pwn/" data-title="RISC-V PWN 调试环境搭建"><i data-svg-src="/lib/simple-icons/icons/line.min.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://xidoo.top/2021/01/riscv-pwn/" data-title="RISC-V PWN 调试环境搭建"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="Share on Myspace" data-sharer="myspace" data-url="http://xidoo.top/2021/01/riscv-pwn/" data-title="RISC-V PWN 调试环境搭建" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="Share on Blogger" data-sharer="blogger" data-url="http://xidoo.top/2021/01/riscv-pwn/" data-title="RISC-V PWN 调试环境搭建" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="Share on Evernote" data-sharer="evernote" data-url="http://xidoo.top/2021/01/riscv-pwn/" data-title="RISC-V PWN 调试环境搭建"><i class="fab fa-evernote fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/2020/06/pwn-docker/" class="prev" rel="prev" title="Ubuntu16.04 docker环境搭建"><i class="fas fa-angle-left fa-fw"></i>Ubuntu16.04 docker环境搭建</a>
+            <a href="/2021/01/starctf2021/" class="next" rel="next" title="*CTF 2021">*CTF 2021<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">🏴‍☠️ Love it, Make magic</div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2019 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">x1do0</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript" src="/lib/smooth-scroll/smooth-scroll.min.js"></script><script type="text/javascript" src="/lib/autocomplete/autocomplete.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.min.js"></script><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/sharer/sharer.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js"></script><script type="text/javascript" src="/lib/katex/auto-render.min.js"></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js"></script><script type="text/javascript" src="/lib/katex/mhchem.min.js"></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":15},"comment":{},"cookieconsent":{"content":{"dismiss":"Got it!","link":"Learn more","message":"This website uses Cookies to improve your experience."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

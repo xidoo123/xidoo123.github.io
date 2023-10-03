@@ -1,0 +1,741 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>Linux Kernel Mitigation &amp; Bypass - Stay Hungry</title><meta name="Description" content="This is My New Hugo Site"><meta property="og:title" content="Linux Kernel Mitigation &amp; Bypass" />
+<meta property="og:description" content="Like user mode, there are also couples of ways of mitigation against exploits in Linux kernel. Here is a list of mitigation in kernel mode and methods to bypass some of them." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://xidoo.top/2021/08/kernel_mitigation_bypass/" /><meta property="og:image" content="http://xidoo.top/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-08-25T10:30:50+08:00" />
+<meta property="article:modified_time" content="2021-08-25T10:30:50+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://xidoo.top/logo.png"/>
+
+<meta name="twitter:title" content="Linux Kernel Mitigation &amp; Bypass"/>
+<meta name="twitter:description" content="Like user mode, there are also couples of ways of mitigation against exploits in Linux kernel. Here is a list of mitigation in kernel mode and methods to bypass some of them."/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://xidoo.top/2021/08/kernel_mitigation_bypass/" /><link rel="prev" href="http://xidoo.top/2021/08/first_post/" /><link rel="next" href="http://xidoo.top/2021/08/slab_buddy_system0/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Linux Kernel Mitigation \u0026 Bypass",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/xidoo.top\/2021\/08\/kernel_mitigation_bypass\/"
+        },"genre": "posts","wordcount":  1788 ,
+        "url": "http:\/\/xidoo.top\/2021\/08\/kernel_mitigation_bypass\/","datePublished": "2021-08-25T10:30:50+08:00","dateModified": "2021-08-25T10:30:50+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "x1do0"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('light' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'light' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/friends/"> Friends </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/friends/" title="">Friends</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">Linux Kernel Mitigation &amp; Bypass</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>x1do0</a></span>&nbsp;<span class="post-category">included in <a href="/categories/kernel/"><i class="far fa-folder fa-fw"></i>Kernel</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2021-08-25">2021-08-25</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;1788 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;9 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#0x00-canary">0x00 CANARY</a></li>
+    <li><a href="#0x01-kaslr">0x01 KASLR</a></li>
+    <li><a href="#0x02-fg_kaslr">0x02 FG_KASLR</a></li>
+    <li><a href="#0x03-smep">0x03 SMEP</a></li>
+    <li><a href="#0x04-smap">0x04 SMAP</a></li>
+    <li><a href="#0x05-mmap_min_addr">0x05 mmap_min_addr</a></li>
+    <li><a href="#0x06-kpti">0x06 KPTI</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>Like user mode, there are also couples of ways of mitigation against exploits in Linux kernel. Here is a list of mitigation in kernel mode and methods to bypass some of them.</p>
+<h2 id="0x00-canary">0x00 CANARY</h2>
+<p>Same as user mode, lying at rbp-8 (or ebp-4 in 32 bits machine)</p>
+<h2 id="0x01-kaslr">0x01 KASLR</h2>
+<p>Same as ASLR in user mode, adding random and varied PAGE SIZE to kernel and module loading address when booted.</p>
+<h2 id="0x02-fg_kaslr">0x02 FG_KASLR</h2>
+<p>Quite new techniques patched to strengthen KASLR, provides an address randomization at Function Granular rather than module granular at KASLR, which means even offset of the function would vary from time to time.</p>
+<p>Two way to bypass it</p>
+<ol>
+<li>Kernel symbols are not affected by FG_KASLR, so we can compute the actual address of functions.</li>
+</ol>
+<p>e.g. Address of <code>commit_creds</code> = Address of <code>ksymtab_commit_creds</code> + <code>value_offset</code> of it</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">kernel_symbol</span> <span class="p">{</span>
+	  <span class="kt">int</span> <span class="n">value_offset</span><span class="p">;</span>
+	  <span class="kt">int</span> <span class="n">name_offset</span><span class="p">;</span>
+	  <span class="kt">int</span> <span class="n">namespace_offset</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div><ol start="2">
+<li><code>modprobe_path</code> and <code>swapgs_restore_regs_and_return_to_usermode</code> are unaffected by FG_KASLR</li>
+</ol>
+<p>More details about exploits using modprobe_path were mentioned in the previous article [1] and [2]</p>
+<h2 id="0x03-smep">0x03 SMEP</h2>
+<p>User mode codes are not permmited to execute in kernel mode (ring 0). Typically Return-to-user will no longer work out because of it. But we can still find gadgets to do Return-Oriented-Programming in kernel mode.</p>
+<h2 id="0x04-smap">0x04 SMAP</h2>
+<p>User mode data should be unaccessible in kernel mode.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">x1do0@x1do0:~$ cat /proc/cpuinfo <span class="p">|</span> grep smep <span class="p">|</span> grep smap
+flags           : fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush mmx fxsr sse sse2 syscall nx mmxext fxsr_opt pdpe1gb rdtscp lm constant_tsc rep_good nopl tsc_reliable nonstop_tsc cpuid extd_apicid pni pclmulqdq ssse3 fma cx16 sse4_1 sse4_2 x2apic movbe popcnt aes xsave avx f16c rdrand hypervisor lahf_lm extapic cr8_legacy abm sse4a misalignsse 3dnowprefetch osvw topoext ssbd ibpb vmmcall fsgsbase bmi1 avx2 smep bmi2 erms invpcid rdseed adx smap clflushopt clwb sha_ni xsaveopt xsavec xgetbv1 xsaves clzero wbnoinvd arat umip pku ospke vaes vpclmulqdq rdpid overflow_recov succor
+</code></pre></td></tr></table>
+</div>
+</div><p>Along with SMEP, there are several ways to bypass them</p>
+<ol>
+<li>
+<p>Use kernel gadgets to do ROP</p>
+</li>
+<li>
+<p>tamper CR4 register. By zero out high bits of CR4, we can disable kernel SMEP and SMAP mitigation.</p>
+</li>
+</ol>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/24/LFq6NIV2ntmrYiU.png"
+        data-srcset="https://i.loli.net/2021/08/24/LFq6NIV2ntmrYiU.png, https://i.loli.net/2021/08/24/LFq6NIV2ntmrYiU.png 1.5x, https://i.loli.net/2021/08/24/LFq6NIV2ntmrYiU.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/24/LFq6NIV2ntmrYiU.png"
+        title="https://i.loli.net/2021/08/24/LFq6NIV2ntmrYiU.png" /></p>
+<ol start="3">
+<li>ret-to-direct-mapped memory (short as ret2dir). Ideas come from [3]. Memory users maped will be identically copied into <code>physmap</code>, see [4] for more about ram layout. So when SMAP and SMEP are enabled, we can actually jump to our codes in <code>physmap</code> to execute user mode codes. More details are in the original thesis and [5].</li>
+</ol>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/24/G751WSjRoB68AdN.png"
+        data-srcset="https://i.loli.net/2021/08/24/G751WSjRoB68AdN.png, https://i.loli.net/2021/08/24/G751WSjRoB68AdN.png 1.5x, https://i.loli.net/2021/08/24/G751WSjRoB68AdN.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/24/G751WSjRoB68AdN.png"
+        title="https://i.loli.net/2021/08/24/G751WSjRoB68AdN.png" /></p>
+<ol start="4">
+<li>overwrite vdso (Virtual Dynamic Shared Object). vDSO is a chunk of memory used for making glibc and kernel compatible[6]. Typically, vDSO is r/w in kernel mode and r/x in user mode. So if we can modify vDSO to our shellcode in kernel mode and trigger codes in vDSO in user mode (basically <code>gettimeofday()</code> will automatically do this), we can execute codes in root privilege. If vDSO is not permitted to write, we can use <code>set_memory_rw()</code> to set area authority flag. More details in [7] and [8].</li>
+</ol>
+<h2 id="0x05-mmap_min_addr">0x05 mmap_min_addr</h2>
+<p><code>mmap_min_addr</code> is a system value set to constrain the minimum address users can mmap to. This restriction prevents kernel from null pointer dereferences.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">x1do0@x1do0:~$ cat /proc/sys/vm/mmap_min_addr
+<span class="m">65536</span>
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="0x06-kpti">0x06 KPTI</h2>
+<p>Used to separate user page table and kernel page table, which means not only cs, ss regiseters should be set properly when return to user mode from ring 0, but also gs register. <code>swapgs</code> should be executed before <code>iret</code>.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">*RAX  0x1001
+*RBX  0x1614000 ◂— 0
+*RCX  0x1614000 ◂— 0
+*RDX  0x1615000
+*RDI  0x705820 ◂— 0
+*RSI  0x1615000
+*R8   0x0
+*R9   0x0
+*R10  0x0
+*R11  0x297
+*R12  0x1613ff0 ◂— 0x540
+*R13  0x1
+ R14  0x0
+*R15  0x1
+*RBP  0x1614000 ◂— 0
+*RSP  0xfffffe0000002fd8 —▸ 0x400eea ◂— mov    qword ptr [rdx - 0x10], rax
+*RIP  0xffffffff81c00aaf ◂— swapgs
+────────────────────────────────────────────────────────────────────[ DISASM ]────────────────────────────────────────────────────────────────────
+ ► 0xffffffff81c00aaf    swapgs
+   0xffffffff81c00ab2    nop    dword ptr [rax]
+   0xffffffff81c00ab5    jmp    0xffffffff81c00ae0 &lt;0xffffffff81c00ae0&gt;
+    ↓
+   0xffffffff81c00ae0    test   byte ptr [rsp + 0x20], 4
+   0xffffffff81c00ae5    jne    0xffffffff81c00ae9 &lt;0xffffffff81c00ae9&gt;
+
+   0xffffffff81c00ae7    iretq
+   0xffffffff81c00ae9    push   rdi
+   0xffffffff81c00aea    swapgs
+   0xffffffff81c00aed    nop    dword ptr [rax]
+   0xffffffff81c00af0    nop
+   0xffffffff81c00af2    mov    rdi, cr3
+────────────────────────────────────────────────────────────────────[ STACK ]─────────────────────────────────────────────────────────────────────
+00:0000│ rsp 0xfffffe0000002fd8 —▸ 0x400eea ◂— mov    qword ptr [rdx - 0x10], rax
+01:0008│     0xfffffe0000002fe0 ◂— 0x33 /* &#39;3&#39; */
+02:0010│     0xfffffe0000002fe8 ◂— 0x202
+03:0018│     0xfffffe0000002ff0 —▸ 0x7fffd2abf100 ◂— 0x20 /* &#39; &#39; */
+04:0020│     0xfffffe0000002ff8 ◂— 0x2b /* &#39;+&#39; */
+05:0028│     0xfffffe0000003000 ◂— add    byte ptr [rax], al
+06:0030│     0xfffffe0000003008 ◂— add    dh, bh
+07:0038│     0xfffffe0000003010 ◂— add    cl, cl
+──────────────────────────────────────────────────────────────────[ BACKTRACE ]───────────────────────────────────────────────────────────────────
+ ► f 0 0xffffffff81c00aaf
+   f 1         0x400eea
+   f 2             0x33
+   f 3            0x202
+   f 4   0x7fffd2abf100
+   f 5             0x2b
+   f 6   0x300000000000
+   f 7 0x1ac000fffffe00
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+pwndbg&gt; info registers
+rax            0x1001              4097
+rbx            0x1614000           23150592
+rcx            0x1614000           23150592
+rdx            0x1615000           23154688
+rsi            0x1615000           23154688
+rdi            0x705820            7362592
+rbp            0x1614000           0x1614000
+rsp            0xfffffe0000002fd8  0xfffffe0000002fd8
+r8             0x0                 0
+r9             0x0                 0
+r10            0x0                 0
+r11            0x297               663
+r12            0x1613ff0           23150576
+r13            0x1                 1
+r14            0x0                 0
+r15            0x1                 1
+rip            0xffffffff81c00aaf  0xffffffff81c00aaf
+eflags         0x6                 [ IOPL=0 PF ]
+cs             0x10                16
+ss             0x0                 0
+ds             0x0                 0
+es             0x0                 0
+fs             0x0                 0
+gs             0x0                 0
+fs_base        0x705418            7361560
+gs_base        0xffff88801f000000  -131391119425536
+k_gs_base      0x0                 0
+</code></pre></td></tr></table>
+</div>
+</div><p>you can see that this instruction simply does <code>xchg gs_base, k_gs_base</code>. After <code>swapgs</code>, page locations are switched between user mode and kernel mode.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback"> RAX  0x1001
+ RBX  0x1614000 ◂— 0
+ RCX  0x1614000 ◂— 0
+ RDX  0x1615000
+ RDI  0x705820 ◂— 0
+ RSI  0x1615000
+ R8   0x0
+ R9   0x0
+ R10  0x0
+ R11  0x297
+ R12  0x1613ff0 ◂— 0x540
+ R13  0x1
+ R14  0x0
+ R15  0x1
+ RBP  0x1614000 ◂— 0
+ RSP  0xfffffe0000002fd8 —▸ 0x400eea ◂— mov    qword ptr [rdx - 0x10], rax
+*RIP  0xffffffff81c00ab2 ◂— nop    dword ptr [rax]
+────────────────────────────────────────────────────────────────────[ DISASM ]────────────────────────────────────────────────────────────────────
+   0xffffffff81c00aaf    swapgs
+ ► 0xffffffff81c00ab2    nop    dword ptr [rax]
+   0xffffffff81c00ab5    jmp    0xffffffff81c00ae0 &lt;0xffffffff81c00ae0&gt;
+    ↓
+   0xffffffff81c00ae0    test   byte ptr [rsp + 0x20], 4
+   0xffffffff81c00ae5    jne    0xffffffff81c00ae9 &lt;0xffffffff81c00ae9&gt;
+
+   0xffffffff81c00ae7    iretq
+   0xffffffff81c00ae9    push   rdi
+   0xffffffff81c00aea    swapgs
+   0xffffffff81c00aed    nop    dword ptr [rax]
+   0xffffffff81c00af0    nop
+   0xffffffff81c00af2    mov    rdi, cr3
+────────────────────────────────────────────────────────────────────[ STACK ]─────────────────────────────────────────────────────────────────────
+00:0000│ rsp 0xfffffe0000002fd8 —▸ 0x400eea ◂— mov    qword ptr [rdx - 0x10], rax
+01:0008│     0xfffffe0000002fe0 ◂— 0x33 /* &#39;3&#39; */
+02:0010│     0xfffffe0000002fe8 ◂— 0x202
+03:0018│     0xfffffe0000002ff0 —▸ 0x7fffd2abf100 ◂— 0x20 /* &#39; &#39; */
+04:0020│     0xfffffe0000002ff8 ◂— 0x2b /* &#39;+&#39; */
+05:0028│     0xfffffe0000003000 ◂— add    byte ptr [rax], al
+06:0030│     0xfffffe0000003008 ◂— add    dh, bh
+07:0038│     0xfffffe0000003010 ◂— add    cl, cl
+──────────────────────────────────────────────────────────────────[ BACKTRACE ]───────────────────────────────────────────────────────────────────
+ ► f 0 0xffffffff81c00ab2
+   f 1         0x400eea
+   f 2             0x33
+   f 3            0x202
+   f 4   0x7fffd2abf100
+   f 5             0x2b
+   f 6   0x300000000000
+   f 7 0x1ac000fffffe00
+──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
+pwndbg&gt; info registers
+rax            0x1001              4097
+rbx            0x1614000           23150592
+rcx            0x1614000           23150592
+rdx            0x1615000           23154688
+rsi            0x1615000           23154688
+rdi            0x705820            7362592
+rbp            0x1614000           0x1614000
+rsp            0xfffffe0000002fd8  0xfffffe0000002fd8
+r8             0x0                 0
+r9             0x0                 0
+r10            0x0                 0
+r11            0x297               663
+r12            0x1613ff0           23150576
+r13            0x1                 1
+r14            0x0                 0
+r15            0x1                 1
+rip            0xffffffff81c00ab2  0xffffffff81c00ab2
+eflags         0x6                 [ IOPL=0 PF ]
+cs             0x10                16
+ss             0x0                 0
+ds             0x0                 0
+es             0x0                 0
+fs             0x0                 0
+gs             0x0                 0
+fs_base        0x705418            7361560
+gs_base        0x0                 0
+k_gs_base      0xffff88801f000000  -131391119425536
+cr0            0x80050033          [ PG AM WP NE ET MP PE ]
+cr2            0x1614ff0           23154672
+cr3            0x1d947000          [ PDBR=14 PCID=0 ]
+cr4            0x1006f0            [ SMEP OSXMMEXCPT OSFXSR PGE MCE PAE PSE ]
+cr8            0x1                 1
+efer           0xd01               [ NXE LMA LME SCE ]
+</code></pre></td></tr></table>
+</div>
+</div><p>BYPASS</p>
+<ol>
+<li>There is no way to find a single <code>swapgs</code> instruction, so we may use the kernel function itself to switch from user mode and kernel mode cleanly.</li>
+</ol>
+<p>Here comes the function swapgs_restore_regs_and_return_to_usermode()</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">/ # cat /proc/kallsyms | grep swapgs_restore_regs_and_return_to_usermode
+ffffffff81c00a34 T swapgs_restore_regs_and_return_to_usermode
+</code></pre></td></tr></table>
+</div>
+</div><p>This function literally push and pop all info into and from stack and do <code>swapgs</code> and <code>iret</code>. We can jump to <code>0xFFFFFFFF81600A4A</code> and let the rest of the code itself help us switch gracefully.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-asm" data-lang="asm"><span class="nl">.text:</span><span class="nf">FFFFFFFF81600A34</span> <span class="mi">41</span> <span class="mi">5</span><span class="no">F</span>                          <span class="no">pop</span>     <span class="no">r15</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A36</span> <span class="mi">41</span> <span class="mi">5</span><span class="no">E</span>                          <span class="no">pop</span>     <span class="no">r14</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A38</span> <span class="mi">41</span> <span class="mi">5</span><span class="no">D</span>                          <span class="no">pop</span>     <span class="no">r13</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A3A</span> <span class="mi">41</span> <span class="mi">5</span><span class="no">C</span>                          <span class="no">pop</span>     <span class="no">r12</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A3C</span> <span class="mi">5</span><span class="no">D</span>                             <span class="no">pop</span>     <span class="no">rbp</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A3D</span> <span class="mi">5</span><span class="no">B</span>                             <span class="no">pop</span>     <span class="no">rbx</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A3E</span> <span class="mi">41</span> <span class="mi">5</span><span class="no">B</span>                          <span class="no">pop</span>     <span class="no">r11</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A40</span> <span class="mi">41</span> <span class="mi">5</span><span class="no">A</span>                          <span class="no">pop</span>     <span class="no">r10</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A42</span> <span class="mi">41</span> <span class="mi">59</span>                          <span class="no">pop</span>     <span class="no">r9</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A44</span> <span class="mi">41</span> <span class="mi">58</span>                          <span class="no">pop</span>     <span class="no">r8</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A46</span> <span class="mi">58</span>                             <span class="no">pop</span>     <span class="no">rax</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A47</span> <span class="mi">59</span>                             <span class="no">pop</span>     <span class="no">rcx</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A48</span> <span class="mi">5</span><span class="no">A</span>                             <span class="no">pop</span>     <span class="no">rdx</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A49</span> <span class="mi">5</span><span class="no">E</span>                             <span class="no">pop</span>     <span class="no">rsi</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A4A</span> <span class="mi">48</span> <span class="mi">89</span> <span class="no">E7</span>                       <span class="no">mov</span>     <span class="no">rdi</span><span class="p">,</span> <span class="no">rsp</span> <span class="c"># from here!
+</span><span class="c"></span><span class="no">.text</span><span class="p">:</span><span class="no">FFFFFFFF81600A4D</span> <span class="mi">65</span> <span class="mi">48</span> <span class="mi">8</span><span class="no">B</span> <span class="mi">24</span> <span class="mi">25</span><span class="err">+</span>                <span class="no">mov</span>     <span class="no">rsp</span><span class="p">,</span> <span class="no">gs</span><span class="p">:</span> <span class="mi">0x5004</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A56</span> <span class="no">FF</span> <span class="mi">77</span> <span class="mi">30</span>                       <span class="no">push</span>    <span class="no">qword</span> <span class="no">ptr</span> <span class="p">[</span><span class="no">rdi</span><span class="err">+</span><span class="mi">30</span><span class="no">h</span><span class="p">]</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A59</span> <span class="no">FF</span> <span class="mi">77</span> <span class="mi">28</span>                       <span class="no">push</span>    <span class="no">qword</span> <span class="no">ptr</span> <span class="p">[</span><span class="no">rdi</span><span class="err">+</span><span class="mi">28</span><span class="no">h</span><span class="p">]</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A5C</span> <span class="no">FF</span> <span class="mi">77</span> <span class="mi">20</span>                       <span class="no">push</span>    <span class="no">qword</span> <span class="no">ptr</span> <span class="p">[</span><span class="no">rdi</span><span class="err">+</span><span class="mi">20</span><span class="no">h</span><span class="p">]</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A5F</span> <span class="no">FF</span> <span class="mi">77</span> <span class="mi">18</span>                       <span class="no">push</span>    <span class="no">qword</span> <span class="no">ptr</span> <span class="p">[</span><span class="no">rdi</span><span class="err">+</span><span class="mi">18</span><span class="no">h</span><span class="p">]</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A62</span> <span class="no">FF</span> <span class="mi">77</span> <span class="mi">10</span>                       <span class="no">push</span>    <span class="no">qword</span> <span class="no">ptr</span> <span class="p">[</span><span class="no">rdi</span><span class="err">+</span><span class="mi">10</span><span class="no">h</span><span class="p">]</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A65</span> <span class="no">FF</span> <span class="mi">37</span>                          <span class="no">push</span>    <span class="no">qword</span> <span class="no">ptr</span> <span class="p">[</span><span class="no">rdi</span><span class="p">]</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A67</span> <span class="mi">50</span>                             <span class="no">push</span>    <span class="no">rax</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A68</span> <span class="no">EB</span> <span class="mi">43</span>                          <span class="no">nop</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A6A</span> <span class="mi">0</span><span class="no">F</span> <span class="mi">20</span> <span class="no">DF</span>                       <span class="no">mov</span>     <span class="no">rdi</span><span class="p">,</span> <span class="no">cr3</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600A6D</span> <span class="no">EB</span> <span class="mi">34</span>                          <span class="no">jmp</span>     <span class="mi">0xFFFFFFFF81600AA3</span>
+ 
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600AA3</span> <span class="mi">48</span> <span class="mi">81</span> <span class="no">CF</span> <span class="mi">00</span> <span class="mi">10</span><span class="err">+</span>                <span class="no">or</span>      <span class="no">rdi</span><span class="p">,</span> <span class="mi">1000</span><span class="no">h</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600AAA</span> <span class="mi">0</span><span class="no">F</span> <span class="mi">22</span> <span class="no">DF</span>                       <span class="no">mov</span>     <span class="no">cr3</span><span class="p">,</span> <span class="no">rdi</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600AAD</span> <span class="mi">58</span>                             <span class="no">pop</span>     <span class="no">rax</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600AAE</span> <span class="mi">5</span><span class="no">F</span>                             <span class="no">pop</span>     <span class="no">rdi</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600AAF</span> <span class="no">FF</span> <span class="mi">15</span> <span class="mi">23</span> <span class="mi">65</span> <span class="mi">62</span><span class="err">+</span>                <span class="no">call</span>    <span class="no">cs</span><span class="p">:</span> <span class="no">SWAPGS</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600AB5</span> <span class="no">FF</span> <span class="mi">25</span> <span class="mi">15</span> <span class="mi">65</span> <span class="mi">62</span><span class="err">+</span>                <span class="no">jmp</span>     <span class="no">cs</span><span class="p">:</span> <span class="no">INTERRUPT_RETURN</span>
+ 
+<span class="nf">_SWAPGS</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF8103EFC0</span> <span class="mi">55</span>                             <span class="no">push</span>    <span class="no">rbp</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF8103EFC1</span> <span class="mi">48</span> <span class="mi">89</span> <span class="no">E5</span>                       <span class="no">mov</span>     <span class="no">rbp</span><span class="p">,</span> <span class="no">rsp</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF8103EFC4</span> <span class="mi">0</span><span class="no">F</span> <span class="mi">01</span> <span class="no">F8</span>                       <span class="no">swapgs</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF8103EFC7</span> <span class="mi">5</span><span class="no">D</span>                             <span class="no">pop</span>     <span class="no">rbp</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF8103EFC8</span> <span class="no">C3</span>                             <span class="no">retn</span>
+ 
+ 
+<span class="nf">_INTERRUPT_RETURN</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600AE0</span> <span class="no">F6</span> <span class="mi">44</span> <span class="mi">24</span> <span class="mi">20</span> <span class="mi">04</span>                 <span class="no">test</span>    <span class="no">byte</span> <span class="no">ptr</span> <span class="p">[</span><span class="no">rsp</span><span class="err">+</span><span class="mi">0x20</span><span class="p">],</span> <span class="mi">4</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600AE5</span> <span class="mi">75</span> <span class="mi">02</span>                          <span class="no">jnz</span>     <span class="no">native_irq_return_ldt</span>
+<span class="nl">.text:</span><span class="nf">FFFFFFFF81600AE7</span> <span class="mi">48</span> <span class="no">CF</span>                          <span class="no">iretq</span>
+</code></pre></td></tr></table>
+</div>
+</div><ol start="2">
+<li>As a matter of fact, CR3 register contains page address in these two modes.</li>
+</ol>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/24/b4YaGA5LcNhExes.png"
+        data-srcset="https://i.loli.net/2021/08/24/b4YaGA5LcNhExes.png, https://i.loli.net/2021/08/24/b4YaGA5LcNhExes.png 1.5x, https://i.loli.net/2021/08/24/b4YaGA5LcNhExes.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/24/b4YaGA5LcNhExes.png"
+        title="https://i.loli.net/2021/08/24/b4YaGA5LcNhExes.png" /></p>
+<p>So if you are lucky enough to find such gadget, you will make it.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">mov     rdi, cr3
+or      rdi, 1000h
+mov     cr3, rdi
+</code></pre></td></tr></table>
+</div>
+</div><h1 id="ref">Ref</h1>
+<p>[1] <a href="https://www.xidoo.top/2021/08/23/hxp-ctf2020" target="_blank" rel="noopener noreffer">https://www.xidoo.top/2021/08/23/hxp-ctf2020</a></p>
+<p>[2] <a href="https://www.anquanke.com/post/id/232545" target="_blank" rel="noopener noreffer">https://www.anquanke.com/post/id/232545</a></p>
+<p>[3] <a href="https://cs.brown.edu/~vpk/papers/ret2dir.sec14.pdf" target="_blank" rel="noopener noreffer">https://cs.brown.edu/~vpk/papers/ret2dir.sec14.pdf</a></p>
+<p>[4] <a href="https://elixir.bootlin.com/linux/v5.0/source/Documentation/x86/x86_64/mm.txt" target="_blank" rel="noopener noreffer">https://elixir.bootlin.com/linux/v5.0/source/Documentation/x86/x86_64/mm.txt</a></p>
+<p>[5] <a href="https://www.anquanke.com/post/id/185408" target="_blank" rel="noopener noreffer">https://www.anquanke.com/post/id/185408</a></p>
+<p>[6] <a href="https://blog.csdn.net/juana1/article/details/6904932" target="_blank" rel="noopener noreffer">https://blog.csdn.net/juana1/article/details/6904932</a></p>
+<p>[7] <a href="https://hardenedlinux.github.io/translation/2015/11/25/Translation-Bypassing-SMEP-Using-vDSO-Overwrites.html" target="_blank" rel="noopener noreffer">https://hardenedlinux.github.io/translation/2015/11/25/Translation-Bypassing-SMEP-Using-vDSO-Overwrites.html</a></p>
+<p>[8] <a href="https://www.jianshu.com/p/3d707fac499a" target="_blank" rel="noopener noreffer">https://www.jianshu.com/p/3d707fac499a</a></p></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2021-08-25</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/2021/08/kernel_mitigation_bypass/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://xidoo.top/2021/08/kernel_mitigation_bypass/" data-title="Linux Kernel Mitigation &amp; Bypass"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://xidoo.top/2021/08/kernel_mitigation_bypass/"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on WhatsApp" data-sharer="whatsapp" data-url="http://xidoo.top/2021/08/kernel_mitigation_bypass/" data-title="Linux Kernel Mitigation &amp; Bypass" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://xidoo.top/2021/08/kernel_mitigation_bypass/" data-title="Linux Kernel Mitigation &amp; Bypass"><i data-svg-src="/lib/simple-icons/icons/line.min.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://xidoo.top/2021/08/kernel_mitigation_bypass/" data-title="Linux Kernel Mitigation &amp; Bypass"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="Share on Myspace" data-sharer="myspace" data-url="http://xidoo.top/2021/08/kernel_mitigation_bypass/" data-title="Linux Kernel Mitigation &amp; Bypass" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="Share on Blogger" data-sharer="blogger" data-url="http://xidoo.top/2021/08/kernel_mitigation_bypass/" data-title="Linux Kernel Mitigation &amp; Bypass" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="Share on Evernote" data-sharer="evernote" data-url="http://xidoo.top/2021/08/kernel_mitigation_bypass/" data-title="Linux Kernel Mitigation &amp; Bypass"><i class="fab fa-evernote fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/2021/08/first_post/" class="prev" rel="prev" title="Init New World"><i class="fas fa-angle-left fa-fw"></i>Init New World</a>
+            <a href="/2021/08/slab_buddy_system0/" class="next" rel="next" title="SLUB &amp; Buddy System in Linux Kernel">SLUB &amp; Buddy System in Linux Kernel<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">🏴‍☠️ Love it, Make magic</div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2019 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">x1do0</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript" src="/lib/smooth-scroll/smooth-scroll.min.js"></script><script type="text/javascript" src="/lib/autocomplete/autocomplete.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.min.js"></script><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/sharer/sharer.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js"></script><script type="text/javascript" src="/lib/katex/auto-render.min.js"></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js"></script><script type="text/javascript" src="/lib/katex/mhchem.min.js"></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":15},"comment":{},"cookieconsent":{"content":{"dismiss":"Got it!","link":"Learn more","message":"This website uses Cookies to improve your experience."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

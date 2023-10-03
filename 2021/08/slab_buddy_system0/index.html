@@ -1,0 +1,895 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>SLUB &amp; Buddy System in Linux Kernel - Stay Hungry</title><meta name="Description" content="This is My New Hugo Site"><meta property="og:title" content="SLUB &amp; Buddy System in Linux Kernel" />
+<meta property="og:description" content="CTF games have flourished in recent years. However, more GLIBC heap allocator exploit techiniques are becoming boring and meaningless, especially for games in China. Challenges are well-designed, deliberately constructed, leading to specific ways to solve them, which is actually further and further away from real world exploits. I started to aim more at Linux kernel memory allocator these days and gathered some imformation about Buddy System &amp; SLUB hitherto." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://xidoo.top/2021/08/slab_buddy_system0/" /><meta property="og:image" content="http://xidoo.top/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-08-27T15:27:39+08:00" />
+<meta property="article:modified_time" content="2021-08-27T15:27:39+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://xidoo.top/logo.png"/>
+
+<meta name="twitter:title" content="SLUB &amp; Buddy System in Linux Kernel"/>
+<meta name="twitter:description" content="CTF games have flourished in recent years. However, more GLIBC heap allocator exploit techiniques are becoming boring and meaningless, especially for games in China. Challenges are well-designed, deliberately constructed, leading to specific ways to solve them, which is actually further and further away from real world exploits. I started to aim more at Linux kernel memory allocator these days and gathered some imformation about Buddy System &amp; SLUB hitherto."/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://xidoo.top/2021/08/slab_buddy_system0/" /><link rel="prev" href="http://xidoo.top/2021/08/kernel_mitigation_bypass/" /><link rel="next" href="http://xidoo.top/2021/09/hssl/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "SLUB \u0026 Buddy System in Linux Kernel",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/xidoo.top\/2021\/08\/slab_buddy_system0\/"
+        },"genre": "posts","wordcount":  4309 ,
+        "url": "http:\/\/xidoo.top\/2021\/08\/slab_buddy_system0\/","datePublished": "2021-08-27T15:27:39+08:00","dateModified": "2021-08-27T15:27:39+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "x1do0"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('light' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'light' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/friends/"> Friends </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/friends/" title="">Friends</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">SLUB &amp; Buddy System in Linux Kernel</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>x1do0</a></span>&nbsp;<span class="post-category">included in <a href="/categories/kernel/"><i class="far fa-folder fa-fw"></i>Kernel</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2021-08-27">2021-08-27</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;4309 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;21 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#buddy-system">Buddy System</a></li>
+    <li><a href="#slub">SLUB</a>
+      <ul>
+        <li><a href="#birds-eye-view">Bird&rsquo;s eye view</a></li>
+        <li><a href="#apis">APIs</a></li>
+        <li><a href="#details">Details</a>
+          <ul>
+            <li><a href="#allocating-process">Allocating process</a></li>
+            <li><a href="#freeing-process">Freeing process</a></li>
+          </ul>
+        </li>
+        <li><a href="#exploits">exploits</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>CTF games have flourished in recent years. However, more GLIBC heap allocator exploit techiniques are becoming boring and meaningless, especially for games in China. Challenges are well-designed, deliberately constructed, leading to specific ways to solve them, which is actually further and further away from real world exploits. I started to aim more at Linux kernel memory allocator these days and gathered some imformation about Buddy System &amp; SLUB hitherto.</p>
+<h2 id="buddy-system">Buddy System</h2>
+<p>Buddy allocation system is an algorithm in which a larger memory block is divided into small parts to satisfy the request. This algorithm is used to give best fit[1].</p>
+<p>There are couple of types of Buddy allocation system</p>
+<ul>
+<li>Binary buddy system</li>
+<li>Fibonacci buddy system</li>
+<li>Weighted buddy system</li>
+<li>Tertiary buddy system</li>
+</ul>
+<p>In Binary buddy system, memory is allocated and freed in PAGE_SIZE (e.g. 4K) using <code>order</code> to indicate size of chunks. Typically we have</p>
+<blockquote>
+<p>SIZE [of chunks of <code>order=n</code>] = 2^n * PAGE_SIZE</p>
+</blockquote>
+<p>We note an example from wiki[2]. Suppose minimum size of chunk is 64K and maximum order of chunk is 4, and user tries to allocate memory of 34K.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/24/snKzB3tw16vGMql.png"
+        data-srcset="https://i.loli.net/2021/08/24/snKzB3tw16vGMql.png, https://i.loli.net/2021/08/24/snKzB3tw16vGMql.png 1.5x, https://i.loli.net/2021/08/24/snKzB3tw16vGMql.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/24/snKzB3tw16vGMql.png"
+        title="https://i.loli.net/2021/08/24/snKzB3tw16vGMql.png" /></p>
+<p>This allocation could have occurred in the following manner</p>
+<ol>
+<li>The initial situation.</li>
+<li>Program A requests memory 34 K, order 0.
+<ol>
+<li>No order 0 blocks are available, so an order 4 block is split, creating two order 3 blocks.</li>
+<li>Still no order 0 blocks available, so the first order 3 block is split, creating two order 2 blocks.</li>
+<li>Still no order 0 blocks available, so the first order 2 block is split, creating two order 1 blocks.</li>
+<li>Still no order 0 blocks available, so the first order 1 block is split, creating two order 0 blocks.</li>
+<li>Now an order 0 block is available, so it is allocated to A.</li>
+</ol>
+</li>
+<li>Program B requests memory 66 K, order 1. An order 1 block is available, so it is allocated to B.</li>
+<li>Program C requests memory 35 K, order 0. An order 0 block is available, so it is allocated to C.</li>
+<li>Program D requests memory 67 K, order 1.
+<ol>
+<li>No order 1 blocks are available, so an order 2 block is split, creating two order 1 blocks.</li>
+<li>Now an order 1 block is available, so it is allocated to D.</li>
+</ol>
+</li>
+<li>Program B releases its memory, freeing one order 1 block.</li>
+<li>Program D releases its memory.
+<ol>
+<li>One order 1 block is freed.</li>
+<li>Since the buddy block of the newly freed block is also free, the two are merged into one order 2 block.</li>
+</ol>
+</li>
+<li>Program A releases its memory, freeing one order 0 block.</li>
+<li>Program C releases its memory.
+<ol>
+<li>One order 0 block is freed.</li>
+<li>Since the buddy block of the newly freed block is also free, the two are merged into one order 1 block.</li>
+<li>Since the buddy block of the newly formed order 1 block is also free, the two are merged into one order 2 block.</li>
+<li>Since the buddy block of the newly formed order 2 block is also free, the two are merged into one order 3 block.</li>
+<li>Since the buddy block of the newly formed order 3 block is also free, the two are merged into one order 4 block.</li>
+</ol>
+</li>
+</ol>
+<p>As you can see, what happens when a memory request is made is as follows:</p>
+<ul>
+<li>If memory is to be allocated
+<ol>
+<li>Look for a memory slot of a suitable size (the minimal 2k block that is larger or equal to that of the requested memory)
+<ol>
+<li>If it is found, it is allocated to the program</li>
+<li>If not, it tries to make a suitable memory slot. The system does so by trying the following:
+<ol>
+<li>Split a free memory slot larger than the requested memory size into half</li>
+<li>If the lower limit is reached, then allocate that amount of memory</li>
+<li>Go back to step 1 (look for a memory slot of a suitable size)</li>
+<li>Repeat this process until a suitable memory slot is found</li>
+</ol>
+</li>
+</ol>
+</li>
+</ol>
+</li>
+<li>If memory is to be freed
+<ol>
+<li>Free the block of memory</li>
+<li>Look at the neighboring block – is it free too?</li>
+<li>If it is, combine the two, and go back to step 2 and repeat this process until either the upper limit is reached (all memory is freed), or until a non-free neighbour block is encountered</li>
+</ol>
+</li>
+</ul>
+<p>Linux complements buddy system mainly by <code>get_free_pages()</code> and <code>alloc_pages()</code>. Memory allocated is continuous and return address of memory can be converted to physical address using const <code>virts_to_phys()</code></p>
+<p>use <code>/proc/buddyinfo</code> and <code>/proc/pagetypeinfo</code> on your computer.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">x1do0@x1do0:~/kernel_learning/khop$ sudo cat /proc/pagetypeinfo
+Page block order: 9
+Pages per block:  512
+
+Free pages count per migrate type at order       0      1      2      3      4      5      6      7      8      9     1
+Node    0, zone      DMA, type    Unmovable      0      0      0      1      1      1      1      0      1      0
+Node    0, zone      DMA, type      Movable      0      0      0      0      0      0      0      0      0      1
+Node    0, zone      DMA, type  Reclaimable      1      1      0      2      2      1      0      1      1      1
+Node    0, zone      DMA, type   HighAtomic      0      0      0      0      0      0      0      0      0      0
+Node    0, zone      DMA, type          CMA      0      0      0      0      0      0      0      0      0      0
+Node    0, zone      DMA, type      Isolate      0      0      0      0      0      0      0      0      0      0
+Node    0, zone    DMA32, type    Unmovable    433    336    227    257     77     26     15      1      3      0
+Node    0, zone    DMA32, type      Movable  13282   9929   4863    441   6437   4340   1477    232     14     53
+Node    0, zone    DMA32, type  Reclaimable    223    139     66    110     25      4      1      2      1      0
+Node    0, zone    DMA32, type   HighAtomic      0      0      0      0      0      0      0      0      0      0
+Node    0, zone    DMA32, type          CMA      0      0      0      0      0      0      0      0      0      0
+Node    0, zone    DMA32, type      Isolate      0      0      0      0      0      0      0      0      0      0
+Node    0, zone   Normal, type    Unmovable     83    151     92    121     41     13      4      3      3      0
+Node    0, zone   Normal, type      Movable   2029   4852   3866   5212   5979   3642   1616    508    173     41     1
+Node    0, zone   Normal, type  Reclaimable      2      9     27     20      4      0      0      1      1      1
+Node    0, zone   Normal, type   HighAtomic      0      0      0      0      0      0      0      0      0      0
+Node    0, zone   Normal, type          CMA      0      0      0      0      0      0      0      0      0      0
+Node    0, zone   Normal, type      Isolate      0      0      0      0      0      0      0      0      0      0
+
+Number of blocks type     Unmovable      Movable  Reclaimable   HighAtomic          CMA      Isolate
+Node 0, zone      DMA            1            5            2            0            0            0
+Node 0, zone    DMA32           91         1398           39            0            0            0
+Node 0, zone   Normal          127         2088           89            0            0            0
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="slub">SLUB</h2>
+<h3 id="birds-eye-view">Bird&rsquo;s eye view</h3>
+<p>Most of the time, memory allocated by buddy system is too large for users. To go to a step further, slub allocator will continue to divide and allocate memory into pieces, just like heap chunks in GLIBC.</p>
+<p>Linux modified SLAB codes and come up with a more efficient mechanism, SLUB[3], intended for memory allocation of kernel objects. There are many structures in slub and I paste an execellent picture of framework here.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/27/JKRCEhmqfXeTYZP.png"
+        data-srcset="https://i.loli.net/2021/08/27/JKRCEhmqfXeTYZP.png, https://i.loli.net/2021/08/27/JKRCEhmqfXeTYZP.png 1.5x, https://i.loli.net/2021/08/27/JKRCEhmqfXeTYZP.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/27/JKRCEhmqfXeTYZP.png"
+        title="https://i.loli.net/2021/08/27/JKRCEhmqfXeTYZP.png" /></p>
+<p>A more brief version.</p>
+<p><img src="https://i.loli.net/2021/08/27/H34QF7hZCNfRSYi.png" style="zoom:150%;" /></p>
+<p><code>kmem_cache</code> is like <code>main_arena</code> in GLIBC, and every <code>kmem_cache</code> contains many <code>slab</code>, each of which is made up of one or more consecutive pages and there are many <code>object</code> of identical size in every pages, which are exposed to users.</p>
+<p>Type <code>cat /proc/slabinfo</code> to see more info on your computer.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span><span class="lnt">132
+</span><span class="lnt">133
+</span><span class="lnt">134
+</span><span class="lnt">135
+</span><span class="lnt">136
+</span><span class="lnt">137
+</span><span class="lnt">138
+</span><span class="lnt">139
+</span><span class="lnt">140
+</span><span class="lnt">141
+</span><span class="lnt">142
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">/ # cat /proc/slabinfo
+slabinfo - version: 2.1
+# name            &lt;active_objs&gt; &lt;num_objs&gt; &lt;objsize&gt; &lt;objperslab&gt; &lt;pagesperslab&gt; : tunables &lt;limit&gt; &lt;batchcount&gt; &lt;sharedfactor&gt; : slabdata &lt;activ&gt;
+fsverity_info          0      0    248   16    1 : tunables    0    0    0 : slabdata      0      0      0
+ip6-frags              0      0    184   22    1 : tunables    0    0    0 : slabdata      0      0      0
+PINGv6                 0      0   1280   12    4 : tunables    0    0    0 : slabdata      0      0      0
+RAWv6                 12     12   1280   12    4 : tunables    0    0    0 : slabdata      1      1      0
+UDPv6                  0      0   1408   11    4 : tunables    0    0    0 : slabdata      0      0      0
+tw_sock_TCPv6          0      0    248   16    1 : tunables    0    0    0 : slabdata      0      0      0
+request_sock_TCPv6      0      0    304   13    1 : tunables    0    0    0 : slabdata      0      0      0
+TCPv6                  0      0   2432   13    8 : tunables    0    0    0 : slabdata      0      0      0
+kcopyd_job             0      0   3312    9    8 : tunables    0    0    0 : slabdata      0      0      0
+dm_uevent              0      0   2632   12    8 : tunables    0    0    0 : slabdata      0      0      0
+scsi_sense_cache      32     32    128   32    1 : tunables    0    0    0 : slabdata      1      1      0
+mqueue_inode_cache      8      8   1024    8    2 : tunables    0    0    0 : slabdata      1      1      0
+fuse_request           0      0    144   28    1 : tunables    0    0    0 : slabdata      0      0      0
+fuse_inode             0      0    896    9    2 : tunables    0    0    0 : slabdata      0      0      0
+ecryptfs_inode_cache      0      0   1024    8    2 : tunables    0    0    0 : slabdata      0      0      0
+ecryptfs_file_cache      0      0     16  256    1 : tunables    0    0    0 : slabdata      0      0      0
+ecryptfs_auth_tok_list_item      0      0    896    9    2 : tunables    0    0    0 : slabdata      0      0      0
+fat_inode_cache        0      0    744   11    2 : tunables    0    0    0 : slabdata      0      0      0
+fat_cache              0      0     40  102    1 : tunables    0    0    0 : slabdata      0      0      0
+squashfs_inode_cache      0      0    768   10    2 : tunables    0    0    0 : slabdata      0      0      0
+jbd2_journal_handle      0      0     48   85    1 : tunables    0    0    0 : slabdata      0      0      0
+jbd2_journal_head      0      0    120   34    1 : tunables    0    0    0 : slabdata      0      0      0
+jbd2_revoke_table_s      0      0     16  256    1 : tunables    0    0    0 : slabdata      0      0      0
+ext4_inode_cache       0      0   1096   29    8 : tunables    0    0    0 : slabdata      0      0      0
+ext4_allocation_context      0      0    128   32    1 : tunables    0    0    0 : slabdata      0      0      0
+ext4_system_zone       0      0     40  102    1 : tunables    0    0    0 : slabdata      0      0      0
+ext4_io_end            0      0     64   64    1 : tunables    0    0    0 : slabdata      0      0      0
+ext4_pending_reservation      0      0     32  128    1 : tunables    0    0    0 : slabdata      0      0      0
+ext4_extent_status      0      0     40  102    1 : tunables    0    0    0 : slabdata      0      0      0
+mbcache                0      0     56   73    1 : tunables    0    0    0 : slabdata      0      0      0
+userfaultfd_ctx_cache      0      0    256   16    1 : tunables    0    0    0 : slabdata      0      0      0
+dnotify_struct         0      0     32  128    1 : tunables    0    0    0 : slabdata      0      0      0
+pid_namespace          0      0    208   19    1 : tunables    0    0    0 : slabdata      0      0      0
+ip4-frags              0      0    200   20    1 : tunables    0    0    0 : slabdata      0      0      0
+xfrm_dst_cache         0      0    384   10    1 : tunables    0    0    0 : slabdata      0      0      0
+xfrm_state             0      0    768   10    2 : tunables    0    0    0 : slabdata      0      0      0
+PING                   8      8   1024    8    2 : tunables    0    0    0 : slabdata      1      1      0
+RAW                    8      8   1024    8    2 : tunables    0    0    0 : slabdata      1      1      0
+tw_sock_TCP            0      0    248   16    1 : tunables    0    0    0 : slabdata      0      0      0
+request_sock_TCP       0      0    304   13    1 : tunables    0    0    0 : slabdata      0      0      0
+TCP                    0      0   2304   14    8 : tunables    0    0    0 : slabdata      0      0      0
+hugetlbfs_inode_cache     25     25    632   25    4 : tunables    0    0    0 : slabdata      1      1      0
+dquot                  0      0    256   16    1 : tunables    0    0    0 : slabdata      0      0      0
+eventpoll_pwq          0      0     72   56    1 : tunables    0    0    0 : slabdata      0      0      0
+dax_cache             10     10    768   10    2 : tunables    0    0    0 : slabdata      1      1      0
+request_queue         15     15   2104   15    8 : tunables    0    0    0 : slabdata      1      1      0
+biovec-max            32     32   4096    8    8 : tunables    0    0    0 : slabdata      4      4      0
+biovec-128             8      8   2048    8    4 : tunables    0    0    0 : slabdata      1      1      0
+biovec-64              8      8   1024    8    2 : tunables    0    0    0 : slabdata      1      1      0
+khugepaged_mm_slot      0      0    112   36    1 : tunables    0    0    0 : slabdata      0      0      0
+user_namespace         0      0    536   15    2 : tunables    0    0    0 : slabdata      0      0      0
+uid_cache             32     32    128   32    1 : tunables    0    0    0 : slabdata      1      1      0
+dmaengine-unmap-256     15     15   2176   15    8 : tunables    0    0    0 : slabdata      1      1      0
+dmaengine-unmap-128     14     14   1152   14    4 : tunables    0    0    0 : slabdata      1      1      0
+sock_inode_cache      27     27    896    9    2 : tunables    0    0    0 : slabdata      3      3      0
+skbuff_fclone_cache      8      8    512    8    1 : tunables    0    0    0 : slabdata      1      1      0
+skbuff_head_cache     16     16    256   16    1 : tunables    0    0    0 : slabdata      1      1      0
+file_lock_cache        0      0    216   18    1 : tunables    0    0    0 : slabdata      0      0      0
+fsnotify_mark_connector    128    128     32  128    1 : tunables    0    0    0 : slabdata      1      1      0
+net_namespace          0      0   4928    6    8 : tunables    0    0    0 : slabdata      0      0      0
+task_delay_info      102    102     80   51    1 : tunables    0    0    0 : slabdata      2      2      0
+taskstats              0      0    344   23    2 : tunables    0    0    0 : slabdata      0      0      0
+proc_dir_entry       294    294    192   21    1 : tunables    0    0    0 : slabdata     14     14      0
+pde_opener           102    102     40  102    1 : tunables    0    0    0 : slabdata      1      1      0
+proc_inode_cache      72     72    680   12    2 : tunables    0    0    0 : slabdata      6      6      0
+bdev_cache            19     19    832   19    4 : tunables    0    0    0 : slabdata      1      1      0
+shmem_inode_cache    583    583    720   11    2 : tunables    0    0    0 : slabdata     53     53      0
+kernfs_node_cache  14130  14130    136   30    1 : tunables    0    0    0 : slabdata    471    471      0
+mnt_cache             36     36    320   12    1 : tunables    0    0    0 : slabdata      3      3      0
+filp                  16     16    256   16    1 : tunables    0    0    0 : slabdata      1      1      0
+inode_cache        11024  11024    608   13    2 : tunables    0    0    0 : slabdata    848    848      0
+dentry             11676  11676    192   21    1 : tunables    0    0    0 : slabdata    556    556      0
+names_cache            8      8   4096    8    8 : tunables    0    0    0 : slabdata      1      1      0
+iint_cache             0      0    120   34    1 : tunables    0    0    0 : slabdata      0      0      0
+lsm_file_cache       170    170     24  170    1 : tunables    0    0    0 : slabdata      1      1      0
+buffer_head            0      0    104   39    1 : tunables    0    0    0 : slabdata      0      0      0
+uts_namespace          0      0    440    9    1 : tunables    0    0    0 : slabdata      0      0      0
+nsproxy               73     73     56   73    1 : tunables    0    0    0 : slabdata      1      1      0
+vm_area_struct        57     57    208   19    1 : tunables    0    0    0 : slabdata      3      3      0
+mm_struct             15     15   1088   15    4 : tunables    0    0    0 : slabdata      1      1      0
+files_cache           11     11    704   11    2 : tunables    0    0    0 : slabdata      1      1      0
+signal_cache          84     84   1152   14    4 : tunables    0    0    0 : slabdata      6      6      0
+sighand_cache         60     60   2112   15    8 : tunables    0    0    0 : slabdata      4      4      0
+task_struct           60     60   5632    5    8 : tunables    0    0    0 : slabdata     12     12      0
+cred_jar              84     84    192   21    1 : tunables    0    0    0 : slabdata      4      4      0
+anon_vma_chain        64     64     64   64    1 : tunables    0    0    0 : slabdata      1      1      0
+anon_vma              46     46     88   46    1 : tunables    0    0    0 : slabdata      1      1      0
+pid                   96     96    128   32    1 : tunables    0    0    0 : slabdata      3      3      0
+Acpi-Operand         392    392     72   56    1 : tunables    0    0    0 : slabdata      7      7      0
+Acpi-ParseExt         39     39    104   39    1 : tunables    0    0    0 : slabdata      1      1      0
+Acpi-State            51     51     80   51    1 : tunables    0    0    0 : slabdata      1      1      0
+numa_policy           15     15    264   15    1 : tunables    0    0    0 : slabdata      1      1      0
+trace_event_file    1472   1472     88   46    1 : tunables    0    0    0 : slabdata     32     32      0
+ftrace_event_field   3995   3995     48   85    1 : tunables    0    0    0 : slabdata     47     47      0
+pool_workqueue        64     64    256   16    1 : tunables    0    0    0 : slabdata      4      4      0
+radix_tree_node      336    336    584   14    2 : tunables    0    0    0 : slabdata     24     24      0
+task_group            12     12    640   12    2 : tunables    0    0    0 : slabdata      1      1      0
+vmap_area            192    192     64   64    1 : tunables    0    0    0 : slabdata      3      3      0
+dma-kmalloc-8k         0      0   8192    4    8 : tunables    0    0    0 : slabdata      0      0      0
+dma-kmalloc-4k         0      0   4096    8    8 : tunables    0    0    0 : slabdata      0      0      0
+dma-kmalloc-2k         0      0   2048    8    4 : tunables    0    0    0 : slabdata      0      0      0
+dma-kmalloc-1k         0      0   1024    8    2 : tunables    0    0    0 : slabdata      0      0      0
+dma-kmalloc-512        8      8    512    8    1 : tunables    0    0    0 : slabdata      1      1      0
+dma-kmalloc-256        0      0    256   16    1 : tunables    0    0    0 : slabdata      0      0      0
+dma-kmalloc-128        0      0    128   32    1 : tunables    0    0    0 : slabdata      0      0      0
+dma-kmalloc-64         0      0     64   64    1 : tunables    0    0    0 : slabdata      0      0      0
+dma-kmalloc-32         0      0     32  128    1 : tunables    0    0    0 : slabdata      0      0      0
+dma-kmalloc-16         0      0     16  256    1 : tunables    0    0    0 : slabdata      0      0      0
+dma-kmalloc-8          0      0      8  512    1 : tunables    0    0    0 : slabdata      0      0      0
+dma-kmalloc-192        0      0    192   21    1 : tunables    0    0    0 : slabdata      0      0      0
+dma-kmalloc-96         0      0     96   42    1 : tunables    0    0    0 : slabdata      0      0      0
+kmalloc-rcl-8k         0      0   8192    4    8 : tunables    0    0    0 : slabdata      0      0      0
+kmalloc-rcl-4k         0      0   4096    8    8 : tunables    0    0    0 : slabdata      0      0      0
+kmalloc-rcl-2k         0      0   2048    8    4 : tunables    0    0    0 : slabdata      0      0      0
+kmalloc-rcl-1k         0      0   1024    8    2 : tunables    0    0    0 : slabdata      0      0      0
+kmalloc-rcl-512        0      0    512    8    1 : tunables    0    0    0 : slabdata      0      0      0
+kmalloc-rcl-256        0      0    256   16    1 : tunables    0    0    0 : slabdata      0      0      0
+kmalloc-rcl-192        0      0    192   21    1 : tunables    0    0    0 : slabdata      0      0      0
+kmalloc-rcl-128        0      0    128   32    1 : tunables    0    0    0 : slabdata      0      0      0
+kmalloc-rcl-96         0      0     96   42    1 : tunables    0    0    0 : slabdata      0      0      0
+kmalloc-rcl-64        64     64     64   64    1 : tunables    0    0    0 : slabdata      1      1      0
+kmalloc-rcl-32         0      0     32  128    1 : tunables    0    0    0 : slabdata      0      0      0
+kmalloc-rcl-16         0      0     16  256    1 : tunables    0    0    0 : slabdata      0      0      0
+kmalloc-rcl-8          0      0      8  512    1 : tunables    0    0    0 : slabdata      0      0      0
+kmalloc-8k            12     12   8192    4    8 : tunables    0    0    0 : slabdata      3      3      0
+kmalloc-4k            32     32   4096    8    8 : tunables    0    0    0 : slabdata      4      4      0
+kmalloc-2k           176    176   2048    8    4 : tunables    0    0    0 : slabdata     22     22      0
+kmalloc-1k           416    416   1024    8    2 : tunables    0    0    0 : slabdata     52     52      0
+kmalloc-512          320    320    512    8    1 : tunables    0    0    0 : slabdata     40     40      0
+kmalloc-256          512    512    256   16    1 : tunables    0    0    0 : slabdata     32     32      0
+kmalloc-192          420    420    192   21    1 : tunables    0    0    0 : slabdata     20     20      0
+kmalloc-128          384    384    128   32    1 : tunables    0    0    0 : slabdata     12     12      0
+kmalloc-96           714    714     96   42    1 : tunables    0    0    0 : slabdata     17     17      0
+kmalloc-64          2624   2624     64   64    1 : tunables    0    0    0 : slabdata     41     41      0
+kmalloc-32          3328   3328     32  128    1 : tunables    0    0    0 : slabdata     26     26      0
+kmalloc-16          1536   1536     16  256    1 : tunables    0    0    0 : slabdata      6      6      0
+kmalloc-8           2048   2048      8  512    1 : tunables    0    0    0 : slabdata      4      4      0
+kmem_cache_node      192    192     64   64    1 : tunables    0    0    0 : slabdata      3      3      0
+kmem_cache           144    144    448    9    1 : tunables    0    0    0 : slabdata     16     16      0
+</code></pre></td></tr></table>
+</div>
+</div><p>The instruction lists all of the current <code>kmem_cache</code>, taking <code>kmalloc-64</code> for example</p>
+<ul>
+<li>name: name of this <code>kmem_cache</code></li>
+<li>active_objs: amount of objects being allocated, which is 2624</li>
+<li>num_objs: max number of objects users can allocate, which is 2624</li>
+<li>objsize: size of each object, which is 64 bytes.</li>
+<li>objperslab: max amount of objects per slab, which is 64</li>
+<li>pagesperslab: numbers of pages per slab, which is 1 here</li>
+</ul>
+<p>So we can see that, in <code>kmalloc-64</code> if we allocate <code>n</code> objects.</p>
+<ol>
+<li>if n&gt;64, more than one slabs are needed.</li>
+<li>if n&gt;2624, buddy system will allocate a new slab in this <code>kmeme_cache</code>.</li>
+</ol>
+<h3 id="apis">APIs</h3>
+<p>There are some important APIs for users.</p>
+<ol>
+<li>create a <code>kmem_cache</code> with specific size and name.</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="k">struct</span> <span class="n">kmem_cache</span> <span class="o">*</span> <span class="nf">kmem_cache_create</span> <span class="p">(</span>	<span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">name</span><span class="p">,</span>
+ 	<span class="n">size_t</span>  	<span class="n">size</span><span class="p">,</span>
+ 	<span class="n">size_t</span>  	<span class="n">align</span><span class="p">,</span>
+ 	<span class="kt">unsigned</span> <span class="kt">long</span>  	<span class="n">flags</span><span class="p">,</span>
+ 	<span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">ctor</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">,</span> <span class="k">struct</span> <span class="n">kmem_cache</span> <span class="o">*</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">long</span><span class="p">),</span>
+ 	<span class="kt">void</span> <span class="p">(</span><span class="o">*</span><span class="n">dtor</span><span class="p">(</span><span class="kt">void</span><span class="o">*</span><span class="p">,</span> <span class="k">struct</span> <span class="n">kmem_cache</span> <span class="o">*</span><span class="p">,</span> <span class="kt">unsigned</span> <span class="kt">long</span><span class="p">));</span>
+</code></pre></td></tr></table>
+</div>
+</div><ol start="2">
+<li>create a <code>object</code> in specific <code>kmem_cache</code></li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="o">*</span> <span class="nf">kmem_cache_alloc</span> <span class="p">(</span><span class="k">struct</span> <span class="n">kmem_cache</span> <span class="o">*</span> <span class="n">cachep</span><span class="p">,</span> <span class="n">gfp_t</span> <span class="n">flags</span><span class="p">);</span>
+</code></pre></td></tr></table>
+</div>
+</div><ol start="3">
+<li>free a specific <code>object</code> in specific <code>kmem_cache</code></li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">kmem_cache_free</span> <span class="p">(</span><span class="k">struct</span> <span class="n">kmem_cache</span> <span class="o">*</span> <span class="n">cachep</span><span class="p">,</span> <span class="kt">void</span> <span class="o">*</span> <span class="n">objp</span><span class="p">);</span>
+</code></pre></td></tr></table>
+</div>
+</div><ol start="4">
+<li>allocate a <code>object</code> in <code>kmalloc-***</code>. Kernel will find a best matched <code>kmem_cache</code>, and if sizes required are more than the biggest size of them (8K), buddy system will help to allocator the memory directly.</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="o">*</span> <span class="nf">kmalloc</span> <span class="p">(</span><span class="n">size_t</span> <span class="n">size</span><span class="p">,</span> <span class="n">gfp_t</span> <span class="n">flags</span><span class="p">);</span>
+</code></pre></td></tr></table>
+</div>
+</div><ol start="5">
+<li>free a <code>object</code>. Kernel will find the page of the object, read out pointer of the object and copy to a <code>freelist</code>, with <code>fd</code> pointer points to next freed <code>object</code>, same as <code>tcache</code> in GLIBC.</li>
+</ol>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">kfree</span> <span class="p">(</span><span class="k">const</span> <span class="kt">void</span> <span class="o">*</span> <span class="n">objp</span><span class="p">);</span>
+</code></pre></td></tr></table>
+</div>
+</div><h3 id="details">Details</h3>
+<p>Let&rsquo;s go deep into <code>kmalloc-***</code>. As you can see, the smallest is  <code>kmalloc-8</code> and the largest is <code>kmalloc-8k</code> with size of 2^3 to 2^13 bytes. In older kernel version, max size is 2^11 bytes. Details are in the following picture.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/27/wHduGFAIfjpoJLP.jpg"
+        data-srcset="https://i.loli.net/2021/08/27/wHduGFAIfjpoJLP.jpg, https://i.loli.net/2021/08/27/wHduGFAIfjpoJLP.jpg 1.5x, https://i.loli.net/2021/08/27/wHduGFAIfjpoJLP.jpg 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/27/wHduGFAIfjpoJLP.jpg"
+        title="https://i.loli.net/2021/08/27/wHduGFAIfjpoJLP.jpg" /></p>
+<p><code>kmem_cache_cpu</code> is like a supermarket</p>
+<ul>
+<li><code>freelist</code> is the header of freed object lists</li>
+<li><code>page</code> is the header of allocated object lists</li>
+</ul>
+<p>And <code>kmem_cache_node</code> is the depository.</p>
+<ul>
+<li><code>partial</code> points to partially allocated slub lists.</li>
+<li><code>full</code> points to fully allocated slub lists.</li>
+</ul>
+<p>We will go through it step by step together.</p>
+<h4 id="allocating-process">Allocating process</h4>
+<ol>
+<li>
+<p><code>kmem_cache_node</code> and <code>kmem_cache_cpu</code> contain no slub.</p>
+</li>
+<li>
+<p>After an allocation request, buddy system allocates a large chunk of memory, divides it into pieces, returns one piece to users. Now <code>kmem_cache_cpu</code> has a slub ready to use with <code>freelist</code> and <code>page</code> point to correct places.</p>
+</li>
+</ol>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/27/qEvnH7gifNFXhRb.jpg"
+        data-srcset="https://i.loli.net/2021/08/27/qEvnH7gifNFXhRb.jpg, https://i.loli.net/2021/08/27/qEvnH7gifNFXhRb.jpg 1.5x, https://i.loli.net/2021/08/27/qEvnH7gifNFXhRb.jpg 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/27/qEvnH7gifNFXhRb.jpg"
+        title="https://i.loli.net/2021/08/27/qEvnH7gifNFXhRb.jpg" /></p>
+<ol start="3">
+<li>Users continue to require allocation</li>
+</ol>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/27/sI51QKd9zObtyWG.jpg"
+        data-srcset="https://i.loli.net/2021/08/27/sI51QKd9zObtyWG.jpg, https://i.loli.net/2021/08/27/sI51QKd9zObtyWG.jpg 1.5x, https://i.loli.net/2021/08/27/sI51QKd9zObtyWG.jpg 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/27/sI51QKd9zObtyWG.jpg"
+        title="https://i.loli.net/2021/08/27/sI51QKd9zObtyWG.jpg" /></p>
+<ol start="4">
+<li>After slab of <code>kmem_cache_cpu</code> is filled with objects, the next allocation will trigger a swtich, putting the previous full slab into the <code>full</code> lists of <code>kmem_cache_node</code> and one not full slab from <code>partial</code> lists to <code>kmem_cache_cpu</code>, and then return a object to users.</li>
+</ol>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/27/amTwIj4x13oyKpl.jpg"
+        data-srcset="https://i.loli.net/2021/08/27/amTwIj4x13oyKpl.jpg, https://i.loli.net/2021/08/27/amTwIj4x13oyKpl.jpg 1.5x, https://i.loli.net/2021/08/27/amTwIj4x13oyKpl.jpg 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/27/amTwIj4x13oyKpl.jpg"
+        title="https://i.loli.net/2021/08/27/amTwIj4x13oyKpl.jpg" /></p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/27/5zOdDJv1cSmGgRL.jpg"
+        data-srcset="https://i.loli.net/2021/08/27/5zOdDJv1cSmGgRL.jpg, https://i.loli.net/2021/08/27/5zOdDJv1cSmGgRL.jpg 1.5x, https://i.loli.net/2021/08/27/5zOdDJv1cSmGgRL.jpg 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/27/5zOdDJv1cSmGgRL.jpg"
+        title="https://i.loli.net/2021/08/27/5zOdDJv1cSmGgRL.jpg" /></p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/27/q4KRAT7oiwdIjae.jpg"
+        data-srcset="https://i.loli.net/2021/08/27/q4KRAT7oiwdIjae.jpg, https://i.loli.net/2021/08/27/q4KRAT7oiwdIjae.jpg 1.5x, https://i.loli.net/2021/08/27/q4KRAT7oiwdIjae.jpg 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/27/q4KRAT7oiwdIjae.jpg"
+        title="https://i.loli.net/2021/08/27/q4KRAT7oiwdIjae.jpg" /></p>
+<ol start="5">
+<li>And finally, all slabs are full. Buddy system stands out again and gives us a brand new empty slab.</li>
+</ol>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/27/ybaSTqXkJNPn9Cl.jpg"
+        data-srcset="https://i.loli.net/2021/08/27/ybaSTqXkJNPn9Cl.jpg, https://i.loli.net/2021/08/27/ybaSTqXkJNPn9Cl.jpg 1.5x, https://i.loli.net/2021/08/27/ybaSTqXkJNPn9Cl.jpg 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/27/ybaSTqXkJNPn9Cl.jpg"
+        title="https://i.loli.net/2021/08/27/ybaSTqXkJNPn9Cl.jpg" /></p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/27/mH65vSYrbDlXZng.jpg"
+        data-srcset="https://i.loli.net/2021/08/27/mH65vSYrbDlXZng.jpg, https://i.loli.net/2021/08/27/mH65vSYrbDlXZng.jpg 1.5x, https://i.loli.net/2021/08/27/mH65vSYrbDlXZng.jpg 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/27/mH65vSYrbDlXZng.jpg"
+        title="https://i.loli.net/2021/08/27/mH65vSYrbDlXZng.jpg" /></p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/27/RXAV9HQdKhsvOZr.jpg"
+        data-srcset="https://i.loli.net/2021/08/27/RXAV9HQdKhsvOZr.jpg, https://i.loli.net/2021/08/27/RXAV9HQdKhsvOZr.jpg 1.5x, https://i.loli.net/2021/08/27/RXAV9HQdKhsvOZr.jpg 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/27/RXAV9HQdKhsvOZr.jpg"
+        title="https://i.loli.net/2021/08/27/RXAV9HQdKhsvOZr.jpg" /></p>
+<p>Now you may want to ask, how can a slab be added into <code>partial</code> lists? Well, follow me with the process of freeing these objects.</p>
+<h4 id="freeing-process">Freeing process</h4>
+<p>Depending on where the object to be free is, there are some kinds of situation.</p>
+<ol>
+<li>
+<p>In <code>kmem_cache_cpu</code>, Kernel will put it from <code>page</code> list to <code>freelist</code> list.</p>
+</li>
+<li>
+<p>In not full slab of <code>partial</code> list in <code>kmem_cache_node</code>, mark the object freed.</p>
+</li>
+</ol>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/27/gRC1iN5Pn4QVU8O.jpg"
+        data-srcset="https://i.loli.net/2021/08/27/gRC1iN5Pn4QVU8O.jpg, https://i.loli.net/2021/08/27/gRC1iN5Pn4QVU8O.jpg 1.5x, https://i.loli.net/2021/08/27/gRC1iN5Pn4QVU8O.jpg 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/27/gRC1iN5Pn4QVU8O.jpg"
+        title="https://i.loli.net/2021/08/27/gRC1iN5Pn4QVU8O.jpg" /></p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/27/Gp6qtU5Slry1bQ7.jpg"
+        data-srcset="https://i.loli.net/2021/08/27/Gp6qtU5Slry1bQ7.jpg, https://i.loli.net/2021/08/27/Gp6qtU5Slry1bQ7.jpg 1.5x, https://i.loli.net/2021/08/27/Gp6qtU5Slry1bQ7.jpg 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/27/Gp6qtU5Slry1bQ7.jpg"
+        title="https://i.loli.net/2021/08/27/Gp6qtU5Slry1bQ7.jpg" /></p>
+<ol start="3">
+<li>In full slab of <code>full</code> list, free it and put the slab into <code>partial</code> list.</li>
+</ol>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/27/csqlf4NFOwezLHb.jpg"
+        data-srcset="https://i.loli.net/2021/08/27/csqlf4NFOwezLHb.jpg, https://i.loli.net/2021/08/27/csqlf4NFOwezLHb.jpg 1.5x, https://i.loli.net/2021/08/27/csqlf4NFOwezLHb.jpg 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/27/csqlf4NFOwezLHb.jpg"
+        title="https://i.loli.net/2021/08/27/csqlf4NFOwezLHb.jpg" /></p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/27/LjKs5At3PYqiyDl.jpg"
+        data-srcset="https://i.loli.net/2021/08/27/LjKs5At3PYqiyDl.jpg, https://i.loli.net/2021/08/27/LjKs5At3PYqiyDl.jpg 1.5x, https://i.loli.net/2021/08/27/LjKs5At3PYqiyDl.jpg 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/27/LjKs5At3PYqiyDl.jpg"
+        title="https://i.loli.net/2021/08/27/LjKs5At3PYqiyDl.jpg" /></p>
+<p>What&rsquo;s more, if a slub is entirely empty, the whole slab will be freed.</p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/27/v4MjQCFHBoqfNl8.jpg"
+        data-srcset="https://i.loli.net/2021/08/27/v4MjQCFHBoqfNl8.jpg, https://i.loli.net/2021/08/27/v4MjQCFHBoqfNl8.jpg 1.5x, https://i.loli.net/2021/08/27/v4MjQCFHBoqfNl8.jpg 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/27/v4MjQCFHBoqfNl8.jpg"
+        title="https://i.loli.net/2021/08/27/v4MjQCFHBoqfNl8.jpg" /></p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/27/RhxaOC25TAos1Jy.jpg"
+        data-srcset="https://i.loli.net/2021/08/27/RhxaOC25TAos1Jy.jpg, https://i.loli.net/2021/08/27/RhxaOC25TAos1Jy.jpg 1.5x, https://i.loli.net/2021/08/27/RhxaOC25TAos1Jy.jpg 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/27/RhxaOC25TAos1Jy.jpg"
+        title="https://i.loli.net/2021/08/27/RhxaOC25TAos1Jy.jpg" /></p>
+<p><img
+        class="lazyload"
+        src="/svg/loading.min.svg"
+        data-src="https://i.loli.net/2021/08/27/nhIMfAgFZbDaH39.png"
+        data-srcset="https://i.loli.net/2021/08/27/nhIMfAgFZbDaH39.png, https://i.loli.net/2021/08/27/nhIMfAgFZbDaH39.png 1.5x, https://i.loli.net/2021/08/27/nhIMfAgFZbDaH39.png 2x"
+        data-sizes="auto"
+        alt="https://i.loli.net/2021/08/27/nhIMfAgFZbDaH39.png"
+        title="https://i.loli.net/2021/08/27/nhIMfAgFZbDaH39.png" /></p>
+<h3 id="exploits">exploits</h3>
+<p>If there is a use-after-free slab vulnerability in kernel mode, modifying <code>fd</code> to attack <code>mprobe_path</code> may be an easy way to exploit.</p>
+<p>If there is an overflow vulnerability in slab structure, the first thing is to allocate lots of objects to make later objects we allocate continuous. By overwriting the content of next ojbect, we can achieve our goal. For example, use  <code>fork</code> to arrange <code>cred</code> structure of child process to the nexe object and zero it out by overflowing the previous object. In [5], author uses <code>shmid_kernel</code> structure to get root privilege.</p>
+<h1 id="ref">Ref</h1>
+<p>[1] <a href="https://www.geeksforgeeks.org/operating-system-allocating-kernel-memory-buddy-system-slab-system/" target="_blank" rel="noopener noreffer">https://www.geeksforgeeks.org/operating-system-allocating-kernel-memory-buddy-system-slab-system/</a></p>
+<p>[2] <a href="https://en.wikipedia.org/wiki/Buddy_memory_allocation" target="_blank" rel="noopener noreffer">https://en.wikipedia.org/wiki/Buddy_memory_allocation</a></p>
+<p>[3] <a href="https://en.wikipedia.org/wiki/SLUB_%28software%29" target="_blank" rel="noopener noreffer">https://en.wikipedia.org/wiki/SLUB_(software)</a></p>
+<p>[4] <a href="https://blog.csdn.net/lukuen/article/details/6935068" target="_blank" rel="noopener noreffer">https://blog.csdn.net/lukuen/article/details/6935068</a></p>
+<p>[5] <a href="https://www.cnblogs.com/bittorrent/p/3266308.html" target="_blank" rel="noopener noreffer">https://www.cnblogs.com/bittorrent/p/3266308.html</a></p></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2021-08-27</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/2021/08/slab_buddy_system0/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://xidoo.top/2021/08/slab_buddy_system0/" data-title="SLUB &amp; Buddy System in Linux Kernel"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://xidoo.top/2021/08/slab_buddy_system0/"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on WhatsApp" data-sharer="whatsapp" data-url="http://xidoo.top/2021/08/slab_buddy_system0/" data-title="SLUB &amp; Buddy System in Linux Kernel" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://xidoo.top/2021/08/slab_buddy_system0/" data-title="SLUB &amp; Buddy System in Linux Kernel"><i data-svg-src="/lib/simple-icons/icons/line.min.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://xidoo.top/2021/08/slab_buddy_system0/" data-title="SLUB &amp; Buddy System in Linux Kernel"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="Share on Myspace" data-sharer="myspace" data-url="http://xidoo.top/2021/08/slab_buddy_system0/" data-title="SLUB &amp; Buddy System in Linux Kernel" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="Share on Blogger" data-sharer="blogger" data-url="http://xidoo.top/2021/08/slab_buddy_system0/" data-title="SLUB &amp; Buddy System in Linux Kernel" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="Share on Evernote" data-sharer="evernote" data-url="http://xidoo.top/2021/08/slab_buddy_system0/" data-title="SLUB &amp; Buddy System in Linux Kernel"><i class="fab fa-evernote fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/2021/08/kernel_mitigation_bypass/" class="prev" rel="prev" title="Linux Kernel Mitigation &amp; Bypass"><i class="fas fa-angle-left fa-fw"></i>Linux Kernel Mitigation &amp; Bypass</a>
+            <a href="/2021/09/hssl/" class="next" rel="next" title="2021 华为夏季实习回顾">2021 华为夏季实习回顾<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">🏴‍☠️ Love it, Make magic</div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2019 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">x1do0</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript" src="/lib/smooth-scroll/smooth-scroll.min.js"></script><script type="text/javascript" src="/lib/autocomplete/autocomplete.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.min.js"></script><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/sharer/sharer.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js"></script><script type="text/javascript" src="/lib/katex/auto-render.min.js"></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js"></script><script type="text/javascript" src="/lib/katex/mhchem.min.js"></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":15},"comment":{},"cookieconsent":{"content":{"dismiss":"Got it!","link":"Learn more","message":"This website uses Cookies to improve your experience."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

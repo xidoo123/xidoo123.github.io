@@ -1,0 +1,21 @@
+<rss xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title>Kernel - Category - Stay Hungry</title>
+        <link>http://xidoo.top/categories/kernel/</link>
+        <description>Kernel - Category - Stay Hungry</description>
+        <generator>Hugo -- gohugo.io</generator><language>en</language><lastBuildDate>Fri, 27 Aug 2021 15:27:39 &#43;0800</lastBuildDate><atom:link href="http://xidoo.top/categories/kernel/" rel="self" type="application/rss+xml" /><item>
+    <title>SLUB &amp; Buddy System in Linux Kernel</title>
+    <link>http://xidoo.top/2021/08/slab_buddy_system0/</link>
+    <pubDate>Fri, 27 Aug 2021 15:27:39 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2021/08/slab_buddy_system0/</guid>
+    <description><![CDATA[<p>CTF games have flourished in recent years. However, more GLIBC heap allocator exploit techiniques are becoming boring and meaningless, especially for games in China. Challenges are well-designed, deliberately constructed, leading to specific ways to solve them, which is actually further and further away from real world exploits. I started to aim more at Linux kernel memory allocator these days and gathered some imformation about Buddy System &amp; SLUB hitherto.</p>]]></description>
+</item><item>
+    <title>Linux Kernel Mitigation &amp; Bypass</title>
+    <link>http://xidoo.top/2021/08/kernel_mitigation_bypass/</link>
+    <pubDate>Wed, 25 Aug 2021 10:30:50 &#43;0800</pubDate>
+    <author>Author</author>
+    <guid>http://xidoo.top/2021/08/kernel_mitigation_bypass/</guid>
+    <description><![CDATA[<p>Like user mode, there are also couples of ways of mitigation against exploits in Linux kernel. Here is a list of mitigation in kernel mode and methods to bypass some of them.</p>]]></description>
+</item></channel>
+</rss>

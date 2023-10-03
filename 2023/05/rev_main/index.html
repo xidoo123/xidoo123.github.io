@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="robots" content="noodp" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1">
+        <title>逆向方法论 - Stay Hungry</title><meta name="Description" content="This is My New Hugo Site"><meta property="og:title" content="逆向方法论" />
+<meta property="og:description" content="年初 SECCON CTF 22 final 上第二天出了一道 KoH 题：给定 binary 要求写出源码，判定标准为编译后与目标 binary 的 diff，越小则分数越高。每一小时更换一门语言，从 c,c&#43;&#43; 到 d, go, web assembly 等等。我读完题目就放弃了因为我知道我的逆向水平就是依托答辩，而队友也不负众望基本一整天都在爆杀全场。我在崇拜之余不由得思考起一个问题，逆向应该怎么学？" />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="http://xidoo.top/2023/05/rev_main/" /><meta property="og:image" content="http://xidoo.top/logo.png"/><meta property="article:section" content="posts" />
+<meta property="article:published_time" content="2023-05-04T16:04:33+02:00" />
+<meta property="article:modified_time" content="2023-05-04T16:04:33+02:00" />
+
+<meta name="twitter:card" content="summary_large_image"/>
+<meta name="twitter:image" content="http://xidoo.top/logo.png"/>
+
+<meta name="twitter:title" content="逆向方法论"/>
+<meta name="twitter:description" content="年初 SECCON CTF 22 final 上第二天出了一道 KoH 题：给定 binary 要求写出源码，判定标准为编译后与目标 binary 的 diff，越小则分数越高。每一小时更换一门语言，从 c,c&#43;&#43; 到 d, go, web assembly 等等。我读完题目就放弃了因为我知道我的逆向水平就是依托答辩，而队友也不负众望基本一整天都在爆杀全场。我在崇拜之余不由得思考起一个问题，逆向应该怎么学？"/>
+<meta name="application-name" content="LoveIt">
+<meta name="apple-mobile-web-app-title" content="LoveIt"><meta name="theme-color" content="#ffffff"><meta name="msapplication-TileColor" content="#da532c"><link rel="shortcut icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"><link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png"><link rel="mask-icon" href="/safari-pinned-tab.svg" color="#5bbad5"><link rel="manifest" href="/site.webmanifest"><link rel="canonical" href="http://xidoo.top/2023/05/rev_main/" /><link rel="prev" href="http://xidoo.top/2022/07/actf2022-kkk/" /><link rel="next" href="http://xidoo.top/2023/09/re-host/" /><link rel="stylesheet" href="/lib/normalize/normalize.min.css"><link rel="stylesheet" href="/css/style.min.css"><link rel="stylesheet" href="/lib/fontawesome-free/all.min.css"><link rel="stylesheet" href="/lib/animate/animate.min.css"><script type="application/ld+json">
+    {
+        "@context": "http://schema.org",
+        "@type": "BlogPosting",
+        "headline": "逆向方法论",
+        "inLanguage": "en",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "http:\/\/xidoo.top\/2023\/05\/rev_main\/"
+        },"genre": "posts","wordcount":  97 ,
+        "url": "http:\/\/xidoo.top\/2023\/05\/rev_main\/","datePublished": "2023-05-04T16:04:33+02:00","dateModified": "2023-05-04T16:04:33+02:00","publisher": {
+            "@type": "Organization",
+            "name": ""},"author": {
+                "@type": "Person",
+                "name": "x1do0"
+            },"description": ""
+    }
+    </script></head>
+    <body header-desktop="fixed" header-mobile="auto"><script type="text/javascript">(window.localStorage && localStorage.getItem('theme') ? localStorage.getItem('theme') === 'dark' : ('light' === 'auto' ? window.matchMedia('(prefers-color-scheme: dark)').matches : 'light' === 'dark')) && document.body.setAttribute('theme', 'dark');</script>
+
+        <div id="mask"></div><div class="wrapper"><header class="desktop" id="header-desktop">
+    <div class="header-wrapper">
+        <div class="header-title">
+            <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+        </div>
+        <div class="menu">
+            <div class="menu-inner"><a class="menu-item" href="/posts/"> Posts </a><a class="menu-item" href="/friends/"> Friends </a><a class="menu-item" href="/categories/"> Categories </a><a class="menu-item" href="/about/"> About </a><span class="menu-item delimiter"></span><span class="menu-item search" id="search-desktop">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-desktop">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-desktop" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-desktop" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-desktop">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </span><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                    <i class="fas fa-adjust fa-fw"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</header><header class="mobile" id="header-mobile">
+    <div class="header-container">
+        <div class="header-wrapper">
+            <div class="header-title">
+                <a href="/" title="Stay Hungry">🚩 Stay hungry</a>
+            </div>
+            <div class="menu-toggle" id="menu-toggle-mobile">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+        <div class="menu" id="menu-mobile"><div class="search-wrapper">
+                    <div class="search mobile" id="search-mobile">
+                        <input type="text" placeholder="Search titles or contents..." id="search-input-mobile">
+                        <a href="javascript:void(0);" class="search-button search-toggle" id="search-toggle-mobile" title="Search">
+                            <i class="fas fa-search fa-fw"></i>
+                        </a>
+                        <a href="javascript:void(0);" class="search-button search-clear" id="search-clear-mobile" title="Clear">
+                            <i class="fas fa-times-circle fa-fw"></i>
+                        </a>
+                        <span class="search-button search-loading" id="search-loading-mobile">
+                            <i class="fas fa-spinner fa-fw fa-spin"></i>
+                        </span>
+                    </div>
+                    <a href="javascript:void(0);" class="search-cancel" id="search-cancel-mobile">
+                        Cancel
+                    </a>
+                </div><a class="menu-item" href="/posts/" title="">Posts</a><a class="menu-item" href="/friends/" title="">Friends</a><a class="menu-item" href="/categories/" title="">Categories</a><a class="menu-item" href="/about/" title="">About</a><a href="javascript:void(0);" class="menu-item theme-switch" title="Switch Theme">
+                <i class="fas fa-adjust fa-fw"></i>
+            </a></div>
+    </div>
+</header>
+<div class="search-dropdown desktop">
+    <div id="search-dropdown-desktop"></div>
+</div>
+<div class="search-dropdown mobile">
+    <div id="search-dropdown-mobile"></div>
+</div>
+<main class="main">
+                <div class="container"><div class="toc" id="toc-auto">
+            <h2 class="toc-title">Contents</h2>
+            <div class="toc-content" id="toc-content-auto"></div>
+        </div><article class="page single"><h1 class="single-title animated flipInX">逆向方法论</h1><div class="post-meta">
+            <div class="post-meta-line"><span class="post-author"><a href="/" title="Author" rel=" author" class="author"><i class="fas fa-user-circle fa-fw"></i>x1do0</a></span>&nbsp;<span class="post-category">included in <a href="/categories/general/"><i class="far fa-folder fa-fw"></i>General</a></span></div>
+            <div class="post-meta-line"><i class="far fa-calendar-alt fa-fw"></i>&nbsp;<time datetime="2023-05-04">2023-05-04</time>&nbsp;<i class="fas fa-pencil-alt fa-fw"></i>&nbsp;97 words&nbsp;
+                <i class="far fa-clock fa-fw"></i>&nbsp;One minute&nbsp;</div>
+        </div><div class="details toc" id="toc-static"  kept="">
+                <div class="details-summary toc-title">
+                    <span>Contents</span>
+                    <span><i class="details-icon fas fa-angle-right"></i></span>
+                </div>
+                <div class="details-content toc-content" id="toc-content-static"><nav id="TableOfContents">
+  <ul>
+    <li><a href="#what-i-want">what I want</a></li>
+    <li><a href="#do-shit-now">do shit now</a></li>
+  </ul>
+</nav></div>
+            </div><div class="content" id="content"><p>年初 SECCON CTF 22 final 上第二天出了一道 KoH 题：给定 binary 要求写出源码，判定标准为编译后与目标 binary 的 diff，越小则分数越高。每一小时更换一门语言，从 c,c++ 到 d, go, web assembly 等等。我读完题目就放弃了因为我知道我的逆向水平就是依托答辩，而队友也不负众望基本一整天都在爆杀全场。我在崇拜之余不由得思考起一个问题，逆向应该怎么学？</p>
+<p>这是一个困扰已久的问题，我在本科时期曾想过在 CTF 赛事中参与逆向题，但基本不得要领。我也直球问过别人：逆向该怎么学？</p>
+<blockquote>
+<p>本科某同届逆向大哥（与某学长）：多刷题就完事了</p>
+</blockquote>
+<blockquote>
+<p>L3H Sec 某逆向大哥：多看就完事了</p>
+</blockquote>
+<p>我能理解他们想表达什么，但这些回答显然对我毫无帮助（（</p>
+<h2 id="what-i-want">what I want</h2>
+<p>我仔细考虑了一下逆向能做的事，比如写外挂等，我发现我并不是很喜欢逆向。那我想要的是什么呢？明确目标以后我承认有点标题党了，<strong>毕竟对于更喜欢漏洞利用、漏洞分析的我来说，我的“逆向”目标其实相当可笑：如何能在反编译工具中看懂程序？这里的程序基本没有复杂逻辑，也不需要选手的逆向技巧，而且程序一般也是带符号的。</strong></p>
+<p>比如，一个 c++ binary 放进 IDA 里我可能完全看不懂程序逻辑，各种奇奇怪怪的东西让人眼花缭乱，一个栈溢出我都可能发现不了。</p>
+<h2 id="do-shit-now">do shit now</h2>
+<p>那么我应该怎么做呢？我试图总结出一套不值一提的逆向方法论，一个我需要去 check 的 list，这样在接触到一门新语言时对着 list 一条一条看，这样至少可以避免遗漏关键点，也能让我有一种“哎呀我把这个 list 上的东西都弄完那这个 blabla 语言的逆向我就会了”的感觉。最主要的是，在方法论的运用过程中这个 list 会被不断扩充、完善，进而更好地学习下一门语言的逆向。</p>
+<p>学习的核心思路是：<strong>逆逆向，即正向</strong>。这种学习方法我还没想到过，在网上闲逛时受<a href="https://brightprogrammer.netlify.app/post/reverse-engineering-rustlang-binaries-0x1-empty-program/" target="_blank" rel="noopener noreffer">这篇文章</a>启发才恍然大悟，决定造一个让自己学习体验更佳的方法论。学习逆向的过程中，不是像以前一样在 IDA 中苦苦尝试从 binary 到 source code 建立映射，而却是去从 source code 到 binary 建立映射。</p>
+<p>对于每一门语言，把握以下这些关键点，尝试去自己写源码、编译，放进 IDA 里看。</p>
+<ul>
+<li>main 函数前发生了什么？</li>
+<li>main 函数
+<ul>
+<li>各种数据类型怎么存的？
+<ul>
+<li>int, float, string, array</li>
+<li>global, local</li>
+<li>类型转换？</li>
+<li>更多数据类型？
+<ul>
+<li>vec</li>
+<li>set</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>控制流？
+<ul>
+<li>库函数怎么调用的？
+<ul>
+<li>打印函数？输入函数？</li>
+<li>.plt? .got?</li>
+<li>&hellip;</li>
+</ul>
+</li>
+<li>自己写的函数怎么调用的？</li>
+<li>分支，循环？</li>
+</ul>
+</li>
+<li>&hellip;</li>
+</ul>
+</li>
+<li>该语言的其他特性</li>
+<li>&hellip;</li>
+</ul>
+<p>或者可以说，对于新造的一门语言，你要去为它写一个 doc，你会去把握哪些关键点。原来学习逆向的最佳方式，反而是正向？</p></div><div class="post-footer" id="post-footer">
+    <div class="post-info">
+        <div class="post-info-line">
+            <div class="post-info-mod">
+                <span>Updated on 2023-05-04</span>
+            </div>
+            <div class="post-info-license"></div>
+        </div>
+        <div class="post-info-line">
+            <div class="post-info-md"><span>
+                            <a class="link-to-markdown" href="/2023/05/rev_main/index.md" target="_blank">Read Markdown</a>
+                        </span></div>
+            <div class="post-info-share">
+                <span><a href="javascript:void(0);" title="Share on Twitter" data-sharer="twitter" data-url="http://xidoo.top/2023/05/rev_main/" data-title="逆向方法论"><i class="fab fa-twitter fa-fw"></i></a><a href="javascript:void(0);" title="Share on Facebook" data-sharer="facebook" data-url="http://xidoo.top/2023/05/rev_main/"><i class="fab fa-facebook-square fa-fw"></i></a><a href="javascript:void(0);" title="Share on WhatsApp" data-sharer="whatsapp" data-url="http://xidoo.top/2023/05/rev_main/" data-title="逆向方法论" data-web><i class="fab fa-whatsapp fa-fw"></i></a><a href="javascript:void(0);" title="Share on Line" data-sharer="line" data-url="http://xidoo.top/2023/05/rev_main/" data-title="逆向方法论"><i data-svg-src="/lib/simple-icons/icons/line.min.svg"></i></a><a href="javascript:void(0);" title="Share on 微博" data-sharer="weibo" data-url="http://xidoo.top/2023/05/rev_main/" data-title="逆向方法论"><i class="fab fa-weibo fa-fw"></i></a><a href="javascript:void(0);" title="Share on Myspace" data-sharer="myspace" data-url="http://xidoo.top/2023/05/rev_main/" data-title="逆向方法论" data-description=""><i data-svg-src="/lib/simple-icons/icons/myspace.min.svg"></i></a><a href="javascript:void(0);" title="Share on Blogger" data-sharer="blogger" data-url="http://xidoo.top/2023/05/rev_main/" data-title="逆向方法论" data-description=""><i class="fab fa-blogger fa-fw"></i></a><a href="javascript:void(0);" title="Share on Evernote" data-sharer="evernote" data-url="http://xidoo.top/2023/05/rev_main/" data-title="逆向方法论"><i class="fab fa-evernote fa-fw"></i></a></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="post-info-more">
+        <section class="post-tags"></section>
+        <section>
+            <span><a href="javascript:void(0);" onclick="window.history.back();">Back</a></span>&nbsp;|&nbsp;<span><a href="/">Home</a></span>
+        </section>
+    </div>
+
+    <div class="post-nav"><a href="/2022/07/actf2022-kkk/" class="prev" rel="prev" title="ACTF2022 kkk 赛后复现"><i class="fas fa-angle-left fa-fw"></i>ACTF2022 kkk 赛后复现</a>
+            <a href="/2023/09/re-host/" class="next" rel="next" title="Contiki Re-hosting 小记">Contiki Re-hosting 小记<i class="fas fa-angle-right fa-fw"></i></a></div>
+</div>
+<div id="comments"></div></article></div>
+            </main><footer class="footer">
+        <div class="footer-container"><div class="footer-line">🏴‍☠️ Love it, Make magic</div><div class="footer-line"><i class="far fa-copyright fa-fw"></i><span itemprop="copyrightYear">2019 - 2023</span><span class="author" itemprop="copyrightHolder">&nbsp;<a href="/" target="_blank">x1do0</a></span>&nbsp;|&nbsp;<span class="license"><a rel="license external nofollow noopener noreffer" href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank">CC BY-NC 4.0</a></span></div>
+        </div>
+    </footer></div>
+
+        <div id="fixed-buttons"><a href="#" id="back-to-top" class="fixed-button" title="Back to Top">
+                <i class="fas fa-arrow-up fa-fw"></i>
+            </a><a href="#" id="view-comments" class="fixed-button" title="View Comments">
+                <i class="fas fa-comment fa-fw"></i>
+            </a>
+        </div><link rel="stylesheet" href="/lib/katex/katex.min.css"><link rel="stylesheet" href="/lib/katex/copy-tex.min.css"><link rel="stylesheet" href="/lib/cookieconsent/cookieconsent.min.css"><script type="text/javascript" src="/lib/smooth-scroll/smooth-scroll.min.js"></script><script type="text/javascript" src="/lib/autocomplete/autocomplete.min.js"></script><script type="text/javascript" src="/lib/lunr/lunr.min.js"></script><script type="text/javascript" src="/lib/lazysizes/lazysizes.min.js"></script><script type="text/javascript" src="/lib/clipboard/clipboard.min.js"></script><script type="text/javascript" src="/lib/sharer/sharer.min.js"></script><script type="text/javascript" src="/lib/katex/katex.min.js"></script><script type="text/javascript" src="/lib/katex/auto-render.min.js"></script><script type="text/javascript" src="/lib/katex/copy-tex.min.js"></script><script type="text/javascript" src="/lib/katex/mhchem.min.js"></script><script type="text/javascript" src="/lib/cookieconsent/cookieconsent.min.js"></script><script type="text/javascript">window.config={"code":{"copyTitle":"Copy to clipboard","maxShownLines":15},"comment":{},"cookieconsent":{"content":{"dismiss":"Got it!","link":"Learn more","message":"This website uses Cookies to improve your experience."},"enable":true,"palette":{"button":{"background":"#f0f0f0"},"popup":{"background":"#1aa3ff"}},"theme":"edgeless"},"math":{"delimiters":[{"display":true,"left":"$$","right":"$$"},{"display":true,"left":"\\[","right":"\\]"},{"display":false,"left":"$","right":"$"},{"display":false,"left":"\\(","right":"\\)"}],"strict":false},"search":{"highlightTag":"em","lunrIndexURL":"/index.json","maxResultLength":10,"noResultsFound":"No results found","snippetLength":30,"type":"lunr"}};</script><script type="text/javascript" src="/js/theme.min.js"></script></body>
+</html>
